@@ -23,10 +23,8 @@ return new class extends Migration
             $table->timestamps();
             $table->string('status')->default("active");
             $table->foreignId('user_role_id')->constrained();
-            $table->string('role');
-            $table->integer('role_id')->unsigned();
             $table->integer('mobile')->nullable();
-            $table->string('gender',6)->nullable();
+            $table->foreignId('gender_id')->nullable()->constrained();
             $table->date('date_of_birth');
         });
     }
