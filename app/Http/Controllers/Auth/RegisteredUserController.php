@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use app\Models\UserRole;
-use App\Models\Gender
+use App\Models\Gender;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
             'last_name' => $request->last_name,
             'address' => $request->address,
             'email' => $request->email,
-            'user_role_id' => UserRole::where('role', 'customer')->first()->id,
+            'user_role_id' => UserRole::where('role', 'Customer')->first()->id,
             'gender_id' => Gender::where('gender', $request->gender)->first()->id,
             'password' => Hash::make($request->password),
             'date_of_birth' => $request->date_of_birth
