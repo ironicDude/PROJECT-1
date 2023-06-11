@@ -26,6 +26,7 @@ return new class extends Migration
             $table->integer('mobile')->nullable();
             $table->foreignId('gender_id')->nullable()->constrained();
             $table->date('date_of_birth');
+            $table->string('image')->nullable();
         });
     }
 
