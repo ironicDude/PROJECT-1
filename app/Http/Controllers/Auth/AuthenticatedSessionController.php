@@ -20,7 +20,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'User has been logged in'
+            'message' => 'User has been logged in',
+            'user_role' => Auth::user()->role->role,
             ], 200);
     }
 

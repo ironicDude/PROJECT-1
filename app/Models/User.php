@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\UserRole;
+use App\Models\Gender;
 
 class User extends Authenticatable
 {
@@ -53,9 +55,9 @@ class User extends Authenticatable
      * relations
      */
     function role(){
-        return $this->hasOne(UserRole::class);
+        return $this->hasOne(UserRole::class, 'id', 'user_role_id');
     }
     function gender(){
-        return $this->hasOne(GenderRole::class);
+        return $this->hasOne(Gender::class, 'gender_id', 'id');
     }
 }
