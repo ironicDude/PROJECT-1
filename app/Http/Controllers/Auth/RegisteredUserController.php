@@ -30,16 +30,13 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'date_of_birth' => 'required|date|before:-10years',
+            'gender' => 'required|string|in:Male,Female,I prefer not to say'
         ]);
         
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
         
-        $gender_id = Gender::where('gender', $request->gender)->first()->id;
-        if(!$gender_id){
-            $gender_id = 0;
-        }
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
