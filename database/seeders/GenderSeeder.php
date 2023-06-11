@@ -20,6 +20,8 @@ class GenderSeeder extends Seeder
         \App\Models\Gender::create([
             'gender' => 'Female'
         ]);
-        
+        \App\Models\Gender::create([
+            'gender' => 'I prefer not to say'
+        ]);
     }
 }

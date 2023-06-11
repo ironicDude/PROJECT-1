@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use app\Models\UserRole;
+use App\Models\UserRole;
 use App\Models\Gender;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
@@ -36,6 +36,10 @@ class RegisteredUserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         
+        $gender_id = Gender::where('gender', $request->gender)->first()->id;
+        if(!$gender_id){
+            $gender_id = 0;
+        }
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -52,6 +56,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return response()->noContent();
+        return response()->json(['message' => 'Successfully registered.'], 201);
     }
 }
