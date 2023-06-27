@@ -16,6 +16,6 @@ class Gender extends Model
      * relations
      */
     function users(){
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'gender_id', 'id');
     }
 }

@@ -58,6 +58,9 @@ class User extends Authenticatable
         return $this->hasOne(UserRole::class, 'id', 'user_role_id');
     }
     function gender(){
-        return $this->hasOne(Gender::class, 'gender_id', 'id');
+        return $this->hasOne(Gender::class, 'id', 'gender_id');
+    }
+    function status(){
+        return $this->hasOne(AccountStatus::class, 'id', 'account_status_id');
     }
 }
