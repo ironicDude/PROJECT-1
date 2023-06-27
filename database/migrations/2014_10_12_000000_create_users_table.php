@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->string('status')->default("active");
+            $table->foreignId('account_status_id')->constrained();
             $table->foreignId('user_role_id')->constrained();
             $table->integer('mobile')->nullable();
             $table->foreignId('gender_id')->nullable()->constrained();
