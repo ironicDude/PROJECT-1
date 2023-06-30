@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\UserRole;
 use App\Models\Gender;
+use App\Models\AccountStatus;
 
 class User extends Authenticatable
 {
@@ -51,16 +52,23 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    //change the account_status_id to Blocked
+    public function deactivate(): void
+    {
+        $this->account_status_id = AccountStatus::where('status', 'Blocked')->value('id');
+        $this->save();
+    } // end of deactivate
+
     /**
      * relations
      */
-    function role(){
+    public function role(){
         return $this->hasOne(UserRole::class, 'id', 'user_role_id');
     }
-    function gender(){
+    public function gender(){
         return $this->hasOne(Gender::class, 'id', 'gender_id');
     }
-    function status(){
+    public function status(){
         return $this->hasOne(AccountStatus::class, 'id', 'account_status_id');
     }
 }

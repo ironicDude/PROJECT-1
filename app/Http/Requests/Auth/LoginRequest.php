@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Exceptions\AccountDeactivatedException;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,6 @@ class LoginRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if(Auth::user())
         return true;
     }
 
@@ -48,6 +48,13 @@ class LoginRequest extends FormRequest
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
+        }
+
+        // Check if the user's account status is "Active" and log them out if not so
+        $user = Auth::user();
+        if ($user->status != 'Active') {
+            Auth::guard('web')->logout();
+            throw new AccountDeactivatedException();
         }
 
         RateLimiter::clear($this->throttleKey());
