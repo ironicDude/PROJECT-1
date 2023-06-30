@@ -53,4 +53,5 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->middleware('auth')
                 ->name('logout');
 
-Route::post('deactivateUser', [UserController::class, 'deactivate']);
+Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
+                ->name('deactivateOrActivate');
