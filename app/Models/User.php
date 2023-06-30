@@ -59,6 +59,13 @@ class User extends Authenticatable
         $this->save();
     } // end of deactivate
 
+    //change the account_status_id to Active
+    public function activate(): void
+    {
+        $this->account_status_id = AccountStatus::where('status', 'Active')->value('id');
+        $this->save();
+    } // end of deactivate
+
     /**
      * relations
      */
