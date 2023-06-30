@@ -12,9 +12,9 @@ use App\Http\Resources\CustomResponse;
 class UserController extends Controller
 {
     use CustomResponse;
-    //call the deactivate method of User on the user with this specific id
+    //call the the User activate and deactivate methods on the user with this specific id
     public function activateOrDeactivate(User $user):JsonResponse
-    {   
+    {
         $accountStatus = $user->status->status;
         if($accountStatus == 'Active'){
             $user->deactivate();
