@@ -6,11 +6,8 @@ use App\Models\User;
 
 class UserPolicy
 {
-    /**
-     * Create a new policy instance.
-     */
-    public function __construct()
+    public function activateOrDeactivate($user, User $toBeToggledUser)
     {
-        //
+        return $user->isAdmin() && $toBeToggledUser->isAdmin() === false;
     }
 }
