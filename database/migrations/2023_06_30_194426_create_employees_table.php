@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->datetime('date_of_joining')->default(now());
+            $table->decimal('salary', 10, 2);
+            $table->string('personal_email');
         });
     }
 

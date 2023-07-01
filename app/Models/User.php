@@ -66,22 +66,25 @@ class User extends Authenticatable
         $this->save();
     }// end of deactivate
 
-    public function isAdmin()
-    {
-        
-    }// end of isAdmin
 
 
     /**
-     * relations
+     * relationships
      */
-    public function role(){
-        return $this->hasOne(UserRole::class, 'id', 'user_role_id');
+    public function role()
+    {
+        return $this->hasOne(UserRole::class, 'user_role_id', 'id');
     }
-    public function gender(){
-        return $this->hasOne(Gender::class, 'id', 'gender_id');
+    public function gender()
+    {
+        return $this->hasOne(Gender::class, 'gender_id', 'id');
     }
-    public function status(){
-        return $this->hasOne(AccountStatus::class, 'id', 'account_status_id');
+    public function status()
+    {
+        return $this->hasOne(AccountStatus::class, 'account_status_id', 'id');
+    }
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'user_id', 'id');
     }
 }
