@@ -32,17 +32,17 @@ class RegisteredUserController extends Controller
             'date_of_birth' => 'required|date|before:-10years',
             'gender' => 'required|string|in:Male,Female,I prefer not to say'
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-        
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'address' => $request->address,
             'email' => $request->email,
-            'user_role_id' => UserRole::where('role', 'Customer')->first()->id,
+            'type' => 'customer',
             'gender_id' => Gender::where('gender', $request->gender)->first()->id,
             'password' => Hash::make($request->password),
             'date_of_birth' => $request->date_of_birth

@@ -9,6 +9,9 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Models\Customer;
+use App\Models\Employee;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,3 +58,5 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
                 ->name('deactivateOrActivate');
+
+

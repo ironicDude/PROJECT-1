@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\UserRole;
 use App\Models\Gender;
 use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
+use App\Models\Customer;
 
 class User extends Authenticatable
 {
@@ -19,8 +19,8 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';
-    protected static $singleTableTypeField = 'user_role_id';
-    protected static $singleTableSubclasses = [Employee::class];
+    protected static $singleTableTypeField = 'type';
+    protected static $singleTableSubclasses = [Employee::class, Customer::class];
     protected static $persisted = [
         'first_name',
         'last_name',
@@ -28,7 +28,7 @@ class User extends Authenticatable
         'password',
         'address',
         'date_of_birth',
-        'user_role_id',
+        'type',
         'gender_id',
         'image'];
     /**
@@ -42,10 +42,11 @@ class User extends Authenticatable
         'email',
         'password',
         'address',
+        'type',
         'date_of_birth',
         'user_role_id',
         'gender_id',
-        'image'
+        'image',
     ];
 
     /**
@@ -87,10 +88,6 @@ class User extends Authenticatable
     /**
      * relationships
      */
-    public function role()
-    {
-        return $this->hasOne(UserRole::class, 'user_role_id', 'id');
-    }
     public function gender()
     {
         return $this->hasOne(Gender::class, 'gender_id', 'id');

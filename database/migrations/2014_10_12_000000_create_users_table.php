@@ -22,14 +22,15 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->foreignId('account_status_id')->constrained();
-            $table->foreignId('user_role_id')->constrained();
+            $table->string('type');
             $table->integer('mobile')->nullable();
             $table->foreignId('gender_id')->nullable()->constrained();
             $table->date('date_of_birth');
             $table->string('image')->nullable();
-            $table->decimal('salary', 10, 2);
-            $table->string('personal_email');
+            $table->decimal('salary', 10, 2)->nullable();
+            $table->string('personal_email')->nullable();
             $table->date('date_of_joining')->default(now());
+            $table->decimal('money', 10, 2)->nullable();
         });
     }
 
