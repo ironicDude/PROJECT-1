@@ -10,11 +10,27 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\UserRole;
 use App\Models\Gender;
 use App\Models\AccountStatus;
+use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
+use App\Models\Employee;
 
 class User extends Authenticatable
 {
+    use SingleTableInheritanceTrait;
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $table = 'users';
+    protected static $singleTableTypeField = 'user_role_id';
+    protected static $singleTableSubclasses = [Employee::class];
+    protected static $persisted = [
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'address',
+        'date_of_birth',
+        'user_role_id',
+        'gender_id',
+        'image'];
     /**
      * The attributes that are mass assignable.
      *

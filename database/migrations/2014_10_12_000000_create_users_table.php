@@ -27,6 +27,9 @@ return new class extends Migration
             $table->foreignId('gender_id')->nullable()->constrained();
             $table->date('date_of_birth');
             $table->string('image')->nullable();
+            $table->decimal('salary', 10, 2);
+            $table->string('personal_email');
+            $table->date('date_of_joining')->default(now());
         });
     }
 
