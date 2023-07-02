@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\UserRole;
 use App\Models\User;
+use App\Models\Role;
 class Employee extends User
 {
     use HasFactory;
@@ -27,6 +27,14 @@ class Employee extends User
         'role_id'
     ];
 
+
+
+    /**
+     * Relationships
+     */
+    public function role(){
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
 }
 
 

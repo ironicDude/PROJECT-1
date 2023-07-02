@@ -90,14 +90,10 @@ class User extends Authenticatable
      */
     public function gender()
     {
-        return $this->hasOne(Gender::class, 'gender_id', 'id');
+        return $this->belongsTo(Gender::class, 'gender_id', 'id');
     }
     public function status()
     {
-        return $this->hasOne(AccountStatus::class, 'account_status_id', 'id');
-    }
-    public function employee()
-    {
-        return $this->hasOne(Employee::class, 'user_id', 'id');
+        return $this->belongsTo(AccountStatus::class, 'account_status_id', 'id');
     }
 }

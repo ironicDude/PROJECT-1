@@ -59,4 +59,9 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
                 ->name('deactivateOrActivate');
 
+                // Route::post('create', function(){
+                //     $employee = Employee::find(8);
+                //     return $employee->role->role;
+                // });
+
 
