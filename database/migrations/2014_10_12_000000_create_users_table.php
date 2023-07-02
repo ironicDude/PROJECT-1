@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('personal_email')->nullable();
             $table->date('date_of_joining')->default(now());
             $table->decimal('money', 10, 2)->nullable();
+            $table->foreignId('role_id')->nullable()->constrained();
         });
     }
 
