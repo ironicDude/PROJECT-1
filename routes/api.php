@@ -57,11 +57,25 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 
 Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
+                ->middleware('auth')
                 ->name('deactivateOrActivate');
 
-                // Route::post('create', function(){
-                //     $employee = Employee::find(8);
-                //     return $employee->role->role;
-                // });
+        Route::post('create', function(){
+        Employee::create([
+            'first_name' => 'Mo',
+            'last_name' => 'Mo',
+            'email' =>'example@j.com',
+            'password'=>'password',
+            'address'=>'address',
+            'date_of_birth'=>'2001-06-06',
+            'gender_id' =>'1',
+            'image' =>null,
+            'salary'=>'34',
+            'personal_email'=>'hello@persona.com',
+            'date_of_joining'=>now(),
+            'role_id'=>'1',
+            'money' => '89'
+                    ]);
+                });
 
 

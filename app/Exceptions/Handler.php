@@ -8,8 +8,12 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use App\Exceptions\AccountDeactivatedException;
+use Illuminate\Auth\Access\AuthorizationException;
+use App\Http\Resources\CustomResponse;
 class Handler extends ExceptionHandler
 {
+    use CustomResponse;
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -30,14 +34,12 @@ class Handler extends ExceptionHandler
             //
         });
 
-        $this->reportable(function (AccountDeactivatedException $e, $request){
-            //
-        });
+        // $this->reportable(function (AccountDeactivatedException $e, $request){
+        //     //
+        // });
         // Register a renderable callback for AccountDeactivatedException
         $this->renderable(function (AccountDeactivatedException $e, $request) {
-            return response()->json([
-                'message' => 'Your account is currently deactivated'
-            ], 403);
+            return $this->customResponse("Account is currently deactivated", null, 403);
         });
     } // end of register
 
@@ -45,11 +47,11 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            return new JsonResponse([
-                'message' => "Unable to locate the {$this->prettyModelNotFound($e)} you requested."
-            ], 404);
+            return $this->customResponse("Unable to locate the {$this->prettyModelNotFound($e)} you requested.", null, 404);
         }
-
+        if ($e instanceof AuthorizationException){
+            return $this->customResponse("Page does not exist", null, 404);
+        }
         return parent::render($request, $e);
     } // end of render
 
@@ -62,4 +64,5 @@ class Handler extends ExceptionHandler
 
         return 'resource';
     } // end of prettyModelNotFound
+
 }

@@ -17,7 +17,6 @@ class Employee extends User
         'email',
         'password',
         'address',
-        'type',
         'date_of_birth',
         'gender_id',
         'image',
@@ -27,7 +26,9 @@ class Employee extends User
         'role_id'
     ];
 
-
+    public function isAdministrator(){
+        return $this->role->role == 'administrator';
+    } //end of isAdministrator
 
     /**
      * Relationships

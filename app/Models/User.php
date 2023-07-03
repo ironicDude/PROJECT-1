@@ -25,12 +25,16 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'email_verified_at',
+        'remember_token',
+        'mobile',
         'password',
         'address',
         'date_of_birth',
         'type',
         'gender_id',
-        'image'];
+        'image',
+        'account_status_id'];
     /**
      * The attributes that are mass assignable.
      *
@@ -81,8 +85,7 @@ class User extends Authenticatable
     {
         $this->account_status_id = AccountStatus::where('status', 'Active')->value('id');
         $this->save();
-    }// end of deactivate
-
+    }// end of activate
 
 
     /**
@@ -92,7 +95,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Gender::class, 'gender_id', 'id');
     }
-    public function status()
+    public function accountStatus()
     {
         return $this->belongsTo(AccountStatus::class, 'account_status_id', 'id');
     }
