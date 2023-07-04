@@ -7,8 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\User;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class UserAccountStatusChangedNotification extends Notification
+class UserAccountStatusChangedNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
 
