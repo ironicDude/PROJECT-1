@@ -17,7 +17,7 @@ class RoleSeeder extends Seeder
             'role' => 'administrator',
         ]);
         \App\Models\Role::create([
-            'role' => 'pharmacists',
+            'role' => 'pharmacist',
         ]);
     }
 }
