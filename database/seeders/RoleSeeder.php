@@ -13,9 +13,9 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\Role::create([
-        //     'role' => 'administrator',
-        // ]);
+        \App\Models\Role::create([
+            'role' => 'administrator',
+        ]);
         \App\Models\Role::create([
             'role' => 'pharmacists',
         ]);
