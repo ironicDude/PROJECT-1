@@ -18,7 +18,7 @@ class Customer extends User
         'email',
         'password',
         'address',
-        'type',
+        'account_status_id',
         'date_of_birth',
         'gender_id',
         'image',

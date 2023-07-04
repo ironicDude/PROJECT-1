@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->foreignId('account_status_id')->constrained();
+            $table->foreignId('account_status_id')->default(1)->constrained();
             $table->string('type');
             $table->integer('mobile')->nullable();
             $table->foreignId('gender_id')->nullable()->constrained();

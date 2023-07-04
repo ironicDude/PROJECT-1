@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Gender;
@@ -37,21 +38,22 @@ class RegisteredUserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user = User::create([
+        $customer = Customer::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'address' => $request->address,
             'email' => $request->email,
             'type' => 'customer',
+            'money' => rand(1, 9999999),
             'gender_id' => Gender::where('gender', $request->gender)->first()->id,
             'password' => Hash::make($request->password),
             'date_of_birth' => $request->date_of_birth
         ]);
 
 
-        event(new Registered($user));
+        event(new Registered($customer));
 
-        Auth::login($user);
+        Auth::login($customer);
 
         return response()->json(['message' => 'Successfully registered.'], 201);
     }
