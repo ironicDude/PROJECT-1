@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Models\Customer;
@@ -59,6 +60,10 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
                 ->middleware('auth')
                 ->name('deactivateOrActivate');
+
+Route::get('/user/notification/index', [NotificationController::class, 'index'])
+                // ->middleware('auth')
+                ->name('notification.read');
 
         Route::post('create', function(){
         Employee::create([
