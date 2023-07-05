@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class AffectedOrganism extends Model
 {
     use HasFactory;
+
+    /**
+     * Relationships
+     */
+    public function drug()
+    {
+        return $this -> belongsTo(Drug::class, 'drug_id', 'id');
+    }
 }
