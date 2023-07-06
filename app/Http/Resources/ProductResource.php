@@ -16,21 +16,31 @@ class ProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $request->name,
-            'labeller' => $request->labeller,
-            'dosage_form' => $request->dosage_form,
-            'strength' => $request->strength,
-            'route' => $request->route,
-            'generic' => $request->generic,
-            'otc' => $request->otc,
-            'drug' => $request->drug,
-            'affected organisms' => $request->drug->affectedOrganisms,
-            'categories' => $request->drug->categories,
-            'dosages' => $request->drug->dosages,
-            'external_identifiers'=> $request->drug->externalIdentifiers,
-            'interactions' => $request->drug->interactions,
-            'prices' => $request->drug->prices,
-            'synonyms' => $request->drug->synonyms,
+                'product_name' => $this->name,
+                // 'labeller' => $this->labeller,
+                // 'dosage_form' => $this->dosage_form,
+                // 'strength' => $this->strength,
+                // 'route' => $this->route,
+                // 'generic' => $this->generic,
+                // 'otc' => $this->otc,
+                // 'drug' => $this->drug->name,
+                // 'affected organisms' => $this->drug->affectedOrganisms,
+                // 'categories' => $this->drug->categories,
+                // 'dosages' => $this->drug->dosages,
+                // 'external_identifiers'=> $this->drug->externalIdentifiers,
+                // 'interactions' => $this->drug->interactions,
+                // 'prices' => $this->drug->prices,
+                // 'synonyms' => $this->drug->synonyms,
         ];
+    }//end of toArray
+
+
+    /**
+     * Get any additional data that should be returned with the resource array.
+     *
+     * @return array
+     */
+    public function with($request)
+    {
     }
 }

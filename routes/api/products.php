@@ -8,6 +8,6 @@ use App\Models\Interaction;
 
 Route::get('/', [ProductController::class, 'index'])
                 ->name('products.get');
-Route::get('interactions', function(){
-    return response()->json(Interaction::where('id', 668285)->first(), 200);
-});
+
+Route::get('{string}', [ProductController::class, 'barSearch'])
+                ->name('product.barSearch');
