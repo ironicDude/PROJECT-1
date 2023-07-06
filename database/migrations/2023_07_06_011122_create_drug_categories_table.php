@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('interactions', function (Blueprint $table) {
+        Schema::create('drug_category', function (Blueprint $table) {
             $table->id();
-            $table->string('drubbank_id', 12);
-            $table->string('name', 100);
-            $table->string('description', 300);
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('drug_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('interactions');
+        Schema::dropIfExists('drug_category');
     }
 };

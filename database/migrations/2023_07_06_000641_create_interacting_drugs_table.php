@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('affected_organisms', function (Blueprint $table) {
+        Schema::create('interacting_drugs', function (Blueprint $table) {
             $table->id();
-            $table->string('organism', 100);
-            $table->foreignId('drug_id')->constrained()->cascadeOnDelete();
+            $table->string('drugbank_id')->unique();
+            $table->string('name', 100);
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('affected_organisms');
+        Schema::dropIfExists('interacting_drugs');
     }
 };
