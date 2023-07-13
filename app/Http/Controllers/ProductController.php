@@ -44,9 +44,14 @@ class ProductController extends Controller
         }
     }//end of barSearch
 
-    public function index(int $id)
+    public function show(int $id)
     {
-        
+        $product = Product::findOrFail($id);
+        $isAvailable = 1;
+
+        $data = [$product, 'is_available' => $isAvailable];
+
+        return $this->customResponse('product returned', $data, 200);
     }
 
 }

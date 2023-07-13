@@ -11,3 +11,6 @@ Route::get('/', [ProductController::class, 'index'])
 
 Route::get('{string}', [ProductController::class, 'barSearch'])
                 ->name('product.barSearch');
+
+Route::get('product/{id}', [ProductController::class, 'show'])
+                ->name('product.show');
