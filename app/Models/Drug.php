@@ -12,6 +12,8 @@ use App\Models\Interaction;
 use App\Models\Price;
 use App\Models\Product;
 use App\Models\Synonym;
+use Illuminate\Support\Facades\DB;
+
 class Drug extends Model
 {
     use HasFactory;
@@ -21,6 +23,17 @@ class Drug extends Model
     'toxicity', 'half_life', 'route_of_elimination',
     'clearance', 'attribute'];
 
+
+
+    public static function search($string, $limit=1)
+    {
+        $drug = DB::select("SELECT name, MAX(id) as drug_id
+                                FROM drugs
+                                WHERE name LIKE '%{$string}%'
+                                GROUP BY name
+                                LIMIT {$limit}");
+        return [$drug];
+    }
 
     /**
      * Relationships
@@ -41,9 +54,9 @@ class Drug extends Model
     {
         return $this -> hasMany(ExternalIdentifier::class, 'drug_id', 'id');
     }
-    public function interactions()
+    public function interactingDrugs()
     {
-        return $this -> hasMany(interaction::class, 'drug_id', 'id');
+        return $this -> belongsToMany(InteractingDrug::class, 'interactions')->withPivot('description');
     }
     public function prices()
     {

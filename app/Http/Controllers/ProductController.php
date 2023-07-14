@@ -13,10 +13,13 @@ use App\Models\Category;
 use App\Models\Drug;
 use App\Models\DrugCategory;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     use CustomResponse;
+
+
     public function index()
     {
         $products = new ProductCollection(Product::orderBy('id')->cursorPaginate(15));
@@ -28,19 +31,15 @@ class ProductController extends Controller
         }
     }//end of index
 
-    public function barSearch(string $string) {
+    public function search(string $string) {
 
-        $products = Product::select('name as produt_name', 'id as product_id')->where('name', 'like', '%'.$string.'%')->limit(2)->get();
+        $products = Product::search($string);
 
-        $drugs = Drug::select('name as drug_name', 'id as drug_id')->where('name', 'like', '%'.$string.'%')->limit(1)->get();
-
-        $data = [$products, $drugs];
-
-        if(sizeof($data)==0){
+        if(count($products)==0){
             return $this->customResponse('no matches to return', null, 204);
         }
         else{
-            return $this->customResponse('matches returned', $data, 200);
+            return $this->customResponse('matches returned', $products, 200);
         }
     }//end of barSearch
 
@@ -53,5 +52,4 @@ class ProductController extends Controller
 
         return $this->customResponse('product returned', $data, 200);
     }
-
 }
