@@ -13,8 +13,9 @@ class DrugInteractionController extends Controller
 {
     use CustomResponse;
 
-    public function search(string $string)
+    public function search(Request $request)
     {
+        $string = $request->string;
         $drug = Drug::search($string, 1);
         $products = Product::search($string, 2);
 
@@ -27,8 +28,10 @@ class DrugInteractionController extends Controller
         }
     }
 
-    public function checkInteraction(int $id, int $interactingId)
+    public function checkInteraction(Request $request)
     {
+        $id = $request->id;
+        $interactingId = $request->interactingId;
         $drug = Drug::findOrFail($id);
         $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
         $description = $interaction->pluck('pivot.description');
@@ -40,4 +43,5 @@ class DrugInteractionController extends Controller
         }
     }
 }
+
 

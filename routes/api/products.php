@@ -16,3 +16,9 @@ Route::get('{string}', [ProductController::class, 'search'])
 Route::get('product/{id}', [ProductController::class, 'show'])
                 ->name('product.show');
 
+Route::get('labellers/{string}', [ProductController::class, 'searchLabellers'])
+                ->name('product.labellers.search');
+
+Route::get('/routes', [ProductController::class, 'getRoutes'])
+                ->name('product.routes.get');
+

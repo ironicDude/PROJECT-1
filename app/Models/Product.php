@@ -23,6 +23,23 @@ class Product extends Model
         'drug_id',
     ];
 
+    public static function searchLabellers(string $string, int $limit=3)
+    {
+        $labellers = DB::select("SELECT DISTINCT labeller
+                                FROM products
+                                WHERE labeller LIKE '%{$string}%'
+                                ORDER BY CHAR_LENGTH(labeller)
+                                LIMIT {$limit}");
+        return $labellers;
+    }//end of getLabellers
+
+    public static function getRoutes()
+    {
+        $routes = DB::select("SELECT DISTINCT 'route' FROM products");
+        return $routes;
+    }// end of getRoutes
+
+
     public static function search(string $string, int $limit=5)
     {
         $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS product_name, MAX(p.id) AS product_id, MAX(d.id) AS drug_id
@@ -32,8 +49,11 @@ class Product extends Model
                                 GROUP BY product_name
                                 ORDER BY CHAR_LENGTH(product_name)
                                 LIMIT {$limit}");
-        return [$products];
-    }
+        return $products;
+    }//end of search
+
+
+
     /**
      * Relationships
      */
