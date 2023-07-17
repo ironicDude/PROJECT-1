@@ -34,7 +34,8 @@ class User extends Authenticatable
         'type',
         'gender_id',
         'image',
-        'account_status_id'];
+        'account_status_id'
+    ];
     /**
      * The attributes that are mass assignable.
      *
@@ -73,20 +74,46 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    //change the account_status_id to Blocked
+    /**
+     * Deactivate the user's account by changing the 'account_status_id' to "Blocked".
+     *
+     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Blocked" status
+     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
+     *
+     * @return void
+     */
     public function deactivate(): void
     {
-        $this->account_status_id = AccountStatus::where('status', 'Blocked')->value('id');
-        $this->save();
-    }// end of deactivate
+        // Retrieve the 'id' value for the "Blocked" status from the 'account_statuses' table.
+        $blockedStatusId = AccountStatus::where('status', 'Blocked')->value('id');
 
-    //change the account_status_id to Active
+        // Update the 'account_status_id' attribute of the current user model to the "Blocked" status ID.
+        $this->account_status_id = $blockedStatusId;
+
+        // Save the updated user model to persist the changes in the database.
+        $this->save();
+    }
+
+    /**
+     * Activate the user's account by changing the 'account_status_id' to "Active".
+     *
+     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Active" status
+     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
+     *
+     * @return void
+     */
     public function activate(): void
     {
-        $this->account_status_id = AccountStatus::where('status', 'Active')->value('id');
-        $this->save();
-    }// end of activate
+        // Retrieve the 'id' value for the "Active" status from the 'account_statuses' table.
+        $activeStatusId = AccountStatus::where('status', 'Active')->value('id');
 
+        // Update the 'account_status_id' attribute of the current user model to the "Active" status ID.
+        $this->account_status_id = $activeStatusId;
+
+        // Save the updated user model to persist the changes in the database.
+        $this->save();
+    }
+    
 
     /**
      * relationships
