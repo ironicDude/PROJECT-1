@@ -25,25 +25,54 @@ class Drug extends Model
 
 
 
-    public static function search($string, $limit=1)
-    {
-        $drug = DB::select("SELECT name, MAX(id) as drug_id
-                                FROM drugs
-                                WHERE name LIKE '%{$string}%'
-                                GROUP BY name
-                                LIMIT {$limit}");
-        return [$drug];
-    }
+    /**
+ * Search for drugs by name.
+ *
+ * This static method is responsible for searching drugs by their names based on the provided search string.
+ * It performs a SQL query using Laravel's DB class to select the drug name and the maximum drug ID for each drug
+ * whose name matches the search string (using the LIKE operator with a wildcard '%'). The results are grouped by drug name.
+ * The method accepts an optional limit parameter, which determines the maximum number of search results to return (default is 1).
+ * The search results are returned as an array of drug objects, each containing the drug name and the maximum drug ID.
+ *
+ * @param string $string The search string for drugs' names.
+ * @param int $limit The optional limit for the maximum number of search results (default is 1).
+ * @return array An array of drug objects, each containing the drug name and the maximum drug ID.
+ */
+public static function search($string, $limit = 1)
+{
+    $drug = DB::select("SELECT name, MAX(id) as drug_id
+                        FROM drugs
+                        WHERE name LIKE '%{$string}%'
+                        GROUP BY name
+                        LIMIT {$limit}");
 
-    public static function searchCategories(string $string, int $limit=3)
-    {
-        $categories = DB::select("SELECT DISTINCT name
-                                FROM categories
-                                WHERE name LIKE '%{$string}%'
-                                ORDER BY CHAR_LENGTH(name)
-                                LIMIT {$limit}");
-        return $categories;
-    }// end of searchCategories
+    return [$drug];
+}
+
+/**
+ * Search for drug categories by name.
+ *
+ * This static method is responsible for searching drug categories by their names based on the provided search string.
+ * It performs a SQL query using Laravel's DB class to select distinct category names whose names match the search string
+ * (using the LIKE operator with a wildcard '%'). The results are ordered by the length of category names.
+ * The method accepts an optional limit parameter, which determines the maximum number of search results to return (default is 3).
+ * The search results are returned as an array of category names.
+ *
+ * @param string $string The search string for drug categories' names.
+ * @param int $limit The optional limit for the maximum number of search results (default is 3).
+ * @return array An array of category names matching the search string.
+ */
+public static function searchCategories(string $string, int $limit = 3)
+{
+    $categories = DB::select("SELECT DISTINCT name
+                              FROM categories
+                              WHERE name LIKE '%{$string}%'
+                              ORDER BY CHAR_LENGTH(name)
+                              LIMIT {$limit}");
+
+    return $categories;
+}
+
 
     /**
      * Relationships
