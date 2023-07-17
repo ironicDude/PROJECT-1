@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('interactions', function (Blueprint $table) {
-            $table->bigInteger('id');
-            $table->foreignId('interacting_drug_id')->constrained();
-            $table->string('description', 300);
-            $table->foreignId('drug_id')->constrained();
+        Schema::create('product_dosage_form', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
+            $table->foreignId('product_id')->constrained();
+            $table->foreignId('dosage_form_id')->constrained();
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('interactions');
+        Schema::dropIfExists('product_dosage_form');
     }
 };

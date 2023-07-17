@@ -35,6 +35,16 @@ class Drug extends Model
         return [$drug];
     }
 
+    public static function searchCategories(string $string, int $limit=3)
+    {
+        $categories = DB::select("SELECT DISTINCT name
+                                FROM categories
+                                WHERE name LIKE '%{$string}%'
+                                ORDER BY CHAR_LENGTH(name)
+                                LIMIT {$limit}");
+        return $categories;
+    }// end of searchCategories
+
     /**
      * Relationships
      */
@@ -44,7 +54,7 @@ class Drug extends Model
     }
     public function categories()
     {
-        return $this -> belongsToMany(Category::class, 'drug_id', 'id');
+        return $this -> belongsToMany(Category::class, 'drug_category');
     }
     public function dosages()
     {

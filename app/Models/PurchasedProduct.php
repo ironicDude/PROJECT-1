@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
-class Route extends Model
+
+class PurchasedProduct extends Model
 {
     use HasFactory;
+
 
 
 
@@ -15,9 +16,8 @@ class Route extends Model
     /**
      * Relationships
      */
-
-    public function products()
+    public function product()
     {
-        return $this->belongsToMany(Product::class, 'product_route');
+        return $this->belongsTo(Product::class);
     }
 }

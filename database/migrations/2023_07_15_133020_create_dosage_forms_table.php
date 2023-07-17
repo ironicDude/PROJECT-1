@@ -11,20 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('interactions', function (Blueprint $table) {
-            $table->bigInteger('id');
-            $table->foreignId('interacting_drug_id')->constrained();
-            $table->string('description', 300);
-            $table->foreignId('drug_id')->constrained();
+        Schema::create('dosage_forms', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
+            $table->string('name')->unique();
         });
     }
-
-    /**
+        /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('interactions');
+        Schema::dropIfExists('dosage_forms');
     }
 };

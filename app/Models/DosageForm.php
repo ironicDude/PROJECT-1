@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
-class Route extends Model
+class DosageForm extends Model
 {
     use HasFactory;
+
+
 
 
 
@@ -18,6 +20,6 @@ class Route extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'product_route');
+        return $this->belongsToMany(Product::class);
     }
 }

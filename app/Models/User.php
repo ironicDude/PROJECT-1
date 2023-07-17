@@ -99,4 +99,8 @@ class User extends Authenticatable
     {
         return $this->belongsTo(AccountStatus::class, 'account_status_id', 'id');
     }
+    public function ratings()
+    {
+        return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');
+    }
 }

@@ -7,18 +7,23 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Resources\CustomResponse;
 use App\Models\Interaction;
 
-Route::get('/', [ProductController::class, 'index'])
-                ->name('products.get');
-
-Route::get('{string}', [ProductController::class, 'search'])
-                ->name('product.search');
-
-Route::get('product/{id}', [ProductController::class, 'show'])
+Route::get('{product}', [ProductController::class, 'show'])
                 ->name('product.show');
 
 Route::get('labellers/{string}', [ProductController::class, 'searchLabellers'])
                 ->name('product.labellers.search');
 
-Route::get('/routes', [ProductController::class, 'getRoutes'])
-                ->name('product.routes.get');
+Route::get('/routes/{string}', [ProductController::class, 'searchRoutes'])
+                ->name('product.routes.search');
 
+Route::get('/dosage_forms/{string}', [ProductController::class, 'searchDosageForms'])
+                ->name('product.dosage_forms.search');
+
+Route::get('/categories/{string}', [ProductController::class, 'searchCategories'])
+                ->name('product.categories.search');
+
+Route::get('/', [ProductController::class, 'index'])
+                ->name('products.get');
+
+Route::get('/names/{string}', [ProductController::class, 'searchNames'])
+                ->name('product.name.search');

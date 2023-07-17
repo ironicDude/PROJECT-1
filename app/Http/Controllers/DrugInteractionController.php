@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\ProductOverviewCollection;
+use App\Http\Resources\ProductOverviewResource;
 use Illuminate\Http\Request;
 use App\Models\Drug;
 use App\Models\InteractingDrug;
 use App\Models\Interaction;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 class DrugInteractionController extends Controller
 {
@@ -40,6 +43,19 @@ class DrugInteractionController extends Controller
         }
         else{
             return $this->customResponse('interaction found', $description, 200);
+        }
+    }
+
+    public function index(Drug $firstDrug, Drug $secondDrug)
+    {
+        $firstDrugProducts = $firstDrug->products()->limit(3);
+        $secondDrugProducts = $secondDrug->products()->limit(3);
+        $products = $firstDrugProducts->union($secondDrugProducts)->get();
+        if($products->isEmpty()){
+            return $this->customResponse('no products to retrieve', null, 404);
+        }
+        else{
+            return $this->customResponse('products retrieved', new ProductOverviewCollection($products), 200);
         }
     }
 }

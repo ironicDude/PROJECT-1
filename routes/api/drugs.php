@@ -9,3 +9,5 @@ Route::get('interaction/{string}', [DrugInteractionController::class, 'search'])
 Route::get('{id}/{interactingId}', [DrugInteractionController::class, 'checkInteraction'])
                 ->name('interaction.check');
 
+Route::get('{firstDrug}/drugs/{secondDrug}', [DrugInteractionController::class, 'index'])
+                ->name('interaction.products.get');

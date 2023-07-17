@@ -15,7 +15,7 @@ class Category extends Model
      */
     public function drugs()
     {
-        return $this -> belongsToMany(Drug::class, 'drug_id', 'id');
+        return $this -> belongsToMany(Drug::class, 'drug_category');
     }
-    
+
 }
