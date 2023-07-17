@@ -24,7 +24,7 @@ class UserController extends Controller
     {
         $this->authorize('activateOrDeactivate', $user);
 
-        $cacheKey = 'activateOrDeactivate2_' . $request->user()->id;
+        $cacheKey = 'activateOrDeactivate_2' . $request->user()->id;
         $interval = 60 * 60;
         $lastMethodCall = Cache::get($cacheKey);
 

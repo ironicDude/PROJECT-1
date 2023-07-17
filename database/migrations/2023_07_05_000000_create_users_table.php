@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('account_status_id')->default(1)->constrained();
             $table->string('type');
             $table->integer('mobile')->nullable();
-            $table->foreignId('gender_id')->nullable()->constrained();
+            $table->foreignId('gender_id')->default(3)->constrained();
             $table->date('date_of_birth');
             $table->string('image')->nullable();
             $table->decimal('salary', 10, 2)->nullable();
