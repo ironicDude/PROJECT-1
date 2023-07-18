@@ -1,5 +1,6 @@
 <?php
-use App\Http\Controllers\UserController;
+
+use App\Http\Controllers\User\UserController;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\User;
@@ -17,7 +18,7 @@ Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
         // Employee::create([
         //     'first_name' => 'Mo',
         //     'last_name' => 'Mo',
-        //     'email' =>'example@j.com',
+        //     'email' =>'hi@j.com',
         //     'password'=>'password',
         //     'address'=>'address',
         //     'date_of_birth'=>'2001-06-06',

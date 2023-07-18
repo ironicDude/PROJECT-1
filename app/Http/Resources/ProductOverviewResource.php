@@ -19,6 +19,7 @@ class ProductOverviewResource extends JsonResource
         return [
                 'name' => $this->name,
                 'id' => $this->id,
+                'drug_id' => $this->drug->id,
                 'labeller' => $this->labeller,
                 'dosage_form' => $this->dosage_form,
                 'strength' => $this->strength,
