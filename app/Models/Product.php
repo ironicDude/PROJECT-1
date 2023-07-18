@@ -209,7 +209,6 @@ class Product extends Model
         return $products->paginate(15);
     }
 
-
     /**
      * Relationships
      */
@@ -236,5 +235,10 @@ class Product extends Model
     public function purchasedProducts()
     {
         return $this->hasMany(PurchasedProduct::class);
+    }
+
+    public function allergies()
+    {
+        return $this->belongsToMany(User::class, 'allergies', 'product_id', 'user_id');
     }
 }

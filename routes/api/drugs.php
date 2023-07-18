@@ -1,13 +1,13 @@
 <?php
 
+use App\Http\Controllers\Drug\DrugInteractionController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DrugInteractionController;
 
 Route::get('interaction/{string}', [DrugInteractionController::class, 'search'])
-                ->name('interaction.search');
+                ->name('drug.search');
 
 Route::get('{id}/{interactingId}', [DrugInteractionController::class, 'checkInteraction'])
-                ->name('interaction.check');
+                ->name('drug.interaction.check');
 
-Route::get('{firstDrug}/drugs/{secondDrug}', [DrugInteractionController::class, 'index'])
-                ->name('interaction.products.get');
+Route::get('{firstDrug}/drugs/{secondDrug}', [DrugController::class, 'index'])
+                ->name('drug.interaction.products.get');

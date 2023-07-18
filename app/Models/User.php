@@ -113,7 +113,45 @@ class User extends Authenticatable
         // Save the updated user model to persist the changes in the database.
         $this->save();
     }
-    
+
+    /**
+     * Check if the user is directly allergic to a given product.
+     *
+     * This method checks if the user is directly allergic to the provided product.
+     * It verifies whether the product exists in the collection of the user's allergies.
+     *
+     * @param \App\Models\Product $product The product to check for allergy.
+     * @return bool Returns true if the user is directly allergic to the product, otherwise false.
+     */
+    public function isAllergicTo(Product $product)
+    {
+        return $this->allergies->contains($product);
+    }
+
+    /**
+     * Check if the user is indirectly allergic to a given product.
+     *
+     * This method checks if the user is indirectly allergic to the provided product.
+     * It retrieves all the products associated with the drugs of the user's allergies,
+     * then excludes the products that are directly allergic to the user.
+     * Finally, it checks if the provided product exists in the remaining collection.
+     *
+     * @param \App\Models\Product $product The product to check for indirect allergy.
+     * @return bool Returns true if the user is indirectly allergic to the product, otherwise false.
+     */
+    public function isIndirectlyAllergicTo(Product $product)
+    {
+        // Get all products associated with the drugs of the user's allergies.
+        $allergyDrugProducts = $this->allergies->pluck('drug.products')->flatten();
+
+        // Exclude the products that are directly allergic to the user.
+        $allergyDrugProducts = $allergyDrugProducts->diff($this->allergies);
+
+        // Check if the provided product exists in the remaining collection.
+        return $allergyDrugProducts->contains($product);
+    }
+
+
 
     /**
      * relationships
@@ -129,5 +167,9 @@ class User extends Authenticatable
     public function ratings()
     {
         return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');
+    }
+    public function allergies()
+    {
+        return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');
     }
 }
