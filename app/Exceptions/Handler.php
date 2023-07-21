@@ -39,7 +39,39 @@ class Handler extends ExceptionHandler
         // });
         // Register a renderable callback for AccountDeactivatedException
         $this->renderable(function (AccountDeactivatedException $e, $request) {
-            return $this->customResponse("Account is currently deactivated", null, 403);
+            return self::customResponse("Account is currently deactivated", null, 403);
+        });
+
+        $this->renderable(function (QuantityExceededOrderLimitException $e, $request) {
+            return self::customResponse("For some regulatory purposes, you cannot order as many of this product", null, 403);
+        });
+
+        $this->renderable(function (OutOfStockException $e, $request) {
+            return self::customResponse("Out of stock", null, 403);
+        });
+
+        $this->renderable(function (EmptyCartException $e, $request) {
+            return self::customResponse("The cart is empty", null, 403);
+        });
+
+        $this->renderable(function (ItemNotInCartException $e, $request) {
+            return self::customResponse("The item is not in the cart", null, 403);
+        });
+
+        $this->renderable(function (NullQuantityException $e, $request) {
+            return self::customResponse("You should pass a quantity", null, 403);
+        });
+
+        $this->renderable(function (NotEnoughMoneyException $e, $request) {
+            return self::customResponse("You don't have enough money", null, 403);
+        });
+
+        $this->renderable(function (PrescriptionRequiredException $e, $request) {
+            return self::customResponse("Prescription required", null, 403);
+        });
+
+        $this->renderable(function (NullAddressException $e, $request) {
+            return self::customResponse("Address required", null, 403);
         });
     } // end of register
 
@@ -47,10 +79,10 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            return $this->customResponse("Unable to locate the {$this->prettyModelNotFound($e)} you requested.", null, 404);
+            return CustomResponse::customResponse("Unable to locate the {$this->prettyModelNotFound($e)} you requested.", null, 404);
         }
         if ($e instanceof AuthorizationException){
-            return $this->customResponse("Page does not exist", null, 404);
+            return CustomResponse::customResponse("Page does not exist", null, 404);
         }
         return parent::render($request, $e);
     } // end of render

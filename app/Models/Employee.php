@@ -37,5 +37,3 @@ class Employee extends User
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 }
-
-

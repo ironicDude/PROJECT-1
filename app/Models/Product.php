@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\OutOfStockException;
 use App\Http\Resources\ProductCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -208,6 +209,21 @@ class Product extends Model
         // Return the paginated result set with a default page size of 15.
         return $products->paginate(15);
     }
+
+
+    public function getEarliestExpiryDateProduct()
+    {
+        $product = $this->purchasedProducts()->whereNotNull('expiry_date')-> orderBy('expiry_date')->limit(1)->first();
+        return $product;
+    }
+
+    public function isAvailble(){
+        $products = $this->purchasedProducts();
+        if($products->count() == 0){
+            throw new OutOfStockException();
+        }
+    }
+
 
     /**
      * Relationships
