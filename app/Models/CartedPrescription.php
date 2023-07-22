@@ -20,6 +20,6 @@ class CartedPrescription extends Model
     //relationships
     public function cart()
     {
-        return $this->hasOne(CustomerCart::class, 'customer_id', 'customer_id');
+        return $this->hasOne(Cart::class, 'customer_id', 'customer_id');
     }
 }

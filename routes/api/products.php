@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CustomerCartController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\Product\AllergyController;
 use App\Http\Controllers\Product\ProductController;
 use Illuminate\Http\Request;
@@ -43,46 +43,50 @@ Route::get('allergies/index', [AllergyController::class, 'index'])
                 ->name('product.allergy.get')
                 ->middleware('auth');
 
-Route::post('cart/store/{product}', [CustomerCartController::class, 'store'])
+Route::post('cart/store/{product}', [CartController::class, 'store'])
                 ->name('cart.store')
                 ->middleware('auth');
 
-Route::delete('cart/remove/{cartedProduct}', [CustomerCartController::class, 'remove'])
+Route::delete('cart/remove/{cartedProduct}', [CartController::class, 'remove'])
                 ->name('cart.remove')
                 ->middleware('auth');
 
-Route::put('cart/update/{cartedProduct}', [CustomerCartController::class, 'updateQuantity'])
+Route::put('cart/update/{cartedProduct}', [CartController::class, 'updateQuantity'])
                 ->name('cart.quantity.update')
                 ->middleware('auth');
 
-Route::get('cart/show', [CustomerCartController::class, 'show'])
+Route::get('cart/show', [CartController::class, 'show'])
                 ->name('cart.show')
                 ->middleware('auth');
 
-Route::put('cart/address/store', [CustomerCartController::class, 'storeAddress'])
+Route::put('cart/address/store', [CartController::class, 'storeAddress'])
                 ->name('cart.address.store')
                 ->middleware('auth');
 
-Route::get('cart/address/show', [CustomerCartController::class, 'getAddress'])
+Route::get('cart/address/show', [CartController::class, 'getAddress'])
                 ->name('cart.address.show')
                 ->middleware('auth');
 
-Route::post('cart/checkout', [CustomerCartController::class, 'checkout'])
+Route::post('cart/checkout', [CartController::class, 'checkout'])
                 ->name('cart.checkout')
                 ->middleware('auth');
 
-Route::get('cart/quantity/show', [CustomerCartController::class, 'getQuantity'])
+Route::get('cart/quantity/show', [CartController::class, 'getQuantity'])
                 ->name('cart.address.show')
                 ->middleware('auth');
 
-Route::get('cart/total/show', [CustomerCartController::class, 'getTotal'])
+Route::get('cart/total/show', [CartController::class, 'getTotal'])
                 ->name('cart.total.show')
                 ->middleware('auth');
 
-Route::delete('cart/clear', [CustomerCartController::class, 'clear'])
+Route::delete('cart/clear', [CartController::class, 'clear'])
                 ->name('cart.clear')
                 ->middleware('auth');
 
-Route::post('cart/prescriptions/store', [CustomerCartController::class, 'storePrescriptions'])
+Route::post('/cart/prescriptions/store', [CartController::class, 'storePrescriptions'])
                 ->name('cart.prescriptions.store')
+                ->middleware('auth');
+
+Route::get('/cart/prescriptions/show', [CartController::class, 'checkPrescriptionsUpload'])
+                ->name('cart.prescriptions.show')
                 ->middleware('auth');

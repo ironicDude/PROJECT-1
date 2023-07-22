@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carted_prescriptions', function (Blueprint $table) {
+        Schema::create('order_statuses', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('customer_id')->references('customer_id')->on('carts');
-            $table->string('prescription');
+            $table->string('name')->unique();
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carted_prescriptions');
+        Schema::dropIfExists('order_statuses');
     }
 };

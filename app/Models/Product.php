@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Route;
 use App\Models\DosageForm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class Product extends Model
@@ -221,6 +222,15 @@ class Product extends Model
         $products = $this->purchasedProducts();
         if($products->count() == 0){
             throw new OutOfStockException();
+        }
+    }
+
+    public function checkIfCarted(Product $product)
+    {
+        $cartedProducts = Auth::user()->cart->cartedProducts->pluck('purchased_productd_id');
+        $purchasedProducts = $product->purchasedProducts->pluck('id');
+        if(count($cartedProducts->intersect($purchasedProducts)) != 0){
+            return true;
         }
     }
 

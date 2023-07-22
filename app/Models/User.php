@@ -12,6 +12,7 @@ use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -152,7 +153,10 @@ class User extends Authenticatable
     }
 
 
-
+    public function getAddress()
+    {
+        return Auth::user()->address;
+    }
     /**
      * relationships
      */

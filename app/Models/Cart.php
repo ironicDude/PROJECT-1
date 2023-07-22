@@ -18,10 +18,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use App\Http\Resources\CustomResponse;
-use Illuminate\Http\UploadedFile;
+use App\Mail\OrderUnderReview;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ItemNotFoundException;
 
-class CustomerCart extends Model
+class Cart extends Model
 {
     use HasFactory;
     use CustomResponse;
@@ -50,7 +53,7 @@ class CustomerCart extends Model
         }
 
         $subtotal = $item->price * $quantity;
-        $cart = CustomerCart::firstOrNew(['customer_id' => $customer->id]);
+        $cart = self::firstOrNew(['customer_id' => $customer->id]);
         $cart->customer_id = $customer->id;
         $cart->save();
         $cartItem = CartedProduct::create([
@@ -69,12 +72,20 @@ class CustomerCart extends Model
     public static function removeItem(CartedProduct $item)
     {
         $cart = $item->cart;
+        $cartedProductsCount = $cart->cartedProducts->count();
         $quantity = $item->quantity;
         $item->increment('quantity', $quantity);
         $item->save();
         $item->delete();
         self::updateTotal($cart);
         self::updateCartQuantity($cart);
+        if ($cartedProductsCount == 1) {
+            $cart->cartedPrescriptions->each(function ($cartedPrescription) {
+                Storage::disk('local')->delete($cartedPrescription->prescription);
+                $cartedPrescription->delete();
+            });
+            $cart->delete();
+        }
     }
 
     public static function updateQuantity(CartedProduct $item, Request $request)
@@ -101,19 +112,21 @@ class CustomerCart extends Model
         self::updateCartQuantity($cart);
     }
 
-    private static function updateTotal(CustomerCart $cart)
+    private static function updateTotal(self $cart)
     {
         $cartedProducts = $cart->cartedProducts;
         $total = $cartedProducts->sum('subtotal');
         $cart->total = $total;
         $cart->save();
+        return $total;
     }
-    private static function updateCartQuantity(CustomerCart $cart)
+    private static function updateCartQuantity(self $cart)
     {
         $cartedProducts = $cart->cartedProducts;
         $quantity = $cartedProducts->sum('quantity');
         $cart->quantity = $quantity;
         $cart->save();
+        return $quantity;
     }
 
     public static function getTotal()
@@ -121,7 +134,7 @@ class CustomerCart extends Model
         $customer = Auth::user();
         $cart = $customer->cart;
         if (!$cart) {
-            return new EmptyCartException();
+            throw new EmptyCartException();
         }
         return $customer->cart->total;
     }
@@ -133,31 +146,38 @@ class CustomerCart extends Model
         ]);
         $cart = Auth::user()->cart;
         if (!$cart) {
-            return new EmptyCartException();
+            throw new EmptyCartException();
         }
         $cart->address = $request->address;
         $cart->save();
+        return $request->address;
     }
 
-    public static function checkout()
+    public static function checkout(Request $request)
     {
-        $customer = Auth::user();
-        $cart = $customer->cart;
-        if ($cart->address == null) {
+        if ($request->address == null) {
             throw new NullAddressException();
         }
+        $customer = Auth::user();
+        $cart = $customer->cart;
         if (!$cart) {
             throw new EmptyCartException();
         }
         if ($customer->money < $cart->total) {
             throw new NotEnoughMoneyException();
         }
-        $cartedProduct = $cart->cartedProducts();
-        $cartedProduct->each(function ($cartedProduct) {
-            if ($cartedProduct->purchasedProduct->product->otc == 0) {
-                throw new PrescriptionRequiredException();
+        $cart->address = $request->address;
+        $cartedPrescriptions = $cart->cartedPrescriptions;
+
+        $containsPrescriptionProducts = 0;
+        foreach($cart->cartedProducts as $product){
+            if ($product->purchasedProduct->product->otc == 0) {
+                $containsPrescriptionProducts = true;
             }
-        });
+        }
+        if ($cartedPrescriptions->count() == 0 && $containsPrescriptionProducts == 1) {
+                throw new PrescriptionRequiredException();
+        }
 
         $customer->money -= $cart->total;
         $pharmacy = Pharmacy::first();
@@ -165,7 +185,39 @@ class CustomerCart extends Model
 
         $customer->save();
         $pharmacy->save();
+
+        $order = Order::create([
+            'customer_id' => $customer->id,
+            'total' => $cart->total,
+            'shipping_fees' => $cart->shipping_fees ?? 0,
+            'shipping_address' => $cart->shipping_address ?? "Damascus",
+            'quantity' => $cart->quantity,
+            'status_id' => $containsPrescriptionProducts == 1 ? OrderStatus::where('name', 'Review')->value('id') : OrderStatus::where('name', 'Delivery')->value('id'),
+        ]);
+        $order->save();
+
+        $cartedProducts = $cart->cartedProducts;
+        foreach ($cartedProducts as $cartedProduct) {
+            $orderedProduct = OrderedProduct::create([
+                'order_id' => $order->id,
+                'purchased_product_id' => $cartedProduct->purchased_product_id,
+                'quantity' => $cartedProduct->quantity,
+                'subtotal' => $cartedProduct->subtotal,
+            ]);
+            $orderedProduct->save();
+        }
+        foreach ($cartedPrescriptions as $cartedPrescription) {
+            $newPrescriptionName = "{$order->id}-{$cartedPrescription->prescription}";
+            Storage::disk('local')->move($cartedPrescription->prescription, $newPrescriptionName);
+            $prescription = Prescription::create([
+                'order_id' => $order->id,
+                'prescription' => $newPrescriptionName,
+            ]);
+            $prescription->save();
+        }
         self::clear();
+
+        Mail::to($customer)->send(new OrderUnderReview($order));
     }
 
     public static function clear()
@@ -178,14 +230,20 @@ class CustomerCart extends Model
         $cartedProducts->each(function ($cartedProduct) {
             $cartedProduct->delete();
         });
+        $cartedPrescriptions = $cart->cartedPrescriptions;
+        $cartedPrescriptions->each(function ($cartedPrescription) {
+            Storage::disk('local')->delete($cartedPrescription->prescription);
+            $cartedPrescription->delete();
+        });
         $cart->delete();
     }
+
 
     public static function getQuantity()
     {
         $cart = Auth::user()->cart;
         if (!$cart) {
-            return new EmptyCartException();
+            throw new EmptyCartException();
         }
         return $cart->quantity;
     }
@@ -194,30 +252,46 @@ class CustomerCart extends Model
     {
         $cart = Auth::user()->cart;
         if (!$cart) {
-            return new EmptyCartException();
+            throw new EmptyCartException();
         }
         return $cart->address;
     }
 
-
     public static function storePrescriptions(Request $request)
     {
+        $request->validate([
+            'images' => 'required',
+        ]);
         $cart = Auth::user()->cart;
         if (!$cart) {
-            return new EmptyCartException();
+            throw new EmptyCartException;
         }
-        $counter = 1;
-        $files = $request->file('files');
-            foreach ($files as $file) {
-            $fileName = "prescription-{$cart->customer_id}-{$counter}";
-            $file->storeAs('public/prescriptions', $fileName);
-            $prescription = ['prescription' => 'public/prescriptions/' . $fileName];
+        $images = $request->file('images');
+        foreach ($images as $image) {
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $filename = "{$originalName}-{$cart->customer_id}.{$image->getClientOriginalExtension()}";
+            Storage::disk('local')->put($filename, File::get($image));
+            $prescription = ['prescription' => $filename];
             $cart->cartedPrescriptions()->create($prescription);
-            $counter++;
+            $cart->save();
         }
     }
 
+    private static function containsPrescriptionProducts($cartedProducts)
+    {
+        return false;
+    }
 
+    public static function checkPrescriptionsUpload()
+    {
+        $cart = Auth::user()->cart;
+        if (!$cart) {
+            throw new EmptyCartException;
+        }
+        return $cart->cartedPrescriptions->count() != 0
+            ? true
+            : false;
+    }
     /**
      * Relationships
      */

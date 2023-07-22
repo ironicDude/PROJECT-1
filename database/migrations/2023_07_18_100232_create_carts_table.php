@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carted_prescriptions', function (Blueprint $table) {
+        Schema::create('carts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id')->unique()->references('id')->on('users');
             $table->timestamps();
-            $table->foreignId('customer_id')->references('customer_id')->on('carts');
-            $table->string('prescription');
+            $table->decimal('shipping_fee')->default(0);
+            $table->string('address')->nullable();
+            $table->decimal('total', 10, 2)->default(0);
+            $table->integer('quantity')->default(0);
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carted_prescriptions');
+        Schema::dropIfExists('carts');
     }
 };

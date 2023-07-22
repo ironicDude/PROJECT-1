@@ -11,6 +11,9 @@ Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
                 ->middleware('auth')
                 ->name('user.deactivateOrActivate');
 
+Route::get('user/address/show', [UserController::class, 'getAddress'])
+                ->middleware('auth')
+                ->name('user.address.show');
 
 
 

@@ -24,13 +24,18 @@ class Customer extends User
         'money',
     ];
 
-
     /**
      * Relationships
      */
 
      public function cart()
      {
-        return $this->hasOne(CustomerCart::class, 'customer_id', 'id');
+        return $this->hasOne(Cart::class, 'customer_id', 'id');
      }
+
+     public function orders()
+     {
+        return $this->hasMany(Cart::class, 'customer_id', 'id');
+     }
+
 }
