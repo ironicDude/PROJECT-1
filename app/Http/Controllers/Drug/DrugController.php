@@ -35,9 +35,9 @@ class DrugController extends Controller
 
         // Check if any search results were found and respond accordingly with a custom response.
         if (count($data) == 0) {
-            return $this->customResponse('No matches', null, 404);
+            return self::customResponse('No matches', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $data, 200);
+            return self::customResponse('Matches returned', $data, 200);
         }
     }
 }

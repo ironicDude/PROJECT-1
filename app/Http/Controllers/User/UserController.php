@@ -51,7 +51,7 @@ class UserController extends Controller
         // If the user has recently called this method, reject subsequent requests until the interval expires.
         if ($lastMethodCall && (time() - $lastMethodCall < $interval)) {
             $timeLeft = intval((($lastMethodCall + $interval) - time()) / 60); // Calculate remaining minutes.
-            return $this->customResponse("Please, wait for $timeLeft minutes before calling this method again", null, 429); // HTTP 429: Too Many Requests.
+            return self::customResponse("Please, wait for $timeLeft minutes before calling this method again", null, 429); // HTTP 429: Too Many Requests.
         } else {
             // Update the cache with the current timestamp to record the latest method call.
             Cache::put($cacheKey, time(), $interval);
@@ -73,7 +73,7 @@ class UserController extends Controller
             event(new UserAccountStatusChanged($request->user(), $user, $accountStatus));
 
             // Return a custom response indicating the new account status and the user information in UserResource format.
-            return $this->customResponse("User is now {$accountStatus}", new UserResource($user), 200);
+            return self::customResponse("User is now {$accountStatus}", new UserResource($user), 200);
         }
     }
 

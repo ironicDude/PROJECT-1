@@ -30,7 +30,7 @@ class AllergyController extends Controller
         // Toggle the allergy status of the product for the authenticated user.
         $user->allergies()->toggle($product);
 
-        return $this->customResponse('Allergy toggled', null, 200);
+        return self::customResponse('Allergy toggled', null, 200);
     }
 
     /**
@@ -48,13 +48,13 @@ class AllergyController extends Controller
 
         // Check if the user is allergic to the product or indirectly allergic to it.
         if ($user->isAllergicTo($product)) {
-            return $this->customResponse('RED: User is allergic to this product', true, 200);
+            return self::customResponse('RED: User is allergic to this product', true, 200);
         } elseif ($user->isIndirectlyAllergicTo($product)) {
-            return $this->customResponse('YELLO: User might be allergic to this product', true, 200);
+            return self::customResponse('YELLO: User might be allergic to this product', true, 200);
         }
 
         // User is not allergic to the product.
-        return $this->customResponse('GREEN: User is not allergic to this product', false, 200);
+        return self::customResponse('GREEN: User is not allergic to this product', false, 200);
     }
 
     /**
@@ -79,9 +79,9 @@ class AllergyController extends Controller
 
         // Check if the user has any allergies and return the appropriate response.
         if ($allergies->isEmpty()) {
-            return $this->customResponse('no allergies returned', null, 404);
+            return self::customResponse('no allergies returned', null, 404);
         }
 
-        return $this->customResponse('allergies returned', $allergies, 200);
+        return self::customResponse('allergies returned', $allergies, 200);
     }
 }
