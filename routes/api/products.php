@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Resources\CustomResponse;
 use App\Models\Interaction;
 
-//search
+// search
 Route::get('{product}', [ProductController::class, 'show'])
                 ->name('product.show');
 
@@ -30,7 +30,7 @@ Route::get('/', [ProductController::class, 'index'])
 Route::get('/names/{string}', [ProductController::class, 'searchNames'])
                 ->name('product.name.search');
 
-//allergy
+// allergy
 Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
                 ->name('product.allergy.toggle')
                 ->middleware('auth');
@@ -43,6 +43,8 @@ Route::get('allergies/index', [AllergyController::class, 'index'])
                 ->name('product.allergy.get')
                 ->middleware('auth');
 
+
+// cart
 Route::post('cart/store/{product}', [CartController::class, 'store'])
                 ->name('cart.store')
                 ->middleware('auth');
@@ -51,7 +53,7 @@ Route::delete('cart/remove/{cartedProduct}', [CartController::class, 'remove'])
                 ->name('cart.remove')
                 ->middleware('auth');
 
-Route::put('cart/update/{cartedProduct}', [CartController::class, 'updateQuantity'])
+Route::put('cart/quantity/update/{cartedProduct}', [CartController::class, 'updateQuantity'])
                 ->name('cart.quantity.update')
                 ->middleware('auth');
 
