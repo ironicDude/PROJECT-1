@@ -12,12 +12,14 @@ use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\UnprocessableQuantityException;
+use App\Http\Resources\CartedProductResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\PurchasedProductResource;
 use App\Mail\OrderUnderReview;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -35,40 +37,29 @@ class Cart extends Model
         'quantity',
         'subtotal'
     ];
-
-
-    public static function grab()
-    {
-        return self::create([
-            'id' => Auth::user()->id
-        ]);
-    }
     /**
-     * Add an item to the customer's cart.
+     * Add a product to the user's cart.
      *
      * @param Product $product The product to be added to the cart.
-     * @param Request $request The HTTP request containing the quantity of the product to be added.
-     *
+     * @param Request $request The HTTP request containing the product quantity.
+     * @return CartedProductResource The newly added carted product resource.
      * @throws QuantityExceededOrderLimitException If the requested quantity exceeds the product's order limit.
      * @throws OutOfStockException If the product is out of stock.
      */
     public static function addItem(Product $product, Request $request)
     {
+        // Validate the request to ensure the quantity is provided and valid.
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
         // Check if the product is available for purchase.
         $product->isAvailble();
 
-        // Get the authenticated customer.
-        $cart = $request->user()->cart;
-
-        // Get the product with the earliest expiry date for the customer.
+        // Get the product with the earliest expiry date for inventory management.
         $item = $product->getEarliestExpiryDateProduct();
 
-        // Validate the request data.
-        $request->validate([
-            'quantity' => 'required|numeric|min:1', // Assuming quantity should be a positive numeric value.
-        ]);
-
-        // Extract the quantity from the request.
+        // Get the requested quantity from the request.
         $quantity = $request->quantity;
 
         // Check if the requested quantity exceeds the product's order limit.
@@ -76,7 +67,7 @@ class Cart extends Model
             throw new QuantityExceededOrderLimitException();
         }
 
-        // Check if there is enough quantity in stock for the requested quantity.
+        // Check if there is enough stock for the requested quantity.
         if ($item->quantity - $quantity < $item->minimum_stock_level) {
             throw new OutOfStockException();
         }
@@ -84,82 +75,92 @@ class Cart extends Model
         // Calculate the subtotal for the carted product.
         $subtotal = $item->price * $quantity;
 
-        // Add the carted product to the cart.
-        CartedProduct::create([
-            'cart_id' => $cart->id,
+        // Create or retrieve the user's cart.
+        $cart = self::firstOrNew([
+            'id' => Auth::user()->id
+        ]);
+        $cart->save();
+
+        // Create a new carted product entry for the user's cart.
+        $cartedProduct = CartedProduct::create([
+            'cart_id' => Auth::user()->id,
             'purchased_product_id' => $item->id,
             'quantity' => $quantity,
             'subtotal' => $subtotal,
         ]);
 
-        // Reduce the product quantity in stock.
+        // Decrement the product quantity in the inventory.
         $item->decrement('quantity', $quantity);
 
-        // Update the cart's total and quantity of items.
+        // Update the cart's total and quantity.
         self::updateTotal($cart);
         self::updateCartQuantity($cart);
+
+        // Return the carted product resource for the newly added item.
+        return new CartedProductResource($cartedProduct);
     }
 
     /**
-     * Remove an item from the cart.
+     * Remove a carted product item from the user's cart.
      *
-     * @param CartedProduct $item The carted product to be removed from the cart.
+     * @param CartedProduct $item The carted product to be removed.
+     * @return CartedProductResource The removed carted product resource.
      */
-    public static function removeItem(CartedProduct $item)
+    public function removeItem(CartedProduct $item)
     {
-        // Get the cart of the authenticated user
-        $cart = Auth::user()->cart;
+        // Get the count of carted products in the user's cart.
+        $cartedProductsCount = $this->cartedProducts->count();
 
-        // Get the count of carted products in the cart.
-        $cartedProductsCount = $cart->cartedProducts->count();
-
-        // Restore the quantity of the removed item back to the product stock.
+        // Increment the product quantity in the inventory as the item is removed from the cart.
         $quantity = $item->quantity;
-        $item->increment('quantity', $quantity);
+        $item->purchasedProduct()->increment('quantity', $quantity);
 
-        // Delete the carted product from the cart.
+        // Delete the carted product entry.
         $item->delete();
 
-        // Update the cart's total and quantity of items.
-        self::updateTotal($cart);
-        self::updateCartQuantity($cart);
+        // Update the cart's total and quantity.
+        self::updateTotal($this);
+        self::updateCartQuantity($this);
 
-        // If there are no carted products left, delete any associated prescriptions and the cart itself.
+        // If the last carted product is removed, delete the cart and any associated prescriptions.
         if ($cartedProductsCount == 1) {
-            $cart->cartedPrescriptions->each(function ($cartedPrescription) {
+            $this->cartedPrescriptions->each(function ($cartedPrescription) {
+                // Delete the associated prescription file from the storage.
                 Storage::disk('local')->delete($cartedPrescription->prescription);
                 $cartedPrescription->delete();
             });
-            $cart->delete();
+            $this->delete();
         }
+
+        // Return the carted product resource for the removed item.
+        return new CartedProductResource($item);
     }
 
     /**
-     * Update the quantity of a carted product in the cart.
+     * Update the quantity of a carted product in the user's cart.
      *
      * @param CartedProduct $item The carted product to be updated.
-     * @param Request $request The HTTP request containing the new quantity.
-     *
-     * @throws QuantityExceededOrderLimitException If the requested quantity exceeds the product's order limit.
-     * @throws OutOfStockException If the product is out of stock.
+     * @param Request $request The HTTP request containing the updated quantity.
+     * @return int The updated quantity of the carted product.
+     * @throws QuantityExceededOrderLimitException If the updated quantity exceeds the product's order limit.
+     * @throws OutOfStockException If the product is out of stock after the update.
      */
-    public static function updateQuantity(CartedProduct $item, Request $request)
+    public function updateQuantity(CartedProduct $item, Request $request)
     {
-        $cart = Auth::user()->cart;
-        // Extract the quantity from the request.
+        // Get the requested quantity from the request.
         $quantity = $request->quantity;
 
-        // Validate the request data.
+        // Validate the request to ensure the updated quantity is provided and valid.
         $request->validate([
-            'quantity' => 'required|numeric|min:1', // Assuming quantity should be a positive numeric value.
+            'quantity' => 'required|numeric|min:1',
         ]);
 
-        // Check if the requested quantity exceeds the product's order limit.
+        // Check if the updated quantity exceeds the product's order limit.
         if ($quantity > $item->purchasedProduct->order_limit) {
             throw new QuantityExceededOrderLimitException();
         }
 
-        // Check if there is enough quantity in stock for the requested quantity.
+        // Check if there is enough stock for the updated quantity.
         if ($item->purchasedProduct->quantity - $quantity < $item->minimum_stock_level) {
             throw new OutOfStockException();
         }
@@ -169,393 +170,305 @@ class Cart extends Model
         $item->subtotal = $item->quantity * $item->purchasedProduct->price;
         $item->save();
 
-        // Update the cart's total and quantity of items.
-        self::updateTotal($cart);
-        self::updateCartQuantity($cart);
+        // Update the cart's total and quantity.
+        self::updateTotal($this);
+        self::updateCartQuantity($this);
+
+        // Return the updated quantity of the carted product.
+        return $item->quantity;
     }
 
-
     /**
-     * Update the total amount for the cart based on the carted products' subtotals.
+     * Update the total value of the cart.
      *
-     * @param Cart $cart The cart to update the total for.
-     *
-     * @return float The updated total amount for the cart.
+     * @param Cart $cart The user's cart.
      */
-    protected static function updateTotal(Cart $cart)
+    protected static function updateTotal()
     {
-        // Get the carted products associated with the cart.
+        // Get the user's cart and its carted products.
+        $cart = Auth::user()->cart;
         $cartedProducts = $cart->cartedProducts;
 
-        // Calculate the new total by summing up the subtotals of all carted products.
+        // Calculate the total value of all carted products.
         $total = $cartedProducts->sum('subtotal');
 
-        // Update the cart's total amount.
+        // Update the cart's total value.
         $cart->total = $total;
         $cart->save();
-
-        // Return the updated total amount for reference.
-        return $total;
     }
 
     /**
-     * Update the quantity of items in the cart based on the quantities of carted products.
+     * Update the total quantity of carted products in the cart.
      *
-     * @param Cart $cart The cart to update the quantity for.
-     *
-     * @return int The updated quantity of items in the cart.
+     * @param Cart $cart The user's cart.
      */
     protected static function updateCartQuantity(Cart $cart)
     {
-        // Get the carted products associated with the cart.
+        // Get the user's cart and its carted products.
+        $cart = Auth::user()->cart;
         $cartedProducts = $cart->cartedProducts;
 
-        // Calculate the new quantity by summing up the quantities of all carted products.
+        // Calculate the total quantity of all carted products.
         $quantity = $cartedProducts->sum('quantity');
 
-        // Update the cart's quantity of items.
+        // Update the cart's total quantity.
         $cart->quantity = $quantity;
         $cart->save();
-
-        // Return the updated quantity of items for reference.
-        return $quantity;
     }
 
     /**
-     * Get the total amount for the current customer's cart.
+     * Get the total value of the cart.
      *
-     * @return float The total amount for the cart.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
+     * @return float The total value of the cart.
      */
-    public static function getTotal()
+    public function getTotal()
     {
-        // Get the authenticated user's cart.
-        $cart = Auth::user()->cart;
-
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Return the total amount for the cart.
-        return $cart->total;
+        return $this->total;
     }
 
     /**
-     * Store the address for the current customer's cart.
+     * Store the user's address for the cart.
      *
-     * @param Request $request The HTTP request containing the address data.
-     *
+     * @param Request $request The HTTP request containing the user's address.
      * @return string The stored address.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
      */
-    public static function storeAdress(Request $request)
+    public function storeAdress(Request $request)
     {
-        // Validate the request data.
+        // Validate the request to ensure the address is provided.
         $request->validate([
             'address' => 'required',
         ]);
 
-        // Get the authenticated user's cart.
-        $cart = Auth::user()->cart;
+        // Store the user's address in the cart.
+        $this->address = $request->address;
+        $this->save();
 
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Store the provided address in the cart.
-        $cart->address = $request->address;
-        $cart->save();
-
-        // Return the stored address for reference.
-        return $request->address;
+        // Return the stored address.
+        return $this->address;
     }
 
     /**
-     * Perform the checkout process for the current customer's cart.
+     * Process the checkout for the cart.
      *
-     * @param Request $request The HTTP request containing the checkout data.
-     *
-     * @throws CheckoutValidationException If the checkout data validation fails.
-     * @throws EmptyCartException If the cart is empty (not found).
+     * @param Request $request The HTTP request containing the necessary checkout information.
      */
-    public static function checkout(Request $request)
+    public function checkout(Request $request)
     {
-        // Validate the checkout data.
+        // Validate the checkout request.
         self::validateCheckout($request);
 
-        // Get the authenticated customer.
+        // Get the customer associated with the cart.
         $customer = $request->user();
 
-        // Get the customer's cart.
-        $cart = $customer->cart;
-
-        // Update the cart's address with the provided address in the checkout request.
-        $cart->address = $request->address;
+        // Update the cart's address with the one provided in the checkout request.
+        $this->address = $request->address;
 
         // Process the payment for the cart.
-        self::processPayment($cart);
+        self::processPayment($this);
 
-        // Create an order based on the cart.
-        $order = self::createOrder($cart);
+        // Create an order based on the current cart.
+        $order = self::createOrder($this);
 
-        // Clear the cart after successful checkout.
-        self::clear($cart);
+        // Clear the cart (remove all carted products and prescriptions).
+        self::clear($this);
 
-        // Send an email to the customer about the order being under review.
+        // Send an email to the customer with the order details for review.
         Mail::to($customer)->send(new OrderUnderReview($order));
     }
 
-
     /**
-     * Clear the cart, removing all carted products and associated prescriptions.
-     *
-     * @throws EmptyCartException If the cart is empty (no carted products found).
+     * Clear the cart by removing all carted products and prescriptions.
      */
-    public static function clear()
+    public function clear()
     {
-        // Get the authenticated customer's cart.
-        $cart = Auth::user()->cart;
+        // Delete all carted products associated with the cart.
+        $this->cartedProducts->each->delete();
 
-        // Get all carted products associated with the cart.
-        $cartedProducts = $cart->cartedProducts;
+        // Delete all carted prescriptions and their associated files from storage.
+        $cartedPrescriptions = $this->cartedPrescriptions;
 
-        // Check if the cart is empty (no carted products found).
-        if (count($cartedProducts) == 0) throw new EmptyCartException();
-
-        // Delete each carted product from the cart in a single line.
-        $cart->cartedProducts->each->delete();
-
-        // Get all carted prescriptions associated with the cart.
-        $cartedPrescriptions = $cart->cartedPrescriptions;
-
-        // Delete each carted prescription file from storage and its associated entry from the cart.
         $cartedPrescriptions->each(function ($cartedPrescription) {
             Storage::disk('local')->delete($cartedPrescription->prescription);
             $cartedPrescription->delete();
         });
 
         // Delete the cart itself.
-        $cart->delete();
+        $this->delete();
     }
 
     /**
-     * Get the total quantity of items in the cart.
+     * Get the total quantity of carted products in the cart.
      *
-     * @return int The total quantity of items in the cart.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
+     * @return int The total quantity of carted products.
      */
-    public static function getQuantity()
+    public function getQuantity()
     {
-        // Get the authenticated customer's cart.
-        $cart = Auth::user()->cart;
-
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Return the total quantity of items in the cart.
-        return $cart->quantity;
+        return $this->quantity;
     }
 
     /**
      * Get the address stored in the cart.
      *
-     * @return string The address stored in the cart.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
+     * @return string|null The address stored in the cart.
      */
-    public static function getAddress()
+    public function getAddress()
     {
-        // Get the authenticated customer's cart.
-        $cart = Auth::user()->cart;
-
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Return the address stored in the cart.
-        return $cart->address;
+        return $this->address;
     }
 
     /**
-     * Store prescriptions in the cart.
+     * Store prescriptions uploaded by the user in the cart.
      *
-     * @param Request $request The HTTP request containing the prescription files.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
+     * @param Request $request The HTTP request containing the uploaded prescription files.
+     * @return array The names of the stored prescription files.
      */
-    public static function storePrescriptions(Request $request)
+    public function storePrescriptions(Request $request)
     {
-        // Validate the request data.
+        // Validate the request to ensure the prescription files are provided and within size limits.
         $request->validate([
             'files' => 'required|array',
-            'files.*' => 'max:4096', // Assuming maximum file size is 4096 KB (4 MB).
+            'files.*' => 'max:4096',
         ]);
 
-        // Get the authenticated customer's cart.
-        $cart = $request->user()->cart;
-
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Store each prescription file in the cart.
+        // Store the uploaded prescription files and associate them with the cart.
         $files = $request->file('files');
+        $fileNames = [];
         foreach ($files as $file) {
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $filename = "{$originalName}-{$cart->customer_id}.{$file->getClientOriginalExtension()}";
+            $filename = "{$originalName}-{$this->customer_id}.{$file->getClientOriginalExtension()}";
+            $fileNames[] = $filename;
             Storage::disk('local')->put($filename, File::get($file));
             $prescription = ['prescription' => $filename];
-            $cart->cartedPrescriptions()->create($prescription);
+            $this->cartedPrescriptions()->create($prescription);
         }
-    }
 
-
-    /**
-     * Check if prescriptions are uploaded in the cart.
-     *
-     * @return bool Returns true if prescriptions are uploaded, false otherwise.
-     *
-     * @throws EmptyCartException If the cart is empty (not found).
-     */
-    public static function checkPrescriptionsUpload()
-    {
-        // Get the authenticated customer's cart.
-        $cart = Auth::user()->cart;
-
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException;
-
-        // Return true if prescriptions are uploaded in the cart, otherwise false.
-        return $cart->cartedPrescriptions->count() != 0 ? true : false;
+        // Return the names of the stored prescription files.
+        return $fileNames;
     }
 
     /**
-     * Validate the checkout request before processing the payment.
+     * Check if there are any prescriptions uploaded in the cart.
      *
-     * @param Request $request The HTTP request containing the checkout data.
-     *
-     * @throws NullAddressException If the address in the checkout request is null.
-     * @throws EmptyCartException If the cart is empty (not found).
-     * @throws NotEnoughMoneyException If the customer doesn't have enough money to pay for the cart.
+     * @return bool True if there are prescriptions uploaded, false otherwise.
      */
-    protected static function validateCheckout(Request $request)
+    public function checkPrescriptionsUpload()
     {
-        // Get the authenticated customer.
+        // Check if there are any carted prescriptions in the cart.
+        return $this->cartedPrescriptions->count() != 0 ? true : false;
+    }
+
+    /**
+     * Validate the checkout request before processing the payment and creating the order.
+     *
+     * @param Request $request The HTTP request containing the checkout information.
+     * @throws NullAddressException If the address is not provided in the request.
+     * @throws NotEnoughMoneyException If the customer does not have enough money to complete the purchase.
+     */
+    protected function validateCheckout(Request $request)
+    {
+        // Get the customer associated with the cart.
         $customer = $request->user();
 
-        // Get the customer's cart.
-        $cart = $customer->cart;
-
-        // Check if the address in the checkout request is null, and if so, throw an exception.
+        // Check if the address is provided in the request.
         if ($request->address == null) {
             throw new NullAddressException();
         }
 
-        // Check if the cart exists, and if not, throw an exception.
-        if (!$cart) throw new EmptyCartException();
-
-        // Check if the customer has enough money to pay for the cart, and if not, throw an exception.
-        if ($customer->money < $cart->total) throw new NotEnoughMoneyException();
+        // Check if the customer has enough money to complete the purchase.
+        if ($customer->money < $this->total) {
+            throw new NotEnoughMoneyException();
+        }
     }
 
     /**
-     * Check if the cart contains prescription-required products and prescriptions are uploaded.
+     * Check if there are any prescription products in the cart.
      *
-     * @param Cart $cart The cart to be checked.
-     *
-     * @throws PrescriptionRequiredException If prescription-required products are in the cart, but no prescriptions are uploaded.
-     *
-     * @return bool Returns true if the cart contains prescription-required products, false otherwise.
+     * @return bool True if there are prescription products in the cart, false otherwise.
+     * @throws PrescriptionRequiredException If there are prescription products in the cart but no prescriptions uploaded.
      */
-    protected static function checkPrescriptionProducts(Cart $cart)
+    protected function checkPrescriptionProducts()
     {
+        // Initialize a flag to check if the cart contains prescription products.
         $containsPrescriptionProducts = false;
 
-        foreach ($cart->cartedProducts as $product) {
-            // Check if the cart contains prescription-required products.
+        // Iterate through the carted products to find prescription products.
+        foreach ($this->cartedProducts as $product) {
             if ($product->purchasedProduct->product->otc == 0) {
                 $containsPrescriptionProducts = true;
             }
         }
 
-        // Check if the cart contains prescription-required products, but no prescriptions are uploaded.
-        if ($cart->cartedPrescriptions->count() == 0 && $containsPrescriptionProducts) {
+        // If there are prescription products in the cart but no prescriptions uploaded, throw an exception.
+        if ($this->cartedPrescriptions->count() == 0 && $containsPrescriptionProducts) {
             throw new PrescriptionRequiredException();
         }
 
+        // Return whether prescription products are present in the cart.
         return $containsPrescriptionProducts;
     }
 
-
     /**
-     * Process the payment for the cart by deducting the total amount from the customer's balance and adding it to the pharmacy's balance.
-     *
-     * @param Cart $cart The cart to process the payment for.
+     * Process the payment for the cart by decrementing customer's money and incrementing pharmacy's money.
      */
-    protected static function processPayment(Cart $cart)
+    protected function processPayment()
     {
         // Get the customer associated with the cart.
-        $customer = $cart->customer;
+        $customer = $this->customer;
 
-        // Perform the payment transaction in a database transaction to ensure consistency.
-        DB::transaction(function () use ($customer, $cart) {
-            // Deduct the total amount from the customer's money.
-            $customer->decrement('money', $cart->total);
-            // Get the first pharmacy (assuming there's only one) and add the total amount to its balance.
+        // Perform the payment transaction within a database transaction to ensure data consistency.
+        DB::transaction(function () use ($customer) {
+            $customer->decrement('money', $this->total);
             $pharmacy = Pharmacy::first();
-            // add the total amount to the pharmacy's money.
-            $pharmacy->increment('money', $cart->total);
+            $pharmacy->increment('money', $this->total);
         });
     }
 
     /**
      * Create an order based on the cart contents.
      *
-     * @param Cart $cart The cart to create the order for.
-     *
-     * @return Order The newly created order.
+     * @return Order The newly created order instance.
      */
-    protected static function createOrder(Cart $cart)
+    protected function createOrder()
     {
-        // Check if the cart contains prescription-required products.
-        $containsPrescriptionProducts = self::checkPrescriptionProducts($cart);
+        // Check if the cart contains prescription products.
+        $containsPrescriptionProducts = $this->checkPrescriptionProducts();
 
-        // Determine the initial status of the order based on the presence of prescription-required products.
+        // Determine the initial status of the order based on whether prescription products are present.
         $initialStatusId = $containsPrescriptionProducts
             ? OrderStatus::where('name', 'Review')->value('id')
             : OrderStatus::where('name', 'Delivery')->value('id');
 
-        // Create a new order based on the cart information and the initial status.
+        // Create a new order entry in the database.
         $order = Order::create([
-            'customer_id' => $cart->customer->id,
-            'total' => $cart->total,
-            'shipping_fees' => $cart->shipping_fees ?? 0,
-            'shipping_address' => $cart->shipping_address ?? "Damascus",
-            'quantity' => $cart->quantity,
+            'customer_id' => $this->customer->id,
+            'total' => $this->total,
+            'shipping_fees' => $this->shipping_fees ?? 0,
+            'shipping_address' => $this->shipping_address ?? "Damascus",
+            'quantity' => $this->quantity,
             'status_id' => $initialStatusId,
         ]);
 
-        // Create ordered products associated with the order.
-        self::createOrderedProducts($cart, $order);
+        // Create ordered product entries for each carted product in the order.
+        self::createOrderedProducts($order);
 
-        // Create prescriptions associated with the order (if any).
-        self::createPrescriptions($cart, $order);
+        // Create prescription entries for each carted prescription in the order.
+        self::createPrescriptions($order);
 
-        // Return the newly created order.
+        // Return the newly created order instance.
         return $order;
     }
 
     /**
-     * Create ordered products associated with the given order based on the carted products in the cart.
+     * Create ordered product entries for the given order based on the carted products in the cart.
      *
-     * @param Cart $cart The cart containing the carted products.
-     * @param Order $order The order to associate the ordered products with.
+     * @param Order $order The order for which ordered products are to be created.
      */
-    protected static function createOrderedProducts(Cart $cart, Order $order)
+    protected function createOrderedProducts(Order $order)
     {
-        // Get all carted products associated with the cart.
-        $cartedProducts = $cart->cartedProducts;
+        // Get the carted products associated with the cart.
+        $cartedProducts = $this->cartedProducts;
 
-        // Create ordered products based on the carted products.
+        // Create ordered product entries for each carted product in the order.
         foreach ($cartedProducts as $cartedProduct) {
             OrderedProduct::create([
                 'order_id' => $order->id,
@@ -567,30 +480,39 @@ class Cart extends Model
     }
 
     /**
-     * Create prescriptions associated with the given order based on the carted prescriptions in the cart.
+     * Create prescription entries for the given order based on the carted prescriptions in the cart.
      *
-     * @param Cart $cart The cart containing the carted prescriptions.
-     * @param Order $order The order to associate the prescriptions with.
+     * @param Order $order The order for which prescription entries are to be created.
      */
-    protected static function createPrescriptions(Cart $cart, Order $order)
+    protected function createPrescriptions(Order $order)
     {
-        // Get all carted prescriptions associated with the cart.
-        $cartedPrescriptions = $cart->cartedPrescriptions;
+        // Get the carted prescriptions associated with the cart.
+        $cartedPrescriptions = $this->cartedPrescriptions;
 
-        // Create prescriptions based on the carted prescriptions.
+        // Create prescription entries for each carted prescription in the order.
         foreach ($cartedPrescriptions as $cartedPrescription) {
-            // Generate a new name for the prescription file by including the order ID to avoid conflicts.
+            // Generate a new name for the prescription file based on the order ID and the original prescription name.
             $newPrescriptionName = "{$order->id}-{$cartedPrescription->prescription}";
 
-            // Move the prescription file to the new location (assuming the disk is set up correctly).
+            // Move the prescription file to a new location with the updated name.
             Storage::disk('local')->move($cartedPrescription->prescription, $newPrescriptionName);
 
-            // Create a new Prescription entry associated with the order.
+            // Create a new prescription entry in the database.
             Prescription::create([
                 'order_id' => $order->id,
                 'prescription' => $newPrescriptionName,
             ]);
         }
+    }
+
+    /**
+     * Get the cart instance for displaying or further processing.
+     *
+     * @return Cart The cart instance.
+     */
+    public function show()
+    {
+        return $this;
     }
 
 

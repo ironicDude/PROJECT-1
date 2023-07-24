@@ -12,7 +12,7 @@ class CartedProduct extends Model
     protected $fillable = [
         'quantity',
         'subtotal',
-        'customer_id',
+        'cart_id',
         'purchased_product_id'
     ];
 

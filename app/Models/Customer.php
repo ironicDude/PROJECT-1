@@ -35,7 +35,7 @@ class Customer extends User
 
      public function orders()
      {
-        return $this->hasMany(Cart::class, 'customer_id', 'id');
+        return $this->hasMany(Order::class, 'customer_id', 'id');
      }
 
 }

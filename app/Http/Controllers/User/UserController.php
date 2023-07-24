@@ -41,7 +41,7 @@ class UserController extends Controller
     public function activateOrDeactivate(Request $request, User $user): JsonResponse
     {
         // Check if the authenticated user has the permission to activate or deactivate user accounts.
-        // $this->authorize('activateOrDeactivate', $user);
+        $this->authorize('activateOrDeactivate', $user);
 
         // Set up caching to prevent rate-limiting for the same user.
         $cacheKey = 'activateOrDeactivate_' . $request->user()->id;
