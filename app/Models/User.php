@@ -153,10 +153,29 @@ class User extends Authenticatable
     }
 
 
+    /**
+     * Get the address of the authenticated user.
+     *
+     * @return string
+     */
     public function getAddress()
     {
         return Auth::user()->address;
     }
+
+    /**
+     * Check if the authenticated user is a customer
+     *
+     * @return bool Returns true if the user is a customer and false if not.
+     */
+    public static function isCustomer($user)
+    {
+        return $user->type == 'customer'
+        ? true
+        : false;
+    }
+
+
     /**
      * relationships
      */

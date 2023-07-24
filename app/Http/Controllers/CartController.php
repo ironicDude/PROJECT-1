@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Models\CartedProduct;
 use App\Models\PurchasedProduct;
+use App\Models\User;
 use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ItemNotFoundException;
@@ -23,6 +24,14 @@ use Illuminate\Support\ItemNotFoundException;
 class CartController extends Controller
 {
     use CustomResponse;
+
+
+    public function grab()
+    {
+        $this->authorize('store');
+        $cart = Cart::grab();
+        return self::customResponse('Cart Created', $cart, 200);
+    }
 
     /**
      * Add the given product to the cart.
@@ -33,6 +42,8 @@ class CartController extends Controller
      */
     public function store(Product $product, Request $request)
     {
+        //only customers can add a product to their carts
+        $this->authorize('store');
         try {
             // Call the static method to add the product to the cart.
             Cart::addItem($product, $request);
@@ -53,6 +64,8 @@ class CartController extends Controller
      */
     public function remove(CartedProduct $cartedProduct)
     {
+        //only customers can remov e a product from their carts
+        $this->authorize('removeItem', $cartedProduct);
         // Call the static method to remove the carted product from the cart.
         Cart::removeItem($cartedProduct);
 
@@ -66,8 +79,10 @@ class CartController extends Controller
      * @param Request $request The HTTP request containing the updated quantity.
      * @return \Illuminate\Http\JsonResponse A JSON response indicating the status of the operation.
      */
-    public function updateQuantity(CartedProduct $cartedProduct, Request $request)
+    public function updateQuantity(Request $request, CartedProduct $cartedProduct)
     {
+        //only customers can update a product's quantity in their carts
+        $this->authorize('updateQuantity', $cartedProduct);
         try {
             // Call the static method to update the quantity of the carted product.
             Cart::updateQuantity($cartedProduct, $request);
@@ -88,6 +103,8 @@ class CartController extends Controller
      */
     public function storeAddress(Request $request)
     {
+        //only customers can store an address to deliver their orders
+        $this->authorize('store');
         try {
             // Call the static method to store the address for the cart.
             $addrss = Cart::storeAdress($request);
@@ -105,6 +122,8 @@ class CartController extends Controller
      */
     public function getAddress()
     {
+        //only customers can view the shipping address of their carts
+        $this->authorize('view');
         try {
             // Call the static method to get the address for the cart.
             $address = Cart::getAddress();
@@ -122,6 +141,8 @@ class CartController extends Controller
      */
     public function show()
     {
+        //only customers can view their carts
+        $this->authorize('view');
         try {
             // Get the cart information for the authenticated user.
             $cart = Auth::user()->cart;
@@ -141,6 +162,8 @@ class CartController extends Controller
      */
     public function checkout(Request $request)
     {
+        //only customers can checkout
+        $this->authorize('store');
         try {
             // Call the static method to process the checkout and complete the purchase.
             Cart::checkout($request);
@@ -162,6 +185,8 @@ class CartController extends Controller
      */
     public function getQuantity()
     {
+        //only customers can view how many products there are in their carts
+        $this->authorize('view');
         try {
             // Call the static method to get the total quantity of items in the cart.
             $quantity = Cart::getQuantity();
@@ -179,6 +204,8 @@ class CartController extends Controller
      */
     public function getTotal()
     {
+        //only customers can view the total of their carts
+        $this->authorize('view');
         try {
             // Call the static method to get the total amount of the cart.
             $total = Cart::getTotal();
@@ -196,6 +223,8 @@ class CartController extends Controller
      */
     public function clear()
     {
+        //only customers can clear their carts
+        $this->authorize('remove');
         try {
             // Call the static method to clear the cart, removing all carted products and prescriptions.
             Cart::clear();
@@ -214,6 +243,8 @@ class CartController extends Controller
      */
     public function storePrescriptions(Request $request)
     {
+        //only customers can add prescriptions to their carts
+        $this->authorize('store');
         try {
             // Call the static method to store prescriptions in the cart.
             Cart::storePrescriptions($request);
@@ -231,6 +262,8 @@ class CartController extends Controller
      */
     public function checkPrescriptionsUpload()
     {
+        //only customers can view if prescriptions have been uploaded in their carts
+        $this->authorize('view');
         try {
             // Call the static method to check if prescriptions are uploaded in the cart.
             $status = Cart::checkPrescriptionsUpload();

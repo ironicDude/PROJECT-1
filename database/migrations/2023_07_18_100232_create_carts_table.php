@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('carts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->unique()->references('id')->on('users');
+            // $table->id('customer_id')->references('id')->on('users');
+            $table->foreignId('id')->unique()->references('id')->on('users');
             $table->timestamps();
             $table->decimal('shipping_fee')->default(0);
             $table->string('address')->nullable();

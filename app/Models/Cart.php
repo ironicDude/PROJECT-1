@@ -31,9 +31,18 @@ class Cart extends Model
     use CustomResponse;
 
     protected $fillable = [
+        'id',
         'quantity',
         'subtotal'
     ];
+
+
+    public static function grab()
+    {
+        return self::create([
+            'id' => Auth::user()->id
+        ]);
+    }
     /**
      * Add an item to the customer's cart.
      *
@@ -49,7 +58,7 @@ class Cart extends Model
         $product->isAvailble();
 
         // Get the authenticated customer.
-        $customer = $request->user();
+        $cart = $request->user()->cart;
 
         // Get the product with the earliest expiry date for the customer.
         $item = $product->getEarliestExpiryDateProduct();
@@ -75,14 +84,9 @@ class Cart extends Model
         // Calculate the subtotal for the carted product.
         $subtotal = $item->price * $quantity;
 
-        // Retrieve or create a cart for the customer.
-        $cart = self::firstOrNew();
-        $cart->customer_id = $customer->id;
-        $cart->save();
-
         // Add the carted product to the cart.
         CartedProduct::create([
-            'customer_id' => $cart->customer_id,
+            'cart_id' => $cart->id,
             'purchased_product_id' => $item->id,
             'quantity' => $quantity,
             'subtotal' => $subtotal,
@@ -103,8 +107,8 @@ class Cart extends Model
      */
     public static function removeItem(CartedProduct $item)
     {
-        // Get the cart to which the carted product belongs.
-        $cart = $item->cart;
+        // Get the cart of the authenticated user
+        $cart = Auth::user()->cart;
 
         // Get the count of carted products in the cart.
         $cartedProductsCount = $cart->cartedProducts->count();
@@ -141,6 +145,7 @@ class Cart extends Model
      */
     public static function updateQuantity(CartedProduct $item, Request $request)
     {
+        $cart = Auth::user()->cart;
         // Extract the quantity from the request.
         $quantity = $request->quantity;
 
@@ -164,9 +169,6 @@ class Cart extends Model
         $item->subtotal = $item->quantity * $item->purchasedProduct->price;
         $item->save();
 
-        // Get the cart to which the carted product belongs.
-        $cart = $item->cart;
-
         // Update the cart's total and quantity of items.
         self::updateTotal($cart);
         self::updateCartQuantity($cart);
@@ -180,7 +182,7 @@ class Cart extends Model
      *
      * @return float The updated total amount for the cart.
      */
-    private static function updateTotal(Cart $cart)
+    protected static function updateTotal(Cart $cart)
     {
         // Get the carted products associated with the cart.
         $cartedProducts = $cart->cartedProducts;
@@ -203,7 +205,7 @@ class Cart extends Model
      *
      * @return int The updated quantity of items in the cart.
      */
-    private static function updateCartQuantity(Cart $cart)
+    protected static function updateCartQuantity(Cart $cart)
     {
         // Get the carted products associated with the cart.
         $cartedProducts = $cart->cartedProducts;
@@ -228,11 +230,8 @@ class Cart extends Model
      */
     public static function getTotal()
     {
-        // Get the authenticated customer.
-        $customer = Auth::user();
-
-        // Get the customer's cart.
-        $cart = $customer->cart;
+        // Get the authenticated user's cart.
+        $cart = Auth::user()->cart;
 
         // Check if the cart exists, and if not, throw an exception.
         if (!$cart) throw new EmptyCartException();
@@ -257,11 +256,8 @@ class Cart extends Model
             'address' => 'required',
         ]);
 
-        // Get the authenticated customer.
-        $customer = Auth::user();
-
-        // Get the customer's cart.
-        $cart = $customer->cart;
+        // Get the authenticated user's cart.
+        $cart = Auth::user()->cart;
 
         // Check if the cart exists, and if not, throw an exception.
         if (!$cart) throw new EmptyCartException();
@@ -604,14 +600,14 @@ class Cart extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+        return $this->belongsTo(Customer::class, 'id', 'id');
     }
     public function cartedProducts()
     {
-        return $this->hasMany(CartedProduct::class, 'customer_id', 'customer_id');
+        return $this->hasMany(CartedProduct::class, 'cart_id', 'id');
     }
     public function cartedPrescriptions()
     {
-        return $this->hasMany(CartedPrescription::class, 'customer_id', 'customer_id');
+        return $this->hasMany(CartedPrescription::class, 'cart_id', 'id');
     }
 }

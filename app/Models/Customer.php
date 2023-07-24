@@ -30,7 +30,7 @@ class Customer extends User
 
      public function cart()
      {
-        return $this->hasOne(Cart::class, 'customer_id', 'id');
+        return $this->hasOne(Cart::class, 'id', 'id');
      }
 
      public function orders()

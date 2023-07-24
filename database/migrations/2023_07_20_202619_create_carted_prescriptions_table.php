@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('carted_prescriptions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('customer_id')->references('customer_id')->on('carts');
+            $table->foreignId('cart_id')->references('id')->on('carts');
             $table->string('prescription');
         });
     }

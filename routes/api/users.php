@@ -17,20 +17,20 @@ Route::get('user/address/show', [UserController::class, 'getAddress'])
 
 
 
-        // Route::post('create', function(){
-        // Employee::create([
-        //     'first_name' => 'Mo',
-        //     'last_name' => 'Mo',
-        //     'email' =>'hi@j.com',
-        //     'password'=>'password',
-        //     'address'=>'address',
-        //     'date_of_birth'=>'2001-06-06',
-        //     'gender_id' =>'1',
-        //     'image' =>null,
-        //     'salary'=>'34',
-        //     'personal_email'=>'hello@persona.com',
-        //     'date_of_joining'=>now(),
-        //     'role_id'=>'1',
-        //     'money' => '89'
-        //             ]);
-        //         });
+        Route::post('create', function(){
+        Employee::create([
+            'first_name' => 'Mo',
+            'last_name' => 'Mo',
+            'email' =>'hi@j.com',
+            'password'=>'password',
+            'address'=>'address',
+            'date_of_birth'=>'2001-06-06',
+            'gender_id' =>'1',
+            'image' =>null,
+            'salary'=>'34',
+            'personal_email'=>'hello@persona.com',
+            'date_of_joining'=>now(),
+            'role_id'=>'1',
+            'money' => '89'
+                    ]);
+                });

@@ -45,6 +45,11 @@ Route::get('allergies/index', [AllergyController::class, 'index'])
 
 
 // cart
+
+Route::post('cart/create', [CartController::class, 'grab'])
+                ->name('cart.create')
+                ->middleware('auth');
+
 Route::post('cart/store/{product}', [CartController::class, 'store'])
                 ->name('cart.store')
                 ->middleware('auth');
@@ -52,7 +57,7 @@ Route::post('cart/store/{product}', [CartController::class, 'store'])
 Route::delete('cart/remove/{cartedProduct}', [CartController::class, 'remove'])
                 ->name('cart.remove')
                 ->middleware('auth');
-
+                
 Route::put('cart/quantity/update/{cartedProduct}', [CartController::class, 'updateQuantity'])
                 ->name('cart.quantity.update')
                 ->middleware('auth');

@@ -19,7 +19,7 @@ class CartedProduct extends Model
 
     public function cart()
     {
-        return $this->belongsTo(Cart::class, 'customer_id', 'customer_id');
+        return $this->belongsTo(Cart::class, 'cart_id', 'id');
     }
 
     public function purchasedProduct()
