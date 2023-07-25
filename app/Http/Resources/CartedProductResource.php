@@ -17,6 +17,7 @@ class CartedProductResource extends JsonResource
         return [
             'id' => $this->id,
             'product_id' => $this->purchasedProduct->product_id,
+            'cart_id' => $this->cart_id,
             'price' => $this->purchasedProduct->price,
             'name' => $this->purchasedProduct->product->name,
             'subtotal' => $this->subtotal,
