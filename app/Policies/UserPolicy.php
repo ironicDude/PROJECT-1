@@ -11,8 +11,8 @@ class UserPolicy
 {
     public function activateOrDeactivate(User $user, User $toBeToggledUser): Response
     {
-        return $user->isAdministrator() &&
-        !$toBeToggledUser->isAdministrator()
+        return $user->type === 'employee' && $user->role->role === 'administrator' &&
+        $toBeToggledUser->role && $toBeToggledUser->role->role != 'administrator'
         ? Response::allow()
         : Response::denyAsNotFound();
     }
