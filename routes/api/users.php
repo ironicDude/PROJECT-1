@@ -21,7 +21,7 @@ Route::get('user/address/show', [UserController::class, 'getAddress'])
         Employee::create([
             'first_name' => 'Mo',
             'last_name' => 'Mo',
-            'email' =>'hi@j.com',
+            'email' =>'employee@j.com',
             'password'=>'password',
             'address'=>'address',
             'date_of_birth'=>'2001-06-06',
@@ -30,7 +30,7 @@ Route::get('user/address/show', [UserController::class, 'getAddress'])
             'salary'=>'34',
             'personal_email'=>'hello@persona.com',
             'date_of_joining'=>now(),
-            'role_id'=>'1',
+            'role_id'=>'2',
             'money' => '89'
                     ]);
                 });
