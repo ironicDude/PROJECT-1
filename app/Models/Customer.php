@@ -27,24 +27,32 @@ class Customer extends User
 
 
 
+    /**
+     * Get a paginated list of orders associated with this customer.
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator The paginated collection of orders.
+     */
     public function viewOrders()
     {
+        // Retrieve the orders associated with this customer using the 'orders' relationship and paginate the results with 10 orders per page.
         $orders = $this->orders()->paginate(10);
+
+        // Wrap the paginated orders collection in an 'OrderOverviewCollection' resource to customize the response format.
         return new OrderOverviewCollection($orders);
     }
+
 
     /**
      * Relationships
      */
 
-     public function cart()
-     {
+    public function cart()
+    {
         return $this->hasOne(Cart::class, 'id', 'id');
-     }
+    }
 
-     public function orders()
-     {
+    public function orders()
+    {
         return $this->hasMany(Order::class, 'customer_id', 'id');
-     }
-
+    }
 }
