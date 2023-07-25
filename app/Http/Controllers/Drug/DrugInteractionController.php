@@ -44,9 +44,9 @@ class DrugInteractionController extends Controller
         // Extract the interaction description from the result and respond accordingly with a custom response.
         $description = $interaction->pluck('pivot.description');
         if (count($description) == 0) {
-            return $this->customResponse('No interaction found', null, 404);
+            return self::customResponse('No interaction found', null, 404);
         } else {
-            return $this->customResponse('Interaction found', $description, 200);
+            return self::customResponse('Interaction found', $description, 200);
         }
     }
 
@@ -73,10 +73,10 @@ class DrugInteractionController extends Controller
 
         // Check if any products were found and respond accordingly with a custom response.
         if ($products->isEmpty()) {
-            return $this->customResponse('No products to retrieve', null, 404);
+            return self::customResponse('No products to retrieve', null, 404);
         } else {
             // Return the product overview information using the ProductOverviewCollection resource.
-            return $this->customResponse('Products retrieved', new ProductOverviewCollection($products), 200);
+            return self::customResponse('Products retrieved', new ProductOverviewCollection($products), 200);
         }
     }
 

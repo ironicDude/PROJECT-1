@@ -36,6 +36,9 @@ class Employee extends User
     public function role(){
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'order_id', 'id');
+    }
 }
-
-

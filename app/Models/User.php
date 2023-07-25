@@ -12,6 +12,7 @@ use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -151,6 +152,28 @@ class User extends Authenticatable
         return $allergyDrugProducts->contains($product);
     }
 
+
+    /**
+     * Get the address of the authenticated user.
+     *
+     * @return string
+     */
+    public function getAddress()
+    {
+        return Auth::user()->address;
+    }
+
+    /**
+     * Check if the authenticated user is a customer
+     *
+     * @return bool Returns true if the user is a customer and false if not.
+     */
+    public static function isCustomer($user)
+    {
+        return $user->type == 'customer'
+        ? true
+        : false;
+    }
 
 
     /**

@@ -51,5 +51,6 @@ class ProductOverviewResource extends JsonResource
      */
     public function with($request)
     {
+        
     }
 }

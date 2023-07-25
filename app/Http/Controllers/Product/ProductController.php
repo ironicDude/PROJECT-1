@@ -82,9 +82,9 @@ class ProductController extends Controller
 
         // Check if any matching product names were found and respond accordingly with a custom response.
         if (count($products) == 0) {
-            return $this->customResponse('No matches to return', null, 404);
+            return self::customResponse('No matches to return', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $products, 200);
+            return self::customResponse('Matches returned', $products, 200);
         }
     }
 
@@ -99,7 +99,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return $this->customResponse('Product returned', new ProductFullResource($product), 200);
+        return self::customResponse('Product returned', new ProductFullResource($product), 200);
     }
 
     /**
@@ -119,9 +119,9 @@ class ProductController extends Controller
 
         // Check if any matching labellers were found and respond accordingly with a custom response.
         if (count($labellers) == 0) {
-            return $this->customResponse('No matches to return', null, 404);
+            return self::customResponse('No matches to return', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $labellers, 200);
+            return self::customResponse('Matches returned', $labellers, 200);
         }
     }
 
@@ -142,9 +142,9 @@ class ProductController extends Controller
 
         // Check if any matching routes were found and respond accordingly with a custom response.
         if (count($routes) == 0) {
-            return $this->customResponse('No matches to return', null, 404);
+            return self::customResponse('No matches to return', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $routes, 200);
+            return self::customResponse('Matches returned', $routes, 200);
         }
     }
 
@@ -165,9 +165,9 @@ class ProductController extends Controller
 
         // Check if any matching categories were found and respond accordingly with a custom response.
         if (count($categories) == 0) {
-            return $this->customResponse('No matches to return', null, 404);
+            return self::customResponse('No matches to return', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $categories, 200);
+            return self::customResponse('Matches returned', $categories, 200);
         }
     }
 
@@ -188,9 +188,9 @@ class ProductController extends Controller
 
         // Check if any matching dosage forms were found and respond accordingly with a custom response.
         if (count($dosageForms) == 0) {
-            return $this->customResponse('No matches to return', null, 404);
+            return self::customResponse('No matches to return', null, 404);
         } else {
-            return $this->customResponse('Matches returned', $dosageForms, 200);
+            return self::customResponse('Matches returned', $dosageForms, 200);
         }
     }
 }

@@ -16,4 +16,5 @@ class UserPolicy
         ? Response::allow()
         : Response::denyAsNotFound();
     }
+
 }

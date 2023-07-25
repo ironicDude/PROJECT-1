@@ -18,10 +18,24 @@ class Customer extends User
         'email',
         'password',
         'address',
-        'account_status_id',
         'date_of_birth',
         'gender_id',
         'image',
         'money',
     ];
+
+    /**
+     * Relationships
+     */
+
+     public function cart()
+     {
+        return $this->hasOne(Cart::class, 'id', 'id');
+     }
+
+     public function orders()
+     {
+        return $this->hasMany(Order::class, 'customer_id', 'id');
+     }
+
 }
