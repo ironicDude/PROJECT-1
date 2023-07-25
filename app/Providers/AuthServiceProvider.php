@@ -20,8 +20,8 @@ class AuthServiceProvider extends ServiceProvider
         'App\Models\User' => 'App\Policies\UserPolicy',
         'App\Models\Product' => 'App\Policies\ProductPolicy',
         'App\Models\CartedProduct' => 'App\Policies\CartedProductPolicy',
-        'App\Models\Cart' => 'App\Policies\CartPolicy'
-
+        'App\Models\Cart' => 'App\Policies\CartPolicy',
+        'App\Models\Customer' => 'App\Policies\CustomerPolicy',
 
     ];
 
