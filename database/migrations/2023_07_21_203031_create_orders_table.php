@@ -17,12 +17,10 @@ return new class extends Migration
             $table->foreignId('employee_id')->nullable()->references('id')->on('users');
             $table->foreignId('customer_id')->constrained()->references('id')->on('users');
             $table->foreignId('status_id')->default(1)->constrained()->references('id')->on('order_statuses');
-            $table->decimal('total', 20, 2)->default(0);
             $table->decimal('shipping_fees', 20, 2)->default(0);
             $table->string('shipping_address');
             $table->foreignId('method_id')->default(1)->constrained()->references('id')->on('methods');
             $table->date('delivery_date')->nullable();
-            $table->integer('quantity');
         });
     }
 

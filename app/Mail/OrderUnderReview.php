@@ -45,7 +45,7 @@ class OrderUnderReview extends Mailable
             view: 'emails.OrderUnderReview',
             with: [
                 'orderId' => $this->order->id,
-                'total' => $this->order->total,
+                'total' => $this->order->getTotal(),
             ]
         );
     }

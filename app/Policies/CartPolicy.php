@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Cart;
 use App\Models\CartedProduct;
+use App\Models\PurchasedProduct;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
@@ -77,5 +78,32 @@ class CartPolicy
     public function checkPrescriptionsUpload(User $user, Cart $cart)
     {
         return $user->type === 'customer' && $cart->id === $user->id;
+    }
+
+
+
+
+    /**
+     * Check if the user is a customer and can update the quantity of the carted product in the cart.
+     *
+     * @param User         $user          The authenticated user (customer).
+     * @param PurchasedProduct $cartedProduct The carted product to be updated.
+     * @return bool True if the customer can update the carted product quantity, false otherwise.
+     */
+    public function updateQuantity(User $user, Cart $cart)
+    {
+        return $user->type === 'customer' && $user->id === $cart->id;
+    }
+
+    /**
+     * Check if the user is a customer and can remove the carted product from the cart.
+     *
+     * @param User         $user          The authenticated user (customer).
+     * @param PurchasedProduct $cartedProduct The carted product to be removed.
+     * @return bool True if the customer can remove the carted product, false otherwise.
+     */
+    public function removeFromCart(User $user, Cart $cart)
+    {
+        return $user->type === 'customer' && $user->id === $cart->id;
     }
 }

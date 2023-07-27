@@ -40,7 +40,7 @@ class OrderShipped extends Mailable
              view: 'emails.OrderShipped',
              with: [
                  'orderId' => $this->order->id,
-                 'total' => $this->order->total,
+                 'total' => $this->order->getTotal(),
                  'deliveryDate' => $this->order->deliveryDate,
              ]
          );

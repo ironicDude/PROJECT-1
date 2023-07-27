@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Http\Resources\OrderFullResource;
 use App\Models\Order;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -42,5 +44,11 @@ class OrderController extends Controller
 
         // Return a custom success response with the details of the order in a resource format.
         return self::customResponse('Order returned', new OrderFullResource($order), 200);
+    }
+
+    public function getPrescriptions(Order $order)
+    {
+        $data = $order->viewPrescriptions();
+        return response()->json(['files'=> $data]);
     }
 }

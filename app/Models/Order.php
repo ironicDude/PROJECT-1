@@ -17,8 +17,37 @@ class Order extends Model
         'quantity'
     ];
 
+    public function getTotal()
+    {
+        return $this->orderedProducts()->sum('subtotal');
+    }
 
-    
+    public function getQuantity()
+    {
+        return $this->orderedProducts()->sum('quantity');
+    }
+
+    public function viewPrescriptions()
+    {
+        $filePaths = $this->prescriptions->pluck('prescription')->toArray();
+
+        $data = [];
+        foreach($filePaths as $path){
+            $fileContents = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\\{$path}");
+            $encodedContents = base64_encode($fileContents);
+            if(pathinfo($path, PATHINFO_EXTENSION) === 'pdf'){
+                $data[] = mb_convert_encoding("data:application/pdf;base64,{$encodedContents}", 'UTF-8');
+            }
+            else{
+                $imgExtension = pathinfo($path, PATHINFO_EXTENSION);
+                $data[] = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContents}", 'UTF-8');
+            }
+        }
+        // $fileFullPaths = array_map(function($path){
+        //     return "C:\Programming\Laravel\PROJECT-1\storage\app\\{$path}";
+        // }, $filePaths);
+        return $data;
+    }
 
     /**
      * relationships

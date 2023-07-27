@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CheckoutOutOfStockException;
 use App\Exceptions\EmptyCartException;
+use App\Exceptions\InShortageException;
 use App\Exceptions\ItemNotInCartException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
@@ -10,6 +12,7 @@ use App\Exceptions\NullQuantityException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
+use App\Exceptions\SameQuantityException;
 use App\Http\Resources\CartedProductResource;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
@@ -30,19 +33,21 @@ class CartController extends Controller
     /**
      * Add a product to the cart.
      *
-     * @param Product $product The product to be added to the cart.
+     * @param PurchasedProduct $product The product to be added to the cart.
      * @param Request $request The HTTP request containing the product details.
      * @return \Illuminate\Http\JsonResponse The JSON response with the result of the add operation.
      */
-    public function store(Product $product, Request $request)
+    public function store(PurchasedProduct $purchasedProduct, Request $request)
     {
-        $this->authorize('storeInCart', $product);
+        $this->authorize('storeInCart', $purchasedProduct);
         try {
-            $item = Cart::addItem($product, $request);
+            $item = Cart::addItem($purchasedProduct, $request);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
             return self::customResponse('Out of stock', null, 422);
+        } catch (InShortageException $e){
+            return self::customResponse($e->getMessage(), null, 422);
         }
         return self::customResponse('Item stored', $item, 200);
     }
@@ -54,10 +59,10 @@ class CartController extends Controller
      * @param CartedProduct $cartedProduct the product to be removed
      * @return \Illuminate\Http\JsonResponse The JSON response with the result of the remove operation.
      */
-    public function remove(Cart $cart, CartedProduct $cartedProduct)
+    public function remove(Cart $cart, PurchasedProduct $purchasedProduct)
     {
-        $this->authorize('removeFromCart', $cartedProduct);
-        $item = $cart->removeItem($cartedProduct);
+        $this->authorize('removeFromCart', $cart);
+        $item = $cart->removeItem($purchasedProduct);
         return self::customResponse('Item removed', $item, 200);
     }
 
@@ -69,15 +74,19 @@ class CartController extends Controller
      * @param CartedProduct $cartedProduct  The carted product to update.
      * @return \Illuminate\Http\JsonResponse The JSON response with the result of the update operation.
      */
-    public function updateQuantity(Request $request, Cart $cart, CartedProduct $cartedProduct)
+    public function updateQuantity(Request $request, Cart $cart, PurchasedProduct $purchasedProduct)
     {
-        $this->authorize('updateQuantity', $cartedProduct);
+        $this->authorize('updateQuantity', $cart);
         try {
-            $quantity = $cart->updateQuantity($cartedProduct, $request);
+            $quantity = $cart->updateQuantity($purchasedProduct, $request);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
             return self::customResponse('Out of stock', null, 422);
+        } catch (InShortageException $e){
+            return self::customResponse($e->getMessage(), null, 422);
+        } catch (SameQuantityException $e){
+            return self::customResponse('The provided quantity is the same as before', null, 422);
         }
         return self::customResponse('Quantity updated', $quantity, 200);
     }
@@ -120,7 +129,7 @@ class CartController extends Controller
     {
         $this->authorize('view', $cart);
         $cart = $cart->show();
-        return self::customResponse('Cart info returned', new CartResource($cart), 200);
+        return self::customResponse('Cart info returned', $cart, 200);
     }
 
     /**
@@ -143,6 +152,10 @@ class CartController extends Controller
             return self::customResponse('You bank account does not have enough credit to complete the transaction', null, 422);
         } catch (PrescriptionRequiredException $e) {
             return self::customResponse('You order contains prescription drugs. Please, add the prescription for each product to continue', null, 422);
+        } catch (CheckoutOutOfStockException $e){
+            return self::customResponse($e->getMessage(), null, 422);
+        } catch (InShortageException $e){
+            return self::customResponse($e->getMessage(), null, 422);
         }
         return self::customResponse('Purchase complete', null, 200);
     }

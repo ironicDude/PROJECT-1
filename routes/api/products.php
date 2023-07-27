@@ -47,15 +47,15 @@ Route::get('allergies/index', [AllergyController::class, 'index'])
 // cart
 
 
-Route::post('cart/store/{product}', [CartController::class, 'store'])
-                ->name('cart.store')
+Route::post('cart/store/{purchasedProduct}', [CartController::class, 'store'])
+                ->name('cart.product.store')
                 ->middleware('auth');
 
-Route::delete('cart/{cart}/remove/{cartedProduct}', [CartController::class, 'remove'])
+Route::delete('cart/{cart}/remove/{purchasedProduct}', [CartController::class, 'remove'])
                 ->name('cart.remove')
                 ->middleware('auth');
 
-Route::put('cart/{cart}/quantity/update/{cartedProduct}', [CartController::class, 'updateQuantity'])
+Route::put('cart/{cart}/quantity/update/{purchasedProduct}', [CartController::class, 'updateQuantity'])
                 ->name('cart.quantity.update')
                 ->middleware('auth');
 

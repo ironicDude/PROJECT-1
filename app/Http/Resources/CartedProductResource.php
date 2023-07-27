@@ -15,14 +15,13 @@ class CartedProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'product_id' => $this->purchasedProduct->product_id,
+            'product_id' => $this->datedProduct->product_id,
             'cart_id' => $this->cart_id,
-            'price' => $this->purchasedProduct->price,
-            'name' => $this->purchasedProduct->product->name,
+            'price' => $this->datedProduct->purchasedProduct->price,
+            'name' => $this->datedProduct->purchasedProduct->product->name,
             'subtotal' => $this->subtotal,
             'quantity' => $this->quantity,
-            'otc' => $this->purchasedProduct->product->otc,
+            'otc' => $this->datedProduct->purchasedProduct->product->otc,
         ];
     }
 }
