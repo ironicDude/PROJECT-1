@@ -212,27 +212,6 @@ class Product extends Model
     }
 
 
-    public function getEarliestExpiryDateProduct()
-    {
-        $product = $this->purchasedProducts()->whereNotNull('expiry_date')-> orderBy('expiry_date')->limit(1)->first();
-        return $product;
-    }
-
-    public function isAvailble(){
-        $products = $this->purchasedProducts();
-        if($products->count() == 0){
-            throw new OutOfStockException();
-        }
-    }
-
-    public function checkIfCarted(Product $product)
-    {
-        $cartedProducts = Auth::user()->cart->cartedProducts->pluck('purchased_productd_id');
-        $purchasedProducts = $product->purchasedProducts->pluck('id');
-        if(count($cartedProducts->intersect($purchasedProducts)) != 0){
-            return true;
-        }
-    }
 
 
     /**
@@ -260,7 +239,7 @@ class Product extends Model
 
     public function purchasedProducts()
     {
-        return $this->hasMany(PurchasedProduct::class);
+        return $this->hasOne(PurchasedProduct::class, 'id', 'id');
     }
 
     public function allergies()

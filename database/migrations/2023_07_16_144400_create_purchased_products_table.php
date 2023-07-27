@@ -12,16 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchased_products', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('id')->unique()->constrained()->references('id')->on('products');
             $table->timestamps();
-            $table->foreignId('product_id')->constrained();
-            $table->integer('purchase_id');
-            $table->integer('quantity');
             $table->decimal('price', 10, 2);
             $table->integer('order_limit');
             $table->integer('minimum_stock_level');
-            $table->date('expiry_date');
-            $table->date('manufacturing_date')->nullable();
         });
     }
 

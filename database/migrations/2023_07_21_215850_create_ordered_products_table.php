@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->foreignId('order_id')->constrained()->references('id')->on('orders');
-            $table->foreignId('purchased_product_id')->constrained()->references('id')->on('purchased_products');
+            $table->foreignId('dated_product_id')->constrained()->references('id')->on('dated_products');
             $table->integer('quantity');
             $table->decimal('subtotal', 20, 2);
         });

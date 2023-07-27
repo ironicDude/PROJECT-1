@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Exceptions\AccountDeactivatedException;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Resources\CustomResponse;
+
 class Handler extends ExceptionHandler
 {
     use CustomResponse;
@@ -43,35 +44,47 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (QuantityExceededOrderLimitException $e, $request) {
-            return self::customResponse("For some regulatory purposes, you cannot order as many of this product", null, 403);
+            return self::customResponse("For some regulatory purposes, you cannot order as many of this product", null, 422);
         });
 
         $this->renderable(function (OutOfStockException $e, $request) {
-            return self::customResponse("Out of stock", null, 403);
+            return self::customResponse("Out of stock", null, 422);
         });
 
         $this->renderable(function (EmptyCartException $e, $request) {
-            return self::customResponse("The cart is empty", null, 403);
+            return self::customResponse("The cart is empty", null, 422);
         });
 
         $this->renderable(function (ItemNotInCartException $e, $request) {
-            return self::customResponse("The item is not in the cart", null, 403);
+            return self::customResponse("The item is not in the cart", null, 422);
         });
 
         $this->renderable(function (NullQuantityException $e, $request) {
-            return self::customResponse("You should pass a quantity", null, 403);
+            return self::customResponse("You should pass a quantity", null, 422);
         });
 
         $this->renderable(function (NotEnoughMoneyException $e, $request) {
-            return self::customResponse("You don't have enough money", null, 403);
+            return self::customResponse("You don't have enough money", null, 422);
         });
 
         $this->renderable(function (PrescriptionRequiredException $e, $request) {
-            return self::customResponse("Prescription required", null, 403);
+            return self::customResponse("Prescription required", null, 422);
         });
 
         $this->renderable(function (NullAddressException $e, $request) {
-            return self::customResponse("Address required", null, 403);
+            return self::customResponse("Address required", null, 422);
+        });
+
+        $this->renderable(function (SameQuantityException $e, $request) {
+            return self::customResponse("Same quantity as the current quantity", null, 422);
+        });
+
+        // $this->renderable(function (InShortageException $e, $request) {
+        //     return self::customResponse("In shortage", null, 422);
+        // });
+
+        $this->renderable(function (ItemAlreadyInCartException $e, $request) {
+            return self::customResponse("Product already in cart. You can modify its quantity.", null, 422);
         });
     } // end of register
 
@@ -81,7 +94,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof ModelNotFoundException) {
             return CustomResponse::customResponse("Unable to locate the {$this->prettyModelNotFound($e)} you requested.", null, 404);
         }
-        if ($e instanceof AuthorizationException){
+        if ($e instanceof AuthorizationException) {
             return CustomResponse::customResponse("Page does not exist", null, 404);
         }
         return parent::render($request, $e);
@@ -90,7 +103,7 @@ class Handler extends ExceptionHandler
     //helper function to beautify the ModelNotFoundException message
     private function prettyModelNotFound(ModelNotFoundException $exception): string
     {
-        if (! is_null($exception->getModel())) {
+        if (!is_null($exception->getModel())) {
             return Str::lower(ltrim(preg_replace('/[A-Z]/', ' $0', class_basename($exception->getModel()))));
         }
 

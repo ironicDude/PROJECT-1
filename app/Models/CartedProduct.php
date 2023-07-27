@@ -13,7 +13,7 @@ class CartedProduct extends Model
         'quantity',
         'subtotal',
         'cart_id',
-        'purchased_product_id'
+        'dated_product_id'
     ];
 
 
@@ -22,8 +22,9 @@ class CartedProduct extends Model
         return $this->belongsTo(Cart::class, 'cart_id', 'id');
     }
 
-    public function purchasedProduct()
+    public function datedProduct()
     {
-        return $this->belongsTo(PurchasedProduct::class, 'purchased_product_id', 'id');
+       return $this->belongsTo(DatedProduct::class, 'dated_product_id', 'id');
     }
+
 }

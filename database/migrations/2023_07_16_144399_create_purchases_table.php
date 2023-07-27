@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carted_products', function (Blueprint $table) {
+        Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cart_id')->references('id')->on('carts');
-            $table->foreignId('dated_product_id')->references('id')->on('dated_products');
-            $table->decimal('subtotal', 10, 2);
-            $table->integer('quantity');
             $table->timestamps();
+            $table->foreignId('employee_id')->constrained()->references('id')->on('users');
+            $table->decimal('total',30,2);
+            $table->decimal('shipping_fees')->nullable()->default(0);
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carted_products');
+        Schema::dropIfExists('purchases');
     }
 };

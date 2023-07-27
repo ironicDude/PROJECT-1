@@ -16,14 +16,17 @@ Route::get('user/address/show', [UserController::class, 'getAddress'])
     ->middleware('auth')
     ->name('user.address.show');
 
-Route::get('customers/customer/{customer}/orders', [OrderController::class, 'index'])
+Route::get('customers/{customer}/orders', [OrderController::class, 'index'])
     ->middleware('auth')
     ->name('customer.orders.get');
 
-Route::get('customers/customer/order/{order}', [OrderController::class, 'show'])
+Route::get('customers/orders/{order}', [OrderController::class, 'show'])
     ->middleware('auth')
     ->name('customer.order.show');
 
+Route::get('customers/orders/{order}/prescriptions', [OrderController::class, 'getPrescriptions'])
+    ->middleware('auth')
+    ->name('customer.order.show');
 
 Route::post('create', function () {
     Employee::create([

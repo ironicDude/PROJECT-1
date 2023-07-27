@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Exceptions\CheckoutOutOfStockException;
 use App\Exceptions\EmptyCartException;
+use App\Exceptions\InShortageException;
+use App\Exceptions\ItemAlreadyInCartException;
 use App\Exceptions\ItemNotInCartException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NotEnoutMoneyException;
@@ -11,8 +14,10 @@ use App\Exceptions\NullQuantityException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
+use App\Exceptions\SameQuantityException;
 use App\Exceptions\UnprocessableQuantityException;
 use App\Http\Resources\CartedProductResource;
+use App\Http\Resources\CartResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -37,183 +42,139 @@ class Cart extends Model
         'quantity',
         'subtotal'
     ];
-    /**
-     * Add a product to the user's cart.
-     *
-     * @param Product $product The product to be added to the cart.
-     * @param Request $request The HTTP request containing the product quantity.
-     * @return CartedProductResource The newly added carted product resource.
-     * @throws QuantityExceededOrderLimitException If the requested quantity exceeds the product's order limit.
-     * @throws OutOfStockException If the product is out of stock.
-     */
-    public static function addItem(Product $product, Request $request)
+
+    public static function addItem(PurchasedProduct $product, Request $request)
     {
-        // Validate the request to ensure the quantity is provided and valid.
+        db::transaction(function () use ($product, $request) {
+            $request->validate([
+                'quantity' => 'required|numeric|min:1',
+            ]);
+            $product->isAvailable();
+
+            $cart = self::firstOrNew(['id' => Auth::user()->id]);
+            $cart->save();
+            if ($cart->getPurchasedProductcartedProducts($product)->count() > 0) {
+                throw new ItemAlreadyInCartException();
+            }
+            $quantity = $request->quantity;
+
+            if ($quantity > $product->order_limit) throw new QuantityExceededOrderLimitException();
+
+            $flag = 0;
+            if ($quantity > 1 && $product->getQuantity() < $product->minimum_stock_level) {
+                $quantity = 1;
+                $flag = 1;
+            }
+
+            $itemsData = self::chooseItems($product, $quantity);
+
+            self::createCartedProducts($itemsData);
+            db::commit();
+            if ($flag == 1) throw new InShortageException("Unfortunately, {$product->product->name} is in shortage. We modified its quantity in your cart to one, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+        });
+    }
+
+    protected static function chooseItems(PurchasedProduct $product, int $quantity)
+    {
+        $items = [];
+        $quantities = [];
+        $itemIds = [];
+        $tempQuantity = $quantity;
+        while ($tempQuantity > 0) {
+            $item = $product->datedProducts()->where('quantity', '>', 0)->whereNotIn('id', $itemIds)->whereNotNull('expiry_date')->orderBy('expiry_date')->first();
+            $itemIds[] = $item->id;
+            if (!$item) {
+                throw new OutOfStockException();
+            }
+            if ($item->quantity >= $tempQuantity) {
+                $quantities[] = $tempQuantity;
+                $tempQuantity = 0;
+            } else {
+                $quantities[] = $item->quantity;
+                $tempQuantity -= $item->quantity;
+            }
+            $items[] = $item;
+        }
+        return [
+            'items' => $items,
+            'quantities' => $quantities
+        ];
+    }
+
+    protected static function createCartedProducts(array $itemsData)
+    {
+        $items = $itemsData['items'];
+        $quantities = $itemsData['quantities'];
+        $counter = 0;
+        foreach ($items as $item) {
+            $subtotal = $item->purchasedProduct->price * $quantities[$counter];
+            CartedProduct::create([
+                'cart_id' => Auth::user()->id,
+                'dated_product_id' => $item->id,
+                'quantity' => $quantities[$counter],
+                'subtotal' => $subtotal,
+            ]);
+            $counter++;
+        }
+    }
+    public function removeItem(PurchasedProduct $product)
+    {
+        if($this->getPurchasedProductcartedProducts($product)->count() == 0) throw new ItemNotInCartException();
+        DB::transaction(function () use ($product) {
+            $this->deletePurchasedProductCartedProducts($product);
+            // If the last carted product is removed, delete the cart and any associated prescriptions.
+            $this->load('cartedProducts');
+            if ($this->cartedProducts->count() == 0) {
+                $this->cartedPrescriptions->each(function ($cartedPrescription) {
+                    // Delete the associated prescription file from the storage.
+                    Storage::disk('local')->delete($cartedPrescription->prescription);
+                    $cartedPrescription->delete();
+                });
+                $this->delete();
+            }
+        });
+    }
+
+    public function updateQuantity(PurchasedProduct $product, Request $request)
+    {
         $request->validate([
             'quantity' => 'required|numeric|min:1',
         ]);
 
-        // Check if the product is available for purchase.
-        $product->isAvailble();
+        $oldQuantity = $this->getPurchasedProductCartedProducts($product)->sum('quantity');
+        $newQuantity = $request->quantity;
 
-        // Get the product with the earliest expiry date for inventory management.
-        $item = $product->getEarliestExpiryDateProduct();
-
-        // Get the requested quantity from the request.
-        $quantity = $request->quantity;
-
-        // Check if the requested quantity exceeds the product's order limit.
-        if ($quantity > $item->order_limit) {
-            throw new QuantityExceededOrderLimitException();
+        if ($newQuantity == $oldQuantity) throw new SameQuantityException();
+        else {
+            $this->deletePurchasedProductCartedProducts($product);
+            $this->load('cartedProducts');
+            // dd($this->cartedProducts);
+            $newRequest = new Request(['quantity' => $newQuantity]);
+            self::addItem($product, $newRequest);
         }
+        return $newQuantity;
+    }
 
-        // Check if there is enough stock for the requested quantity.
-        if ($item->quantity - $quantity < $item->minimum_stock_level) {
-            throw new OutOfStockException();
-        }
+    protected function getPurchasedProductcartedProducts(PurchasedProduct $product)
+    {
+        $datedProductIds = $product->datedProducts->pluck('id');
+        return $this->cartedProducts->whereIn('dated_product_id', $datedProductIds);
+    }
 
-        // Calculate the subtotal for the carted product.
-        $subtotal = $item->price * $quantity;
-
-        // Create or retrieve the user's cart.
-        $cart = self::firstOrNew([
-            'id' => Auth::user()->id
-        ]);
-        $cart->save();
-
-        // Create a new carted product entry for the user's cart.
-        $cartedProduct = CartedProduct::create([
-            'cart_id' => Auth::user()->id,
-            'purchased_product_id' => $item->id,
-            'quantity' => $quantity,
-            'subtotal' => $subtotal,
-        ]);
-
-        // Decrement the product quantity in the inventory.
-        $item->decrement('quantity', $quantity);
-
-        // Update the cart's total and quantity.
-        self::updateTotal($cart);
-        self::updateCartQuantity($cart);
-
-        // Return the carted product resource for the newly added item.
-        return new CartedProductResource($cartedProduct);
+    protected function deletePurchasedProductCartedProducts(PurchasedProduct $product)
+    {
+        $datedProductIds = $product->datedProducts->pluck('id');
+        $this->cartedProducts->whereIn('dated_product_id', $datedProductIds)->each->delete();
     }
 
     /**
-     * Remove a carted product item from the user's cart.
+     * Get the total quantity of carted products in the cart.
      *
-     * @param CartedProduct $item The carted product to be removed.
-     * @return CartedProductResource The removed carted product resource.
+     * @return int The total quantity of carted products.
      */
-    public function removeItem(CartedProduct $item)
+    public function getQuantity()
     {
-        // Get the count of carted products in the user's cart.
-        $cartedProductsCount = $this->cartedProducts->count();
-
-        // Increment the product quantity in the inventory as the item is removed from the cart.
-        $quantity = $item->quantity;
-        $item->purchasedProduct()->increment('quantity', $quantity);
-
-        // Delete the carted product entry.
-        $item->delete();
-
-        // Update the cart's total and quantity.
-        self::updateTotal($this);
-        self::updateCartQuantity($this);
-
-        // If the last carted product is removed, delete the cart and any associated prescriptions.
-        if ($cartedProductsCount == 1) {
-            $this->cartedPrescriptions->each(function ($cartedPrescription) {
-                // Delete the associated prescription file from the storage.
-                Storage::disk('local')->delete($cartedPrescription->prescription);
-                $cartedPrescription->delete();
-            });
-            $this->delete();
-        }
-
-        // Return the carted product resource for the removed item.
-        return new CartedProductResource($item);
-    }
-
-    /**
-     * Update the quantity of a carted product in the user's cart.
-     *
-     * @param CartedProduct $item The carted product to be updated.
-     * @param Request $request The HTTP request containing the updated quantity.
-     * @return int The updated quantity of the carted product.
-     * @throws QuantityExceededOrderLimitException If the updated quantity exceeds the product's order limit.
-     * @throws OutOfStockException If the product is out of stock after the update.
-     */
-    public function updateQuantity(CartedProduct $item, Request $request)
-    {
-        // Get the requested quantity from the request.
-        $quantity = $request->quantity;
-
-        // Validate the request to ensure the updated quantity is provided and valid.
-        $request->validate([
-            'quantity' => 'required|numeric|min:1',
-        ]);
-
-        // Check if the updated quantity exceeds the product's order limit.
-        if ($quantity > $item->purchasedProduct->order_limit) {
-            throw new QuantityExceededOrderLimitException();
-        }
-
-        // Check if there is enough stock for the updated quantity.
-        if ($item->purchasedProduct->quantity - $quantity < $item->minimum_stock_level) {
-            throw new OutOfStockException();
-        }
-
-        // Update the carted product's quantity and subtotal.
-        $item->quantity = $quantity;
-        $item->subtotal = $item->quantity * $item->purchasedProduct->price;
-        $item->save();
-
-        // Update the cart's total and quantity.
-        self::updateTotal($this);
-        self::updateCartQuantity($this);
-
-        // Return the updated quantity of the carted product.
-        return $item->quantity;
-    }
-
-    /**
-     * Update the total value of the cart.
-     *
-     * @param Cart $cart The user's cart.
-     */
-    protected static function updateTotal()
-    {
-        // Get the user's cart and its carted products.
-        $cart = Auth::user()->cart;
-        $cartedProducts = $cart->cartedProducts;
-
-        // Calculate the total value of all carted products.
-        $total = $cartedProducts->sum('subtotal');
-
-        // Update the cart's total value.
-        $cart->total = $total;
-        $cart->save();
-    }
-
-    /**
-     * Update the total quantity of carted products in the cart.
-     *
-     * @param Cart $cart The user's cart.
-     */
-    protected static function updateCartQuantity(Cart $cart)
-    {
-        // Get the user's cart and its carted products.
-        $cart = Auth::user()->cart;
-        $cartedProducts = $cart->cartedProducts;
-
-        // Calculate the total quantity of all carted products.
-        $quantity = $cartedProducts->sum('quantity');
-
-        // Update the cart's total quantity.
-        $cart->quantity = $quantity;
-        $cart->save();
+        return $this->cartedProducts->sum('quantity');
     }
 
     /**
@@ -223,7 +184,7 @@ class Cart extends Model
      */
     public function getTotal()
     {
-        return $this->total;
+        return $this->cartedProducts->sum('subtotal');
     }
 
     /**
@@ -246,66 +207,6 @@ class Cart extends Model
         // Return the stored address.
         return $this->address;
     }
-
-    /**
-     * Process the checkout for the cart.
-     *
-     * @param Request $request The HTTP request containing the necessary checkout information.
-     */
-    public function checkout(Request $request)
-    {
-        // Validate the checkout request.
-        self::validateCheckout($request);
-
-        // Get the customer associated with the cart.
-        $customer = $request->user();
-
-        // Update the cart's address with the one provided in the checkout request.
-        $this->address = $request->address;
-
-        // Process the payment for the cart.
-        self::processPayment($this);
-
-        // Create an order based on the current cart.
-        $order = self::createOrder($this);
-
-        // Clear the cart (remove all carted products and prescriptions).
-        self::clear($this);
-
-        // Send an email to the customer with the order details for review.
-        Mail::to($customer)->send(new OrderUnderReview($order));
-    }
-
-    /**
-     * Clear the cart by removing all carted products and prescriptions.
-     */
-    public function clear()
-    {
-        // Delete all carted products associated with the cart.
-        $this->cartedProducts->each->delete();
-
-        // Delete all carted prescriptions and their associated files from storage.
-        $cartedPrescriptions = $this->cartedPrescriptions;
-
-        $cartedPrescriptions->each(function ($cartedPrescription) {
-            Storage::disk('local')->delete($cartedPrescription->prescription);
-            $cartedPrescription->delete();
-        });
-
-        // Delete the cart itself.
-        $this->delete();
-    }
-
-    /**
-     * Get the total quantity of carted products in the cart.
-     *
-     * @return int The total quantity of carted products.
-     */
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
     /**
      * Get the address stored in the cart.
      *
@@ -315,46 +216,39 @@ class Cart extends Model
     {
         return $this->address;
     }
-
     /**
-     * Store prescriptions uploaded by the user in the cart.
+     * Process the checkout for the cart.
      *
-     * @param Request $request The HTTP request containing the uploaded prescription files.
-     * @return array The names of the stored prescription files.
+     * @param Request $request The HTTP request containing the necessary checkout information.
      */
-    public function storePrescriptions(Request $request)
+    public function checkout(Request $request)
     {
-        // Validate the request to ensure the prescription files are provided and within size limits.
-        $request->validate([
-            'files' => 'required|array',
-            'files.*' => 'max:4096',
-        ]);
+        // Perform the payment transaction within a database transaction to ensure data consistency.
+        DB::transaction(function () use ($request) {
+            // Validate the checkout request.
+            self::validateCheckout($request);
 
-        // Store the uploaded prescription files and associate them with the cart.
-        $files = $request->file('files');
-        $fileNames = [];
-        foreach ($files as $file) {
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $filename = "{$originalName}-{$this->customer_id}.{$file->getClientOriginalExtension()}";
-            $fileNames[] = $filename;
-            Storage::disk('local')->put($filename, File::get($file));
-            $prescription = ['prescription' => $filename];
-            $this->cartedPrescriptions()->create($prescription);
-        }
+            // Get the customer associated with the cart.
+            $customer = $request->user();
 
-        // Return the names of the stored prescription files.
-        return $fileNames;
-    }
+            // Update the cart's address with the one provided in the checkout request.
+            $this->address = $request->address;
 
-    /**
-     * Check if there are any prescriptions uploaded in the cart.
-     *
-     * @return bool True if there are prescriptions uploaded, false otherwise.
-     */
-    public function checkPrescriptionsUpload()
-    {
-        // Check if there are any carted prescriptions in the cart.
-        return $this->cartedPrescriptions->count() != 0 ? true : false;
+            //process the stock for this order
+            $this->processStock();
+
+            // Process the payment for the cart.
+            $this->processPayment();
+
+            // Create an order based on the current cart.
+            $order = $this->createOrder();
+
+            // Clear the cart (remove all carted products and prescriptions).
+            $this->clear();
+
+            // Send an email to the customer with the order details for review.
+            Mail::to($customer)->send(new OrderUnderReview($order));
+        });
     }
 
     /**
@@ -370,14 +264,12 @@ class Cart extends Model
         $customer = $request->user();
 
         // Check if the address is provided in the request.
-        if ($request->address == null) {
-            throw new NullAddressException();
-        }
+        if ($request->address == null) throw new NullAddressException();
 
         // Check if the customer has enough money to complete the purchase.
-        if ($customer->money < $this->total) {
-            throw new NotEnoughMoneyException();
-        }
+        if ($customer->money < $this->total) throw new NotEnoughMoneyException();
+
+        $this->checkPrescriptionProducts();
     }
 
     /**
@@ -393,13 +285,13 @@ class Cart extends Model
 
         // Iterate through the carted products to find prescription products.
         foreach ($this->cartedProducts as $product) {
-            if ($product->purchasedProduct->product->otc == 0) {
+            if ($product->datedProduct->purchasedProduct->product->otc == 0) {
                 $containsPrescriptionProducts = true;
             }
         }
 
         // If there are prescription products in the cart but no prescriptions uploaded, throw an exception.
-        if ($this->cartedPrescriptions->count() == 0 && $containsPrescriptionProducts) {
+        if ($this->checkPrescriptionsUpload() == false && $containsPrescriptionProducts) {
             throw new PrescriptionRequiredException();
         }
 
@@ -417,9 +309,38 @@ class Cart extends Model
 
         // Perform the payment transaction within a database transaction to ensure data consistency.
         DB::transaction(function () use ($customer) {
-            $customer->decrement('money', $this->total);
+            $total = $this->getTotal();
+            $customer->decrement('money', $total);
             $pharmacy = Pharmacy::first();
-            $pharmacy->increment('money', $this->total);
+            $pharmacy->increment('money', $total);
+        });
+    }
+
+    protected function processStock()
+    {
+        // Get the customer associated with the cart.
+        $cartedProducts = $this->cartedProducts;
+
+        // Perform the payment transaction within a database transaction to ensure data consistency.
+        DB::transaction(function () use ($cartedProducts) {
+            $purchasedProducts = [];
+            foreach ($cartedProducts as $cartedProduct) {
+                // Check if there is enough stock before updating quantities
+                $purchasedProduct = $cartedProduct->datedProduct->purchasedProduct;
+                if (!in_array($purchasedProduct, $purchasedProducts)) {
+                    $purchasedProductStockLevel = $purchasedProduct->getQuantity();
+                    $purchasedProductMinimumStockLevel = $purchasedProduct->minimum_stock_level;
+                    $quantityInCart = $this->getPurchasedProductcartedProducts($purchasedProduct)->sum('quantity');
+                    $productName = $purchasedProduct->product->name;
+                    if ($purchasedProductStockLevel > 0 && $quantityInCart > 1 && $purchasedProductStockLevel < $purchasedProductMinimumStockLevel) {
+                        throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to one, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+                    } elseif ($purchasedProductStockLevel == 0) {
+                        throw new OutOfStockException();
+                    }
+                }
+                $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);
+                $purchasedProducts[] = $purchasedProduct;
+            }
         });
     }
 
@@ -430,29 +351,21 @@ class Cart extends Model
      */
     protected function createOrder()
     {
-        // Check if the cart contains prescription products.
-        $containsPrescriptionProducts = $this->checkPrescriptionProducts();
-
-        // Determine the initial status of the order based on whether prescription products are present.
-        $initialStatusId = $containsPrescriptionProducts
-            ? OrderStatus::where('name', 'Review')->value('id')
-            : OrderStatus::where('name', 'Delivery')->value('id');
 
         // Create a new order entry in the database.
         $order = Order::create([
             'customer_id' => $this->customer->id,
-            'total' => $this->total,
             'shipping_fees' => $this->shipping_fees ?? 0,
             'shipping_address' => $this->shipping_address ?? "Damascus",
-            'quantity' => $this->quantity,
-            'status_id' => $initialStatusId,
+            'status_id' => 1,
+            'method_id' => 1,
         ]);
 
         // Create ordered product entries for each carted product in the order.
-        self::createOrderedProducts($order);
+        $this->createOrderedProducts($order);
 
         // Create prescription entries for each carted prescription in the order.
-        self::createPrescriptions($order);
+        $this->createPrescriptions($order);
 
         // Return the newly created order instance.
         return $order;
@@ -472,7 +385,7 @@ class Cart extends Model
         foreach ($cartedProducts as $cartedProduct) {
             OrderedProduct::create([
                 'order_id' => $order->id,
-                'purchased_product_id' => $cartedProduct->purchased_product_id,
+                'dated_product_id' => $cartedProduct->dated_product_id,
                 'quantity' => $cartedProduct->quantity,
                 'subtotal' => $cartedProduct->subtotal,
             ]);
@@ -504,6 +417,69 @@ class Cart extends Model
             ]);
         }
     }
+    /**
+     * Store prescriptions uploaded by the user in the cart.
+     *
+     * @param Request $request The HTTP request containing the uploaded prescription files.
+     * @return array The names of the stored prescription files.
+     */
+    public function storePrescriptions(Request $request)
+    {
+        // Validate the request to ensure the prescription files are provided and within size limits.
+        $request->validate([
+            'files' => 'required|array',
+            'files.*' => 'max:4096',
+        ]);
+
+        // Store the uploaded prescription files and associate them with the cart.
+        $files = $request->file('files');
+        $fileNames = [];
+        foreach ($files as $file) {
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $noSpaceOriginalName = str_replace(' ', '', $originalName);
+            $filename = "{$noSpaceOriginalName}-{$this->customer_id}.{$file->getClientOriginalExtension()}";
+            $fileNames[] = $filename;
+            Storage::disk('local')->put($filename, File::get($file));
+            $prescription = ['prescription' => $filename];
+            $this->cartedPrescriptions()->create($prescription);
+        }
+
+        // Return the names of the stored prescription files.
+        return $fileNames;
+    }
+
+    /**
+     * Check if there are any prescriptions uploaded in the cart.
+     *
+     * @return bool True if there are prescriptions uploaded, false otherwise.
+     */
+    public function checkPrescriptionsUpload()
+    {
+        // Check if there are any carted prescriptions in the cart.
+        return $this->cartedPrescriptions->count() > 0 ? true : false;
+    }
+    /**
+     * Clear the cart by removing all carted products and prescriptions.
+     */
+    public function clear()
+    {
+        DB::transaction(function () {
+            // Delete all carted products associated with the cart.
+            $this->cartedProducts->each->delete();
+
+            // Delete all carted prescriptions and their associated files from storage.
+            $cartedPrescriptions = $this->cartedPrescriptions;
+
+            $cartedPrescriptions->each(function ($cartedPrescription) {
+                Storage::disk('local')->delete($cartedPrescription->prescription);
+                $cartedPrescription->delete();
+            });
+
+            // Delete the cart itself.
+            $this->delete();
+        });
+    }
+
 
     /**
      * Get the cart instance for displaying or further processing.
@@ -512,7 +488,7 @@ class Cart extends Model
      */
     public function show()
     {
-        return $this;
+        return new CartResource($this);
     }
 
 
