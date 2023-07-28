@@ -72,16 +72,14 @@ class AllergyController extends Controller
         // Load the allergies for the user with the associated drug name.
         $user->load('allergies:id,drug_id,name');
 
-        // Map the allergies to a formatted array containing the allergy ID, drug ID, and name.
-        $allergies = $user->allergies->map(function ($allergy) {
-            return ['id' => $allergy->id, 'drug_id' => $allergy->drug_id, 'name' => $allergy->name . ' [' . $allergy->drug->name . ']'];
-        });
+        $allergies = $user->getAllergies();
+
 
         // Check if the user has any allergies and return the appropriate response.
-        if ($allergies->isEmpty()) {
-            return self::customResponse('no allergies returned', null, 404);
+        if (!$allergies) {
+            return self::customResponse('no allergies found', null, 404);
         }
 
-        return self::customResponse('allergies returned', $allergies, 200);
+        return self::customResponse('allergies found', $allergies, 200);
     }
 }

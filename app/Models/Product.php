@@ -218,6 +218,7 @@ class Product extends Model
 
 
 
+
     /**
      * Relationships
      */

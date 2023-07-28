@@ -15,10 +15,10 @@ class OrderedProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->purchasedProduct->product->name,
+            'name' => $this->datedProduct->purchasedProduct->product->name,
             'order_id' => $this->order_id,
             'id' => $this->id,
-            'product_id' => $this->purchasedProduct->product_id,
+            'product_id' => $this->datedProduct->product_id,
             'quantity' => $this->quantity,
             'subtotal' => $this->subtotal,
         ];

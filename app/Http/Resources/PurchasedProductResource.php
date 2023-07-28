@@ -15,13 +15,11 @@ class PurchasedProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-                'product_id' => $this->product_id,
+                'product_id' => $this->id,
                 'quantity' => $this->quantity,
                 'price'=> $this->price,
                 'order_limit' => $this->order_limit,
                 'minimum_stock_level' => $this->minimum_stock_level,
-                'expiry_date' => $this->expiry_date,
-                'manufacturing_date' => $this->manufacturing_date,
         ];
     }
 }

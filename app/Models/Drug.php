@@ -12,6 +12,7 @@ use App\Models\Interaction;
 use App\Models\Price;
 use App\Models\Product;
 use App\Models\Synonym;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class Drug extends Model
@@ -38,15 +39,16 @@ class Drug extends Model
  * @param int $limit The optional limit for the maximum number of search results (default is 1).
  * @return array An array of drug objects, each containing the drug name and the maximum drug ID.
  */
-public static function search($string, $limit = 1)
+public static function searchNames($request, $limit = 1)
 {
+    $string = $request->string;
     $drug = DB::select("SELECT name, MAX(id) as drug_id
                         FROM drugs
                         WHERE name LIKE '%{$string}%'
                         GROUP BY name
                         LIMIT {$limit}");
 
-    return [$drug];
+    return $drug;
 }
 
 /**
@@ -62,8 +64,9 @@ public static function search($string, $limit = 1)
  * @param int $limit The optional limit for the maximum number of search results (default is 3).
  * @return array An array of category names matching the search string.
  */
-public static function searchCategories(string $string, int $limit = 3)
+public static function searchCategories(Request $request, int $limit = 3)
 {
+    $string = $request->string;
     $categories = DB::select("SELECT DISTINCT name
                               FROM categories
                               WHERE name LIKE '%{$string}%'
