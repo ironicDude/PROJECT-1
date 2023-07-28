@@ -150,6 +150,7 @@ class Product extends Model
         $rating = $request->rating;
         $dosageForm = $request->dosage_form;
         $otc = $request->otc;
+        $availability = $request->availability;
 
         // Create a base query for the products.
         $products = Product::query();
@@ -196,15 +197,32 @@ class Product extends Model
         }
 
         if (strlen($minPrice) != 0) {
-            $products = $products->whereHas('purchasedProducts', function ($query) use ($minPrice) {
+            $products = $products->whereHas('purchasedProduct', function ($query) use ($minPrice) {
                 $query->where('price', '>=', $minPrice);
             });
         }
 
         if (strlen($maxPrice) != 0) {
-            $products = $products->whereHas('purchasedProducts', function ($query) use ($maxPrice) {
+            $products = $products->whereHas('purchasedProduct', function ($query) use ($maxPrice) {
                 $query->where('price', '<=', $maxPrice);
             });
+        }
+
+        if (strlen($availability) != 0) {
+            if($availability == 1){
+                $products = $products->whereHas('purchasedProduct', function ($query) {
+                    $query->whereHas('datedProducts', function($query){
+                        $query->where('quantity', '>', 0);
+                    });
+                });
+            }
+            elseif($availability == 0){
+                $producs = $products->whereDoesntHave('purchasedProduct')->orWhereHas('purchasedProduct', function ($query){
+                    $query->whereDoesntHave('datedProducts', function($query){
+                        $query->where('quantity', '>', 0);
+                    });
+                });
+            }
         }
 
         // Return the paginated result set with a default page size of 15.

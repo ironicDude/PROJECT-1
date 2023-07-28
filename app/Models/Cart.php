@@ -43,6 +43,7 @@ class Cart extends Model
         'subtotal'
     ];
 
+
     public static function addItem(PurchasedProduct $product, Request $request)
     {
         db::transaction(function () use ($product, $request) {
