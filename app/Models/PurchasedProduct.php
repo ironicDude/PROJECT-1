@@ -23,8 +23,9 @@ class PurchasedProduct extends Model
     {
         $datedProducts = $this->datedProducts;
         if ($datedProducts->count() == 0 || $datedProducts->sum('quantity') == 0) {
-            throw new OutOfStockException();
+            return false;
         }
+        return true;
     }
 
     public function checkIfCarted()

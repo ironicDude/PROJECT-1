@@ -211,6 +211,10 @@ class Product extends Model
         return $products->paginate(15);
     }
 
+    public function isPurchased()
+    {
+        return $this->purchasedProduct ?? true;
+    }
 
 
 
@@ -237,7 +241,7 @@ class Product extends Model
         return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot(['rating', 'reviews']);
     }
 
-    public function purchasedProducts()
+    public function purchasedProduct()
     {
         return $this->hasOne(PurchasedProduct::class, 'id', 'id');
     }
