@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\ProductOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AffectedOrganism;
@@ -76,6 +77,51 @@ public static function searchCategories(Request $request, int $limit = 3)
     return $categories;
 }
 
+    public static function getRelatedInteractionProducts(Drug $firstDrug, Drug $secondDrug)
+    {
+        $firstDrugProducts = collect();
+        $firstDrug->products->each(function ($product) use ($firstDrugProducts) {
+            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
+                $firstDrugProducts->push($product);
+            }
+            if ($firstDrugProducts->count() == 3) {
+                return false;
+            }
+        });
+
+        $secondDrugProducts = collect();
+        $secondDrug->products->each(function ($product) use ($secondDrugProducts) {
+            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
+                $secondDrugProducts->push($product);
+            }
+            if ($secondDrugProducts->count() == 3) {
+                return false;
+            }
+        });
+
+        // Merge the product information of both drugs and retrieve the results.
+        $products = $firstDrugProducts->union($secondDrugProducts);
+
+        return new ProductOverviewCollection($products);
+    }
+
+    public static function checkInteraction(Request $request)
+    {
+        // Retrieve drug IDs from the request.
+        $id = $request->id;
+        $interactingId = $request->interactingId;
+
+        // Find the Drug model corresponding to the given ID.
+        $drug = Drug::findOrFail($id);
+
+        // Check for interactions between the two drugs using the interactingDrugs() relationship.
+        $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
+
+        // Extract the interaction description from the result and respond accordingly with a custom response.
+        $description = $interaction->pluck('pivot.description');
+
+        return $description;
+    }
 
     /**
      * Relationships

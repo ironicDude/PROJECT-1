@@ -9,7 +9,7 @@ Route::get('interaction', [DrugController::class, 'search'])
     ->name('drug.search');
 
 // Route to check if two drugs have any interactions by their IDs
-Route::get('check/{id}/{interactingId}', [DrugInteractionController::class, 'checkInteraction'])
+Route::get('/interaction/check', [DrugInteractionController::class, 'checkInteraction'])
     ->name('drug.interaction.check');
 
 // Route to get a list of drug interactions between two specific drugs by their names or identifiers

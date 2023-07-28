@@ -31,18 +31,7 @@ class DrugInteractionController extends Controller
      */
     public function checkInteraction(Request $request)
     {
-        // Retrieve drug IDs from the request.
-        $id = $request->id;
-        $interactingId = $request->interactingId;
-
-        // Find the Drug model corresponding to the given ID.
-        $drug = Drug::findOrFail($id);
-
-        // Check for interactions between the two drugs using the interactingDrugs() relationship.
-        $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
-
-        // Extract the interaction description from the result and respond accordingly with a custom response.
-        $description = $interaction->pluck('pivot.description');
+        $description = Drug::checkInteraction($request);
         if (count($description) == 0) {
             return self::customResponse('No interaction found', null, 404);
         } else {
@@ -64,37 +53,10 @@ class DrugInteractionController extends Controller
      */
     public function index(Drug $firstDrug, Drug $secondDrug)
     {
-        $firstDrugProducts = collect();
-        $firstDrug->products->each(function ($product) use ($firstDrugProducts) {
-            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
-                $firstDrugProducts->push($product);
-            }
-            if ($firstDrugProducts->count() == 3) {
-                return false;
-            }
-        });
-
-        $secondDrugProducts = collect();
-        $secondDrug->products->each(function ($product) use ($secondDrugProducts) {
-            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
-                $secondDrugProducts->push($product);
-            }
-            if ($secondDrugProducts->count() == 3) {
-                return false;
-            }
-        });
-
-
-
-        // Merge the product information of both drugs and retrieve the results.
-        $products = $firstDrugProducts->union($secondDrugProducts);
-
-        // Check if any products were found and respond accordingly with a custom response.
-        if ($products->isEmpty()) {
-            return self::customResponse('No products to retrieve', null, 404);
-        } else {
-            // Return the product overview information using the ProductOverviewCollection resource.
-            return self::customResponse('Products retrieved', new ProductOverviewCollection($products), 200);
+        $products = Drug::getRelatedInteractionProducts($firstDrug, $secondDrug);
+        if ($products->isEmpty()){
+            return self::customResponse('These drugs have no available products', null, 200);
         }
+        return self::customResponse('Relateed products retrieved', new ProductOverviewCollection($products), 200);
     }
 }

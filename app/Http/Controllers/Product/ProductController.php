@@ -46,7 +46,7 @@ class ProductController extends Controller
             empty($request->maxPrice) && empty($request->category) &&
             empty($request->labeller) && empty($request->route) &&
             empty($request->rating) && empty($request->dosageForm) &&
-            empty($request->otc) && $products->isEmpty()
+            empty($request->otc) && empty($request->availability) && $products->isEmpty()
         ) {
             // Attempt to suggest a corrected product name using an external API (rxnav.nlm.nih.gov).
             $name = $request->name;
