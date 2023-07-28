@@ -23,7 +23,7 @@ class OrderedProduct extends Model
         return $this->belongsTo(Order::class, 'order_id', 'id');
      }
 
-     public function datedProducts()
+     public function datedProduct()
      {
         return $this->belongsTo(DatedProduct::class, 'dated_product_id', 'id');
      }

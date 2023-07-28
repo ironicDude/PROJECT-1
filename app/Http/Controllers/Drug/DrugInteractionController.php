@@ -54,7 +54,7 @@ class DrugInteractionController extends Controller
      * Retrieve product information related to two drugs based on their models.
      *
      * This method receives two Drug models and retrieves product information related to those drugs.
-     * It limits the results to a maximum of three products per drug and returns the product overview
+     * It limits the results to a maximum of three available products per drug and returns the product overview
      * information in a custom response format. If no products are found, an appropriate error message
      * is returned.
      *
@@ -64,12 +64,30 @@ class DrugInteractionController extends Controller
      */
     public function index(Drug $firstDrug, Drug $secondDrug)
     {
-        // Retrieve product information related to the first and second drugs, limiting to three products each.
-        $firstDrugProducts = $firstDrug->products()->limit(3);
-        $secondDrugProducts = $secondDrug->products()->limit(3);
+        $firstDrugProducts = collect();
+        $firstDrug->products->each(function ($product) use ($firstDrugProducts) {
+            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
+                $firstDrugProducts->push($product);
+            }
+            if ($firstDrugProducts->count() == 3) {
+                return false;
+            }
+        });
+
+        $secondDrugProducts = collect();
+        $secondDrug->products->each(function ($product) use ($secondDrugProducts) {
+            if ($product->isPurchased() && $product->purchasedProduct && $product->purchasedProduct->isAvailable()) {
+                $secondDrugProducts->push($product);
+            }
+            if ($secondDrugProducts->count() == 3) {
+                return false;
+            }
+        });
+
+
 
         // Merge the product information of both drugs and retrieve the results.
-        $products = $firstDrugProducts->union($secondDrugProducts)->get();
+        $products = $firstDrugProducts->union($secondDrugProducts);
 
         // Check if any products were found and respond accordingly with a custom response.
         if ($products->isEmpty()) {
@@ -79,5 +97,4 @@ class DrugInteractionController extends Controller
             return self::customResponse('Products retrieved', new ProductOverviewCollection($products), 200);
         }
     }
-
 }

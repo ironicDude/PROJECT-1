@@ -27,4 +27,5 @@ class CartedProduct extends Model
        return $this->belongsTo(DatedProduct::class, 'dated_product_id', 'id');
     }
 
+
 }

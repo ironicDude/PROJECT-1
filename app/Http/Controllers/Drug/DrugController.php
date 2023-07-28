@@ -23,12 +23,9 @@ class DrugController extends Controller
      */
     public function search(Request $request)
     {
-        // Retrieve the search string from the request.
-        $string = $request->string;
-
         // Perform the drug and product search using the search method in the Drug and Product models.
-        $drug = Drug::search($string, 1);
-        $products = Product::search($string, 2);
+        $drug = Drug::searchNames($request, 1);
+        $products = Product::searchNames($request, 2);
 
         // Combine the search results for drugs and products into an array.
         $data = [$drug, $products];

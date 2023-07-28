@@ -12,22 +12,22 @@ use App\Models\Interaction;
 Route::get('{product}', [ProductController::class, 'show'])
                 ->name('product.show');
 
-Route::get('labellers/{string}', [ProductController::class, 'searchLabellers'])
+Route::get('/search/labellers', [ProductController::class, 'searchLabellers'])
                 ->name('product.labellers.search');
 
-Route::get('/routes/{string}', [ProductController::class, 'searchRoutes'])
+Route::get('/search/routes', [ProductController::class, 'searchRoutes'])
                 ->name('product.routes.search');
 
-Route::get('/dosage_forms/{string}', [ProductController::class, 'searchDosageForms'])
+Route::get('/search/dosage_forms', [ProductController::class, 'searchDosageForms'])
                 ->name('product.dosage_forms.search');
 
-Route::get('/categories/{string}', [ProductController::class, 'searchCategories'])
+Route::get('/search/categories', [ProductController::class, 'searchCategories'])
                 ->name('product.categories.search');
 
 Route::get('/', [ProductController::class, 'index'])
                 ->name('products.get');
 
-Route::get('/names/{string}', [ProductController::class, 'searchNames'])
+Route::get('/search/names', [ProductController::class, 'searchNames'])
                 ->name('product.name.search');
 
 // allergy

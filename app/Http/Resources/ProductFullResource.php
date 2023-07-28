@@ -21,12 +21,8 @@ class ProductFullResource extends JsonResource
             'dosage_form' => $this->dosage_form,
             'strength' => $this->strength,
             'otc' => $this->otc,
-            'price' => $this->purchasedProducts->pluck('price'),
-            'availability' => $this->purchasedProducts->isNotEmpty()
-                ? $this->purchasedProducts->map(function ($purchasedProduct) {
-                    return $purchasedProduct->quantity > $purchasedProduct->minimum_stock_level;
-                })
-            : [false],
+            'price' => ($this->isPurchased() && $this->purchasedProduct) ? $this->purchasedProduct->price : null,
+            'availability' => $this->isPurchased() && $this->purchasedProduct &&$this->purchasedProduct->isAvailable(),
             'route' => $this->route,
             'generic' => $this->generic,
             'drug' => $this->drug->toArray(),

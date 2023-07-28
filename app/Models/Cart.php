@@ -49,7 +49,7 @@ class Cart extends Model
             $request->validate([
                 'quantity' => 'required|numeric|min:1',
             ]);
-            $product->isAvailable();
+            if(!$product->isAvailable()) throw new OutOfStockException();
 
             $cart = self::firstOrNew(['id' => Auth::user()->id]);
             $cart->save();
