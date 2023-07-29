@@ -6,5 +6,4 @@ use App\Models\User;
 
 class ProductPolicy
 {
-    
 }

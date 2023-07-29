@@ -61,7 +61,7 @@ class CartController extends Controller
      */
     public function remove(Cart $cart, PurchasedProduct $purchasedProduct)
     {
-        $this->authorize('removeFromCart', $cart);
+        $this->authorize('manageCart', $cart);
         $item = $cart->removeItem($purchasedProduct);
         return self::customResponse('Item removed', $item, 200);
     }
@@ -76,7 +76,7 @@ class CartController extends Controller
      */
     public function updateQuantity(Request $request, Cart $cart, PurchasedProduct $purchasedProduct)
     {
-        $this->authorize('updateQuantity', $cart);
+        $this->authorize('manageCart', $cart);
         try {
             $quantity = $cart->updateQuantity($purchasedProduct, $request);
         } catch (QuantityExceededOrderLimitException $e) {
@@ -100,7 +100,7 @@ class CartController extends Controller
      */
     public function storeAddress(Request $request, Cart $cart)
     {
-        $this->authorize('storeAddress', $cart);
+        $this->authorize('manageCart', $cart);
         $address = $cart->storeAdress($request);
         return self::customResponse('Address stored', $address, 200);
     }
@@ -113,7 +113,7 @@ class CartController extends Controller
      */
     public function getAddress(Cart $cart)
     {
-        $this->authorize('viewAddress', $cart);
+        $this->authorize('manageCart', $cart);
         $address = $cart->getAddress();
         return self::customResponse('Address returned', $address, 200);
     }
@@ -127,7 +127,7 @@ class CartController extends Controller
 
     public function show(Cart $cart)
     {
-        $this->authorize('view', $cart);
+        $this->authorize('manageCart', $cart);
         $cart = $cart->show();
         return self::customResponse('Cart info returned', $cart, 200);
     }
@@ -143,7 +143,7 @@ class CartController extends Controller
 
     public function checkout(Request $request, Cart $cart)
     {
-        $this->authorize('checkout', $cart);
+        $this->authorize('manageCart', $cart);
         try {
             $cart->checkout($request);
         } catch (NullAddressException $e) {
@@ -169,7 +169,7 @@ class CartController extends Controller
 
     public function getQuantity(Cart $cart)
     {
-        $this->authorize('viewQuantity', $cart);
+        $this->authorize('manageCart', $cart);
         $quantity = $cart->getQuantity();
         return self::customResponse('Quantity returned', $quantity, 200);
     }
@@ -183,7 +183,7 @@ class CartController extends Controller
 
     public function getTotal(Cart $cart)
     {
-        $this->authorize('viewTotal', $cart);
+        $this->authorize('manageCart', $cart);
         $total = $cart->getTotal();
         return self::customResponse('Total returned', $total, 200);
     }
@@ -197,7 +197,7 @@ class CartController extends Controller
 
     public function clear(Cart $cart)
     {
-        $this->authorize('clear', $cart);
+        $this->authorize('manageCart', $cart);
         $cart->clear();
         return self::customResponse('Cart cleared', null, 200);
     }
@@ -211,7 +211,7 @@ class CartController extends Controller
      */
     public function storePrescriptions(Request $request, Cart $cart)
     {
-        $this->authorize('storePrescriptions', $cart);
+        $this->authorize('manageCart', $cart);
         $prescriptionNames = $cart->storePrescriptions($request);
         return self::customResponse('Prescriptions stored', $prescriptionNames, 200);
     }
@@ -224,7 +224,7 @@ class CartController extends Controller
      */
     public function checkPrescriptionsUpload(Cart $cart)
     {
-        $this->authorize('checkPrescriptionsUpload', $cart);
+        $this->authorize('manageCart', $cart);
         $status = $cart->checkPrescriptionsUpload();
         return self::customResponse('Status returned', $status, 200);
     }

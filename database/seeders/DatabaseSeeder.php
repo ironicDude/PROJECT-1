@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             MethodSeeder::class,
-            // AccountStatusSeeder::class,
+            AccountStatusSeeder::class,
             OrderStatusSeeder::class,
-            // RoleSeeder::class,
-            // GenderSeeder::class,
+            RoleSeeder::class,
+            GenderSeeder::class,
         ]);
     }
 }

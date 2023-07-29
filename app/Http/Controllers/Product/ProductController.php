@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Drug;
 use App\Models\DrugCategory;
+use App\Models\PurchasedProduct;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -193,4 +194,8 @@ class ProductController extends Controller
             return self::customResponse('Matches returned', $dosageForms, 200);
         }
     }
+
+
+   
+
 }
