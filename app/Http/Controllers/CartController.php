@@ -40,8 +40,13 @@ class CartController extends Controller
     public function store(PurchasedProduct $purchasedProduct, Request $request)
     {
         $this->authorize('storeInCart', $purchasedProduct);
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
         try {
-            $item = Cart::addItem($purchasedProduct, $request);
+            $item = Cart::addItem($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
@@ -77,8 +82,13 @@ class CartController extends Controller
     public function updateQuantity(Request $request, Cart $cart, PurchasedProduct $purchasedProduct)
     {
         $this->authorize('manageCart', $cart);
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
         try {
-            $quantity = $cart->updateQuantity($purchasedProduct, $request);
+            $quantity = $cart->updateQuantity($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
@@ -100,8 +110,12 @@ class CartController extends Controller
      */
     public function storeAddress(Request $request, Cart $cart)
     {
+        // Validate the request to ensure the address is provided.
+        $request->validate([
+            'address' => 'required',
+        ]);
         $this->authorize('manageCart', $cart);
-        $address = $cart->storeAdress($request);
+        $address = $cart->storeAdress($request->address);
         return self::customResponse('Address stored', $address, 200);
     }
 
@@ -144,8 +158,14 @@ class CartController extends Controller
     public function checkout(Request $request, Cart $cart)
     {
         $this->authorize('manageCart', $cart);
+
+        // Validate the request to ensure the address is provided.
+        $request->validate([
+            'address' => 'required',
+        ]);
+        
         try {
-            $cart->checkout($request);
+            $cart->checkout($request->address);
         } catch (NullAddressException $e) {
             return self::customResponse('Please, provide an shipping address', null, 422);
         } catch (NotEnoughMoneyException $e) {

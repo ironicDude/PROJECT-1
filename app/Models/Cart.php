@@ -46,12 +46,10 @@ class Cart extends Model
     ];
 
 
-    public static function addItem(PurchasedProduct $product, Request $request)
+    public static function addItem(PurchasedProduct $product, int $quantity)
     {
-        db::transaction(function () use ($product, $request) {
-            $request->validate([
-                'quantity' => 'required|numeric|min:1',
-            ]);
+        db::transaction(function () use ($product, $quantity) {
+
             if(!$product->isAvailable()) throw new OutOfStockException();
 
             $cart = self::firstOrNew(['id' => Auth::user()->id]);
@@ -59,7 +57,6 @@ class Cart extends Model
             if ($cart->getPurchasedProductcartedProducts($product)->count() > 0) {
                 throw new ItemAlreadyInCartException();
             }
-            $quantity = $request->quantity;
 
             if ($quantity > $product->order_limit) throw new QuantityExceededOrderLimitException();
 
@@ -138,22 +135,17 @@ class Cart extends Model
         });
     }
 
-    public function updateQuantity(PurchasedProduct $product, Request $request)
+    public function updateQuantity(PurchasedProduct $product, int $newQuantity)
     {
-        $request->validate([
-            'quantity' => 'required|numeric|min:1',
-        ]);
 
         $oldQuantity = $this->getPurchasedProductCartedProducts($product)->sum('quantity');
-        $newQuantity = $request->quantity;
 
         if ($newQuantity == $oldQuantity) throw new SameQuantityException();
         else {
             $this->deletePurchasedProductCartedProducts($product);
             $this->load('cartedProducts');
             // dd($this->cartedProducts);
-            $newRequest = new Request(['quantity' => $newQuantity]);
-            self::addItem($product, $newRequest);
+            self::addItem($product, $newQuantity);
         }
         return $newQuantity;
     }
@@ -196,15 +188,11 @@ class Cart extends Model
      * @param Request $request The HTTP request containing the user's address.
      * @return string The stored address.
      */
-    public function storeAdress(Request $request)
+    public function storeAdress(string $address)
     {
-        // Validate the request to ensure the address is provided.
-        $request->validate([
-            'address' => 'required',
-        ]);
 
         // Store the user's address in the cart.
-        $this->address = $request->address;
+        $this->address = $address;
         $this->save();
 
         // Return the stored address.
@@ -224,18 +212,18 @@ class Cart extends Model
      *
      * @param Request $request The HTTP request containing the necessary checkout information.
      */
-    public function checkout(Request $request)
+    public function checkout(string $address)
     {
         // Perform the payment transaction within a database transaction to ensure data consistency.
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($address) {
             // Validate the checkout request.
-            self::validateCheckout($request);
+            self::validateCheckout($address);
 
             // Get the customer associated with the cart.
-            $customer = $request->user();
+            $customer = Auth::user();
 
             // Update the cart's address with the one provided in the checkout request.
-            $this->address = $request->address;
+            $this->address = $address;
 
             //process the stock for this order
             $this->processStock();
@@ -261,13 +249,13 @@ class Cart extends Model
      * @throws NullAddressException If the address is not provided in the request.
      * @throws NotEnoughMoneyException If the customer does not have enough money to complete the purchase.
      */
-    protected function validateCheckout(Request $request)
+    protected function validateCheckout(string $address)
     {
         // Get the customer associated with the cart.
-        $customer = $request->user();
+        $customer = Auth::user();
 
         // Check if the address is provided in the request.
-        if ($request->address == null) throw new NullAddressException();
+        if ($address == null) throw new NullAddressException();
 
         // Check if the customer has enough money to complete the purchase.
         if ($customer->money < $this->total) throw new NotEnoughMoneyException();
