@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\MinimumStockLevelExceeded;
 use App\Exceptions\CheckoutOutOfStockException;
 use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
@@ -26,6 +27,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use App\Http\Resources\CustomResponse;
 use App\Http\Resources\PurchasedProductResource;
 use App\Mail\OrderUnderReview;
+use App\Notifications\MinimumStockLevelExceededNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -341,6 +343,12 @@ class Cart extends Model
                 }
                 $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);
                 $purchasedProducts[] = $purchasedProduct;
+                if($purchasedProduct->getQuantity() < $purchasedProduct->minimum_stock_level){
+                    $inventoryManager = Employee::where('role_id', 2)->first();
+                    $admin = Employee::where('role_id', '1')->first();
+                    // event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
+                    $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
+                }
             }
         });
     }
