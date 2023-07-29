@@ -31,7 +31,7 @@ class DrugController extends Controller
         $data = [$drug, $products];
 
         // Check if any search results were found and respond accordingly with a custom response.
-        if (count($data) == 0) {
+        if (count($data[0]) == 0 && count($data[1]) == 0) {
             return self::customResponse('No matches', null, 404);
         } else {
             return self::customResponse('Matches returned', $data, 200);
