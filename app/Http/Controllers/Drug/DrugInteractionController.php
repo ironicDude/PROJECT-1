@@ -31,7 +31,7 @@ class DrugInteractionController extends Controller
      */
     public function checkInteraction(Request $request)
     {
-        $description = Drug::checkInteraction($request);
+        $description = Drug::checkInteraction($request->id, $request->interactingId);
         if (count($description) == 0) {
             return self::customResponse('No interaction found', null, 404);
         } else {

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\NameNotFoundException;
 use App\Exceptions\OutOfStockException;
+use App\Exceptions\SuggestionException;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductOverviewCollection;
 use App\Http\Resources\ProductOverviewResource;
@@ -118,9 +120,8 @@ class Product extends Model
      * @param int $limit The optional limit for the maximum number of search results (default is 5).
      * @return array An array of product objects, each containing the product name, maximum product ID, and maximum drug ID.
      */
-    public static function searchNames(Request $request, int $limit = 5)
+    public static function searchNames(string $string, int $limit = 5)
     {
-        $string = $request->string;
         $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS product_name, MAX(p.id) AS product_id, MAX(d.id) AS drug_id
                             FROM drugs AS d
                             JOIN products AS p ON d.id = p.drug_id
@@ -225,6 +226,27 @@ class Product extends Model
                     });
                 });
             }
+        }
+
+        // Check if the search query did not yield any results and a product name was provided.
+        if (
+            !empty($request->name) && empty($request->minPrice) &&
+            empty($request->maxPrice) && empty($request->category) &&
+            empty($request->labeller) && empty($request->route) &&
+            empty($request->rating) && empty($request->dosageForm) &&
+            empty($request->otc) && empty($request->availability) && !$products->exists()
+        ) {
+            // Attempt to suggest a corrected product name using an external API (rxnav.nlm.nih.gov).
+            $name = $request->name;
+            $response = Http::get("https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name={$name}");
+
+            // If suggestions are found, return them as a response.
+            if (empty(($response->json()['suggestionGroup']['suggestionList']))) {
+                throw new NameNotFoundException("Your search - {$name} - did not match any records. Suggestions: Make sure all words are spelled correctly. Try different words.Try more general words. Try fewer words.");
+            }
+            $suggestedName = $response->json()['suggestionGroup']['suggestionList']['suggestion'][0];
+            $suggestedNameId = Product::where('name', $suggestedName)->value('id');
+            throw new SuggestionException("Did you mean {$suggestedName}?", $suggestedName, $suggestedNameId);
         }
 
         // Return the paginated result set with a default page size of 15.

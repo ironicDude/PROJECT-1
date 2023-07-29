@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Product;
 
+use App\Exceptions\NameNotFoundException;
+use App\Exceptions\SuggestionException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomResponse;
@@ -38,29 +40,16 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // Retrieve a list of products based on the provided search parameters.
-        $products = Product::index($request);
-
-        // Check if the search query did not yield any results and a product name was provided.
-        if (
-            !empty($request->name) && empty($request->minPrice) &&
-            empty($request->maxPrice) && empty($request->category) &&
-            empty($request->labeller) && empty($request->route) &&
-            empty($request->rating) && empty($request->dosageForm) &&
-            empty($request->otc) && empty($request->availability) && $products->isEmpty()
-        ) {
-            // Attempt to suggest a corrected product name using an external API (rxnav.nlm.nih.gov).
-            $name = $request->name;
-            $response = Http::get("https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name={$name}");
-
-            // If suggestions are found, return them as a response.
-            if (empty(($response->json()['suggestionGroup']['suggestionList']))) {
-                return response()->json(['message' => "Your search - {$name} - did not match any documents. Suggestions: Make sure all words are spelled correctly. Try different words.Try more general words. Try fewer words."], 404);
-            }
-            $suggestedName = $response->json()['suggestionGroup']['suggestionList']['suggestion'][0];
-            return response()->json(['message' => "Did you mean {$suggestedName}?"], 404);
+        try{
+            // Retrieve a list of products based on the provided search parameters.
+            $products = Product::index($request);
+        } catch(NameNotFoundException $e){
+            return self::customResponse($e->getMessage(), null, 404 );
+        } catch(SuggestionException $e){
+            $data = ['product name' => $e->suggestedName,
+                    'product id' => $e->suggestedNameId];
+            return self::customResponse($e->getMessage(), $data, 404);
         }
-
         // If matching products are found, return them in a custom ProductOverviewCollection format.
         $collection = new ProductOverviewCollection($products);
         return $collection;
@@ -196,6 +185,6 @@ class ProductController extends Controller
     }
 
 
-   
+
 
 }

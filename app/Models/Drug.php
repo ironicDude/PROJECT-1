@@ -40,9 +40,9 @@ class Drug extends Model
  * @param int $limit The optional limit for the maximum number of search results (default is 1).
  * @return array An array of drug objects, each containing the drug name and the maximum drug ID.
  */
-public static function searchNames($request, $limit = 1)
+public static function searchNames(string $string, $limit = 1)
 {
-    $string = $request->string;
+
     $drug = DB::select("SELECT d.name, MAX(d.id) as drug_id
                         FROM drugs
                         INNER JOIN interacting_drugs
@@ -106,12 +106,8 @@ public static function searchCategories(Request $request, int $limit = 3)
         return new ProductOverviewCollection($products);
     }
 
-    public static function checkInteraction(Request $request)
+    public static function checkInteraction(int $id, int $interactingId)
     {
-        // Retrieve drug IDs from the request.
-        $id = $request->id;
-        $interactingId = $request->interactingId;
-
         // Find the Drug model corresponding to the given ID.
         $drug = Drug::findOrFail($id);
 
