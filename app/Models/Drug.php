@@ -43,9 +43,8 @@ class Drug extends Model
 public static function searchNames(string $string, $limit = 1)
 {
 
-    $drug = DB::select("SELECT d.name, MAX(d.id) as drug_id
+    $drug = DB::select("SELECT name, MAX(id) as drug_id
                         FROM drugs
-                        INNER JOIN interacting_drugs
                         WHERE name LIKE '%{$string}%'
                         GROUP BY name
                         LIMIT {$limit}");
@@ -66,9 +65,8 @@ public static function searchNames(string $string, $limit = 1)
  * @param int $limit The optional limit for the maximum number of search results (default is 3).
  * @return array An array of category names matching the search string.
  */
-public static function searchCategories(Request $request, int $limit = 3)
+public static function searchCategories(string $string, int $limit = 3)
 {
-    $string = $request->string;
     $categories = DB::select("SELECT DISTINCT name
                               FROM categories
                               WHERE name LIKE '%{$string}%'

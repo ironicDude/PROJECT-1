@@ -68,7 +68,7 @@ class ProductController extends Controller
     public function searchNames(Request $request)
     {
         // Search for product names that match the provided search term using the Product model's searchNames method.
-        $products = Product::searchNames($request);
+        $products = Product::searchNames($request->string);
 
         // Check if any matching product names were found and respond accordingly with a custom response.
         if (count($products) == 0) {
@@ -105,7 +105,7 @@ class ProductController extends Controller
     public function searchLabellers(Request $request)
     {
         // Search for labellers based on the provided search criteria using the Product model's searchLabellers method.
-        $labellers = Product::searchLabellers($request);
+        $labellers = Product::searchLabellers($request->string);
 
         // Check if any matching labellers were found and respond accordingly with a custom response.
         if (count($labellers) == 0) {
@@ -128,7 +128,7 @@ class ProductController extends Controller
     public function searchRoutes(Request $request)
     {
         // Search for routes of administration based on the provided search criteria using the Product model's searchRoutes method.
-        $routes = Product::searchRoutes($request);
+        $routes = Product::searchRoutes($request->string);
 
         // Check if any matching routes were found and respond accordingly with a custom response.
         if (count($routes) == 0) {
@@ -151,7 +151,7 @@ class ProductController extends Controller
     public function searchCategories(Request $request)
     {
         // Search for drug categories based on the provided search criteria using the Drug model's searchCategories method.
-        $categories = Drug::searchCategories($request);
+        $categories = Drug::searchCategories($request->string);
 
         // Check if any matching categories were found and respond accordingly with a custom response.
         if (count($categories) == 0) {
@@ -174,7 +174,7 @@ class ProductController extends Controller
     public function searchDosageForms(Request $request)
     {
         // Search for dosage forms based on the provided search criteria using the Product model's searchDosageForms method.
-        $dosageForms = Product::searchDosageForms($request);
+        $dosageForms = Product::searchDosageForms($request->string);
 
         // Check if any matching dosage forms were found and respond accordingly with a custom response.
         if (count($dosageForms) == 0) {

@@ -47,9 +47,8 @@ class Product extends Model
      * @param int $limit The optional limit for the maximum number of search results (default is 3).
      * @return array An array of labeller names matching the search string.
      */
-    public static function searchLabellers(Request $request, int $limit = 3)
+    public static function searchLabellers(string $string, int $limit = 3)
     {
-        $string = $request->string;
         $labellers = DB::select("SELECT DISTINCT labeller
                             FROM products
                             WHERE labeller LIKE '%{$string}%'
@@ -71,9 +70,8 @@ class Product extends Model
      * @param int $limit The optional limit for the maximum number of search results (default is 3).
      * @return array An array of route names matching the search string.
      */
-    public static function searchRoutes(Request $request, int $limit = 3)
+    public static function searchRoutes(string $string, int $limit = 3)
     {
-        $string = $request->string;
         $routes = DB::select("SELECT DISTINCT name
                             FROM routes
                             WHERE name LIKE '%{$string}%'
@@ -95,9 +93,8 @@ class Product extends Model
      * @param int $limit The optional limit for the maximum number of search results (default is 3).
      * @return array An array of dosage form names matching the search string.
      */
-    public static function searchDosageForms(Request $request, int $limit = 3)
+    public static function searchDosageForms(string $string, int $limit = 3)
     {
-        $string = $request->string;
         $dosageForms = DB::select("SELECT DISTINCT name
                             FROM dosage_forms
                             WHERE name LIKE '%{$string}%'
