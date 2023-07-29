@@ -10,7 +10,7 @@ class InteractingDrug extends Model
     use HasFactory;
 
 
-
+    
 
 
     /**

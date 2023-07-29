@@ -43,8 +43,9 @@ class Drug extends Model
 public static function searchNames($request, $limit = 1)
 {
     $string = $request->string;
-    $drug = DB::select("SELECT name, MAX(id) as drug_id
+    $drug = DB::select("SELECT d.name, MAX(d.id) as drug_id
                         FROM drugs
+                        INNER JOIN interacting_drugs
                         WHERE name LIKE '%{$string}%'
                         GROUP BY name
                         LIMIT {$limit}");
@@ -116,7 +117,10 @@ public static function searchCategories(Request $request, int $limit = 3)
 
         // Check for interactions between the two drugs using the interactingDrugs() relationship.
         $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
-
+        if(!$interaction){
+            $drug = Drug::findOrFail($interactingId);
+            $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $id)->get();
+        }
         // Extract the interaction description from the result and respond accordingly with a custom response.
         $description = $interaction->pluck('pivot.description');
 
