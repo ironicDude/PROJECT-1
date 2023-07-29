@@ -57,7 +57,15 @@ class LoginRequest extends FormRequest
             throw new AccountDeactivatedException();
         }
 
+
+
         RateLimiter::clear($this->throttleKey());
+    }
+
+    public function getCountryFromIp(string $ip)
+    {
+
+
     }
 
     /**

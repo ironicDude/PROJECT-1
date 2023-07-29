@@ -3,14 +3,16 @@
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Product\AllergyController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Product\PurchasedProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Resources\CustomResponse;
 use App\Models\Interaction;
+use App\Models\PurchasedProduct;
 
 // search
 // Show a specific product's information
-Route::get('{product}', [ProductController::class, 'show'])
+Route::get('/get/{product}', [ProductController::class, 'show'])
                 ->name('product.show');
 
 // Search products by labellers
@@ -113,4 +115,33 @@ Route::post('/cart/{cart}/prescriptions/store', [CartController::class, 'storePr
 // Check if prescriptions are uploaded for the cart for the authenticated user
 Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkPrescriptionsUpload'])
                 ->name('cart.prescriptions.show')
+                ->middleware('auth');
+
+// stock levels feature
+Route::get('/purchasedProducts', [PurchasedProductController::class, 'index'])
+                ->name('products.purchasedProducts.get')
+                ->middleware('auth');
+
+Route::get('/purchasedProducts/{purchasedProduct}/price/get', [PurchasedProductController::class, 'getPrice'])
+                ->name('products.purchasedProducts.price.get')
+                ->middleware('auth');
+
+Route::get('/purchasedProducts/{purchasedProduct}/minimumStockLevel/get', [PurchasedProductController::class, 'getMinimumStockLevel'])
+                ->name('products.purchasedProducts.minimumStockLevel.get')
+                ->middleware('auth');
+
+Route::get('/purchasedProducts/{purchasedProduct}/orderLimit/get', [PurchasedProductController::class, 'getOrderLimit'])
+                ->name('products.purchasedProducts.orderLimit.get')
+                ->middleware('auth');
+
+Route::post('/purchasedProducts/{purchasedProduct}/price/set', [PurchasedProductController::class, 'setPrice'])
+                ->name('products.purchasedProducts.price.set')
+                ->middleware('auth');
+
+Route::post('/purchasedProducts/{purchasedProduct}/minimumStockLevel/set', [PurchasedProductController::class, 'setMinimumStockLevel'])
+                ->name('products.purchasedProducts.minimumStockLevel.set')
+                ->middleware('auth');
+
+Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedProductController::class, 'setOrderLimit'])
+                ->name('products.purchasedProducts.orderLimit.set')
                 ->middleware('auth');

@@ -21,5 +21,14 @@ class PurchasedProductPolicy
         return $user->type === 'customer';
     }
 
+    // public function getAll(User $user)
+    // {
+    //     return $user->type == 'employee' && ($user->role->role == 'administrator' || $user->role->role == 'Inventory Manager');
+    // }
+
+    public function getAndSet(User $user)
+    {
+        return $user->type == 'employee' && ($user->role->role == 'administrator' || $user->role->role == 'Inventory Manager');
+    }
 
 }

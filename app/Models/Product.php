@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Exceptions\OutOfStockException;
 use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductOverviewCollection;
+use App\Http\Resources\ProductOverviewResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Drug;
@@ -233,7 +235,6 @@ class Product extends Model
     {
         return $this->purchasedProduct ?? true;
     }
-
 
 
 

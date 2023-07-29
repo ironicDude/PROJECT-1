@@ -16,7 +16,7 @@ class PurchasedProductResource extends JsonResource
     {
         return [
                 'product_id' => $this->id,
-                'quantity' => $this->quantity,
+                'quantity' => $this->datedProducts->sum('quantity'),
                 'price'=> $this->price,
                 'order_limit' => $this->order_limit,
                 'minimum_stock_level' => $this->minimum_stock_level,
