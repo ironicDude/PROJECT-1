@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use App\Exceptions\AccountDeactivatedException;
+use Exception;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +17,42 @@ class LoginRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
+    public function authorize()
     {
+        return $this->authorizeLocation()
+        ? Response::allow()
+        : Response::denyWithStatus(401, 'Unauthorized');
+    }
+
+    protected function authorizeLocation()
+    {
+        $apiKey = "5d9612032736493f841d5b00e2cbdad4";
+        $deniedCountries = ['United States'];
+        $ip = "209.142.68.29"; //A United States IP.
+        // $ip = $this->ip();
+        $fields = 'country_name';
+        $location = $this->get_geolocation($apiKey, $ip, "en", $fields, "");
+        $decodedLocation = json_decode($location, true);
+        // dd($decodedLocation);
+        if(in_array($decodedLocation['country_name'], $deniedCountries)){
+            return false;
+        }
         return true;
+    }
+
+    protected function get_geolocation($apiKey, $ip, $lang = "en", $fields = "*", $excludes = "") {
+        $url = "https://api.ipgeolocation.io/ipgeo?apiKey={$apiKey}&ip={$ip}&lang={$lang}&fields={$fields}&excludes={$excludes}";
+        $cURL = curl_init();
+
+        curl_setopt($cURL, CURLOPT_URL, $url);
+        curl_setopt($cURL, CURLOPT_HTTPGET, true);
+        curl_setopt($cURL, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($cURL, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ));
+
+        return curl_exec($cURL);
     }
 
     /**
@@ -42,6 +77,7 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $this->authorize();
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
@@ -57,16 +93,9 @@ class LoginRequest extends FormRequest
             throw new AccountDeactivatedException();
         }
 
-
-
         RateLimiter::clear($this->throttleKey());
     }
 
-    public function getCountryFromIp(string $ip)
-    {
-
-
-    }
 
     /**
      * Ensure the login request is not rate limited.
