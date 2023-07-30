@@ -94,6 +94,11 @@ class PurchasedProduct extends Model
     {
         return $this->product->name;
     }
+
+    public function getSafeDistance()
+    {
+        return $this->getQuantity() - $this->getMinimumStockLevel();
+    }
     /**
      * Relationships
      */

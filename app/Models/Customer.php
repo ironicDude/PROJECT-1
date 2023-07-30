@@ -6,6 +6,7 @@ use App\Http\Resources\OrderOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class Customer extends User
 {
@@ -41,6 +42,12 @@ class Customer extends User
         return new OrderOverviewCollection($orders);
     }
 
+    public function createCart()
+    {
+        $cart = Cart::firstOrNew(['id' => $this->id]);
+        $cart->save();
+        return $cart;
+    }
 
     /**
      * Relationships

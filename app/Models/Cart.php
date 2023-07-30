@@ -47,41 +47,52 @@ class Cart extends Model
     ];
 
 
-    public static function addItem(PurchasedProduct $product, int $quantity)
+    public function addItem(PurchasedProduct $product, int $quantity)
     {
-        db::transaction(function () use ($product, $quantity) {
+        DB::transaction(function () use ($product, $quantity) {
 
-            if(!$product->isAvailable()) throw new OutOfStockException();
-            if(($quantity > $product->getQuantity()) && $product->isMinimumStockLevelSafe())
-            {
-                $allowedQuantity = $product->getQuantity() - $product->getMinimumStockLevel();
-                $productName = $product->getName();
-                self::addItem($product, $allowedQuantity);
-                throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to {$allowedQuantity}, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
-            }
-            $cart = self::firstOrNew(['id' => Auth::user()->id]);
-            $cart->save();
-            if ($cart->getPurchasedProductcartedProducts($product)->count() > 0) {
+            if ($this->getPurchasedProductcartedProducts($product)->count() > 0) {
                 throw new ItemAlreadyInCartException();
             }
 
-            if ($quantity > $product->getOrderLimit()) throw new QuantityExceededOrderLimitException();
+            $this->validateStock($product, $quantity);
 
-            $flag = 0;
-            if ($quantity > 1 && $product->getQuantity() < $product->getMinimumStockLevel()) {
-                $quantity = 1;
-                $flag = 1;
-            }
+            $itemsData = $this->chooseItems($product, $quantity);
 
-            $itemsData = self::chooseItems($product, $quantity);
-
-            self::createCartedProducts($itemsData);
-            db::commit();
-            if ($flag == 1) throw new InShortageException("Unfortunately, {$product->product->name} is in shortage. We modified its quantity in your cart to one, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+            $this->createCartedProducts($itemsData);
         });
     }
 
-    protected static function chooseItems(PurchasedProduct $product, int $quantity)
+    protected function validateStock(PurchasedProduct $product, int $quantity)
+    {
+        if(!$product->isAvailable()){
+            throw new OutOfStockException();
+        }
+
+        if($quantity > $product->getOrderLimit()){
+            throw new QuantityExceededOrderLimitException();
+        }
+
+        DB::commit();
+        if (!$product->isMinimumStockLevelSafe() && $quantity > 1) {
+            $allowedQuantity = 1;
+            $this->updateQuantityAndThrowShortageException($product, $allowedQuantity);
+        }
+
+        if($product->isMinimumStockLevelSafe() && $quantity > $product->getSafeDistance()){
+            $allowedQuantity = $product->getSafeDistance();
+            $this->updatequantityAndThrowShortageException($product, $allowedQuantity);
+        }
+    }
+
+    protected function updateQuantityAndThrowShortageException(PurchasedProduct $product, int $quantity)
+    {
+        $productName = $product->getName();
+        $this->updateQuantity($product, $quantity);
+        throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to {$quantity}, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+    }
+
+    protected function chooseItems(PurchasedProduct $product, int $quantity)
     {
         $items = [];
         $quantities = [];
@@ -108,7 +119,7 @@ class Cart extends Model
         ];
     }
 
-    protected static function createCartedProducts(array $itemsData)
+    protected function createCartedProducts(array $itemsData)
     {
         $items = $itemsData['items'];
         $quantities = $itemsData['quantities'];
@@ -144,16 +155,10 @@ class Cart extends Model
 
     public function updateQuantity(PurchasedProduct $product, int $newQuantity)
     {
-
-        $oldQuantity = $this->getPurchasedProductCartedProducts($product)->sum('quantity');
-
-        if ($newQuantity == $oldQuantity) throw new SameQuantityException();
-        else {
-            $this->deletePurchasedProductCartedProducts($product);
-            $this->load('cartedProducts');
-            // dd($this->cartedProducts);
-            self::addItem($product, $newQuantity);
-        }
+        $this->deletePurchasedProductCartedProducts($product);
+        $this->load('cartedProducts');
+        // dd($this->cartedProducts);
+        $this->addItem($product, $newQuantity);
         return $newQuantity;
     }
 
@@ -224,7 +229,7 @@ class Cart extends Model
         // Perform the payment transaction within a database transaction to ensure data consistency.
         DB::transaction(function () use ($address) {
             // Validate the checkout request.
-            self::validateCheckout($address);
+            $this->validateCheckout($address);
 
             // Get the customer associated with the cart.
             $customer = Auth::user();
@@ -326,19 +331,12 @@ class Cart extends Model
                 // Check if there is enough stock before updating quantities
                 $purchasedProduct = $cartedProduct->datedProduct->purchasedProduct;
                 if (!in_array($purchasedProduct, $purchasedProducts)) {
-                    $purchasedProductStockLevel = $purchasedProduct->getQuantity();
-                    $purchasedProductMinimumStockLevel = $purchasedProduct->minimum_stock_level;
                     $quantityInCart = $this->getPurchasedProductcartedProducts($purchasedProduct)->sum('quantity');
-                    $productName = $purchasedProduct->product->name;
-                    if ($purchasedProductStockLevel > 0 && $quantityInCart > 1 && $purchasedProductStockLevel < $purchasedProductMinimumStockLevel) {
-                        throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to one, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
-                    } elseif ($purchasedProductStockLevel == 0) {
-                        throw new OutOfStockException();
-                    }
+                    $this->validateStock($purchasedProduct, $quantityInCart);
                 }
                 $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);
                 $purchasedProducts[] = $purchasedProduct;
-                if($purchasedProduct->getQuantity() < $purchasedProduct->minimum_stock_level){
+                if($purchasedProduct->getQuantity() < $purchasedProduct->getMinimumStockLevel()){
                     $inventoryManager = Employee::where('role_id', 2)->first();
                     $admin = Employee::where('role_id', '1')->first();
                     event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));

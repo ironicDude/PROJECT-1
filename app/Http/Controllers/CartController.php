@@ -40,6 +40,7 @@ class CartController extends Controller
      */
     public function store(PurchasedProduct $purchasedProduct, Request $request)
     {
+        $cart = Auth::user()->createCart();
         $this->authorize('storeInCart', $purchasedProduct);
 
         $request->validate([
@@ -47,7 +48,7 @@ class CartController extends Controller
         ]);
 
         try {
-            $item = Cart::addItem($purchasedProduct, $request->quantity);
+            $item = $cart->addItem($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
