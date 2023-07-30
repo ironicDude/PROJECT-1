@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,7 @@ public function store(LoginRequest $request)
     return response()->json([
         'message' => 'User has been logged in',
         'type' => Auth::user()->type,
+        'info' => new UserResource(Auth::user()),
     ], 200);
 }
 
