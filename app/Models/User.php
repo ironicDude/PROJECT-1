@@ -157,16 +157,6 @@ class User extends Authenticatable
 
 
     /**
-     * Get the address of the authenticated user.
-     *
-     * @return string
-     */
-    public function getAddress()
-    {
-        return Auth::user()->address;
-    }
-
-    /**
      * Check if the authenticated user is a customer
      *
      * @return bool Returns true if the user is a customer and false if not.
@@ -183,6 +173,87 @@ class User extends Authenticatable
         $allergies = $this->allergies;
         return new AllergyCollection($allergies);
     }
+
+
+    public function getFirstName()
+    {
+        return $this->first_name;
+    }
+
+    public function getLastName()
+    {
+        return $this->last_name;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
+
+    public function getGender()
+    {
+        return $this->gender->gender;
+    }
+
+    public function getDateOfBirth()
+    {
+        return $this->date_of_birth;
+    }
+
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    public function getAccountStatus()
+    {
+        return $this->accountStatus->status;
+    }
+
+     /**
+     * Get the address of the authenticated user.
+     *
+     * @return string
+     */
+    public function getAddress()
+    {
+        return Auth::user()->address;
+    }
+
+    public function setFirstName(string $firstName)
+    {
+        $this->first_name = $firstName;
+        $this->save();
+        return $this->first_name;
+    }
+
+    public function setLastName(string $lastName)
+    {
+        $this->last_name = $lastName;
+        $this->save();
+        return $this->last_name;
+    }
+
 
 
     /**

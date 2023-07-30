@@ -81,4 +81,6 @@ class UserController extends Controller
     {
         return self::customResponse('address returned', Auth::user()->address, 200);
     }
+
+    
 }

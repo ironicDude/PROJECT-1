@@ -62,4 +62,10 @@ class Customer extends User
     {
         return $this->hasMany(Order::class, 'customer_id', 'id');
     }
+
+
+    public function getMoney()
+    {
+        return $this->momey;
+    }
 }

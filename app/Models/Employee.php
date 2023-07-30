@@ -30,6 +30,28 @@ class Employee extends User
         return $this->role->role == 'administrator';
     } //end of isAdministrator
 
+
+    public function getSalary()
+    {
+        return $this->salary;
+    }
+
+    public function getPersonalEmail()
+    {
+        return $this->personal_email;
+    }
+
+    public function getDateOfJoining()
+    {
+        return $this->date_of_joining;
+    }
+
+    public function getRole()
+    {
+        return $this->role->role;
+    }
+
+    
     /**
      * Relationships
      */
