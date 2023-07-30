@@ -15,6 +15,7 @@ use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
@@ -254,6 +255,26 @@ class User extends Authenticatable
         return $this->last_name;
     }
 
+    public function setMobile(string $lastName)
+    {
+        $this->last_name = $lastName;
+        $this->save();
+        return $this->last_name;
+    }
+
+    public function setGender(string $gender)
+    {
+        $this->gender = Gender::where('gender', $gender)->first();
+        $this->save();
+        return $this->gender->gender;
+    }
+
+    public function setDateOfBirth(Carbon $date)
+    {
+        $this->gender = Gender::where('gender', $date)->first();
+        $this->save();
+        return $this->date_of_birth;
+    }
 
 
     /**
