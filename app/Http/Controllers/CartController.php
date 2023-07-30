@@ -6,6 +6,7 @@ use App\Exceptions\CheckoutOutOfStockException;
 use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
 use App\Exceptions\ItemNotInCartException;
+use App\Exceptions\LimitedStockException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
 use App\Exceptions\NullQuantityException;
@@ -163,7 +164,7 @@ class CartController extends Controller
         $request->validate([
             'address' => 'required',
         ]);
-        
+
         try {
             $cart->checkout($request->address);
         } catch (NullAddressException $e) {

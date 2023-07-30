@@ -85,6 +85,15 @@ class PurchasedProduct extends Model
         return new PurchasedProductCollection(self::paginate(20));
     }
 
+    public function isMinimumStockLevelSafe()
+    {
+        return $this->getQuantity() > $this->getMinimumStockLevel();
+    }
+
+    public function getName()
+    {
+        return $this->product->name;
+    }
     /**
      * Relationships
      */

@@ -8,6 +8,7 @@ use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
 use App\Exceptions\ItemAlreadyInCartException;
 use App\Exceptions\ItemNotInCartException;
+use App\Exceptions\LimitedStockException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NotEnoutMoneyException;
 use App\Exceptions\NullAddressException;
@@ -51,17 +52,23 @@ class Cart extends Model
         db::transaction(function () use ($product, $quantity) {
 
             if(!$product->isAvailable()) throw new OutOfStockException();
-
+            if(($quantity > $product->getQuantity()) && $product->isMinimumStockLevelSafe())
+            {
+                $allowedQuantity = $product->getQuantity() - $product->getMinimumStockLevel();
+                $productName = $product->getName();
+                self::addItem($product, $allowedQuantity);
+                throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to {$allowedQuantity}, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+            }
             $cart = self::firstOrNew(['id' => Auth::user()->id]);
             $cart->save();
             if ($cart->getPurchasedProductcartedProducts($product)->count() > 0) {
                 throw new ItemAlreadyInCartException();
             }
 
-            if ($quantity > $product->order_limit) throw new QuantityExceededOrderLimitException();
+            if ($quantity > $product->getOrderLimit()) throw new QuantityExceededOrderLimitException();
 
             $flag = 0;
-            if ($quantity > 1 && $product->getQuantity() < $product->minimum_stock_level) {
+            if ($quantity > 1 && $product->getQuantity() < $product->getMinimumStockLevel()) {
                 $quantity = 1;
                 $flag = 1;
             }
@@ -238,7 +245,7 @@ class Cart extends Model
             $this->clear();
 
             // Send an email to the customer with the order details for review.
-            Mail::to($customer)->send(new OrderUnderReview($order));
+            // Mail::to($customer)->send(new OrderUnderReview($order));
         });
     }
 
@@ -334,8 +341,8 @@ class Cart extends Model
                 if($purchasedProduct->getQuantity() < $purchasedProduct->minimum_stock_level){
                     $inventoryManager = Employee::where('role_id', 2)->first();
                     $admin = Employee::where('role_id', '1')->first();
-                    // event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
-                    $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
+                    event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
+                    // $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
                 }
             }
         });
