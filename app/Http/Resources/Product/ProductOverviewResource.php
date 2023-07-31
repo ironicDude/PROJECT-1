@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Product;
 
 use App\Models\PurchasedProduct;
 use Illuminate\Http\Request;
@@ -19,9 +19,9 @@ class ProductOverviewResource extends JsonResource
         return [
                 'name' => $this->name,
                 'id' => $this->id,
-                'drug_id' => $this->drug->id,
+                'drugId' => $this->drug->id,
                 'labeller' => $this->labeller,
-                'dosage_form' => $this->dosage_form,
+                'dosageForm' => $this->dosage_form,
                 'strength' => $this->strength,
                 'otc' => $this->otc,
                 'price' => ($this->isPurchased() && $this->purchasedProduct) ? $this->purchasedProduct->price : null,

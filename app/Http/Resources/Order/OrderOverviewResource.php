@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Order;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryResource extends JsonResource
+class OrderOverviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,9 +15,10 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'category_data' => [
-                'name' => $this->name
-            ],
+            'order_id' => $this->id,
+            'Status' => $this->status->name,
+            'total' => $this->getTotal(),
+            'date' => $this->updated_at->format('Y-m-d'),
         ];
     }
 }

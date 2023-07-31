@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'forceLogout'])->group(function () {
 
     // Activate or deactivate a user (employee) based on user_id
     Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])

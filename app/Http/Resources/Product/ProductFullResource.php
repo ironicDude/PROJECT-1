@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,7 +18,7 @@ class ProductFullResource extends JsonResource
             'name' => $this->name,
             'id' => $this->id,
             'labeller' => $this->labeller,
-            'dosage_form' => $this->dosage_form,
+            'dosageForm' => $this->dosage_form,
             'strength' => $this->strength,
             'otc' => $this->otc,
             'price' => ($this->isPurchased() && $this->purchasedProduct) ? $this->purchasedProduct->price : null,
@@ -26,9 +26,9 @@ class ProductFullResource extends JsonResource
             'route' => $this->route,
             'generic' => $this->generic,
             'drug' => $this->drug->toArray(),
-            'affected organisms' => $this->drug->affectedOrganisms->pluck('organism'),
+            'affectedOrganisms' => $this->drug->affectedOrganisms->pluck('organism'),
             'categories' => $this->drug->categories->pluck('name'),
-            'external_identifiers'=> $this->drug->externalIdentifiers->pluck('url'),
+            'externalIdentifiers'=> $this->drug->externalIdentifiers->pluck('url'),
             'synonyms' => $this->drug->synonyms->pluck('synonym'),
     ];
     }

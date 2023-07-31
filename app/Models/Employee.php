@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\User\EmployeeResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;

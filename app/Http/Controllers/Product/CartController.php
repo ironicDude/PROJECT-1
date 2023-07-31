@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Product;
 
 use App\Exceptions\CheckoutOutOfStockException;
 use App\Exceptions\EmptyCartException;
@@ -15,6 +15,7 @@ use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\CartedProductResource;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;

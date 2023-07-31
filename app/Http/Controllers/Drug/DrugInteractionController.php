@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Drug;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomResponse;
-use App\Http\Resources\ProductOverviewCollection;
-use App\Http\Resources\ProductOverviewResource;
+use App\Http\Resources\Product\ProductOverviewCollection;
 use Illuminate\Http\Request;
 use App\Models\Drug;
 use App\Models\InteractingDrug;

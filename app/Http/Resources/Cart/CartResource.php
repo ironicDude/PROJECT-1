@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Cart;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -30,7 +30,7 @@ class CartResource extends JsonResource
                     'id' => $item->datedProduct->product_id,
                     'otc' => $item->datedProduct->purchasedProduct->product->otc,
                     'price' => $item->datedProduct->purchasedProduct->price,
-                    'cart_id' => $this->id
+                    'cartId' => $this->id
                 ];
             } else {
                 // If the PurchasedProduct is already in the 'distinct' array, increment the quantity and subtotal.
@@ -39,7 +39,7 @@ class CartResource extends JsonResource
             }
         }
         return [
-            'cart_id' => $this->id,
+            'cartId' => $this->id,
             'items' => $distinctItems,
             'prescriptions' => new CartedPrescriptionCollection($this->cartedPrescriptions),
             'delivery' => $this->delivery,

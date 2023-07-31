@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Cart;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AllergyResource extends JsonResource
+class CartedPrescriptionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,8 +14,9 @@ class AllergyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return ['id' => $this->id,
-                'drug_id' => $this->drug_id,
-                'name' => $this->name . ' [' . $this->drug->name . ']'];
+        return [
+            'id' => $this->id,
+            'prescripiton' => $this->prescription,
+        ];
     }
 }

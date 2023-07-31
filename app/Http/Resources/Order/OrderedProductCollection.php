@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Order;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class CartedPrescriptionCollection extends ResourceCollection
+class OrderedProductCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.

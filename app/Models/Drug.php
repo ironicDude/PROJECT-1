@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Resources\ProductOverviewCollection;
+use App\Http\Resources\Product\ProductOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AffectedOrganism;

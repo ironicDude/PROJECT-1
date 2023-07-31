@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -25,6 +26,16 @@ class AuthenticatedSessionController extends Controller
  */
 public function store(LoginRequest $request)
 {
+
+    // $validator = Validator::make($request->all(), [
+    //     'email' => 'required|string|email',
+    //     'password' => 'required'
+    // ]);
+
+    // // If the validation fails, return a JSON response with the validation errors and status code 422 (Unprocessable Entity).
+    // if ($validator->fails()) {
+    //     return response()->json(['errors' => $validator->errors()], 422);
+    // }
     // Attempt to authenticate the user with the provided credentials.
     $request->authenticate();
 

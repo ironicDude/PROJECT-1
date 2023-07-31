@@ -22,8 +22,8 @@ class UserPolicy
         // and the user to be toggled is not an administrator.
         if (
             $user->type === 'employee' &&
-            $user->role->role === 'administrator' &&
-            $toBeToggledUser->role && $toBeToggledUser->role->role != 'administrator'
+            in_array('administrator', $user->roles->pluck('role')->toArray()) &&
+            !in_array('administrator', $toBeToggledUser->roles->pluck('role')->toArray())
         ) {
             // If the conditions are met, allow the activation or deactivation action.
             return Response::allow();

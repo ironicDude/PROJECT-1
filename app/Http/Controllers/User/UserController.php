@@ -4,13 +4,13 @@ namespace App\Http\Controllers\User;
 
 use App\Events\UserAccountStatusChanged;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\User\UserResource;
 use App\Models\Employee;
 use App\Notifications\UserAccountStatusChangedNotification;
 use Illuminate\Support\Facades\Auth;
@@ -67,15 +67,15 @@ class UserController extends Controller
             }
 
             // Refresh the user model to get the updated account status.
-            $accountStatus = $user->fresh()->accountStatus->status;
+            $accountStatus = strtolower($user->fresh()->account_status);
 
             // Broadcast an event to notify about the change in user account status.
             event(new UserAccountStatusChanged($request->user(), $user, $accountStatus));
-
             // Return a custom response indicating the new account status and the user information in UserResource format.
             return self::customResponse("User is now {$accountStatus}", new UserResource($user), 200);
         }
     }
+
 
     public function getAddress()
     {

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
-use App\Http\Resources\OrderFullResource;
+use App\Http\Resources\Order\OrderFullResource;
 use App\Models\Order;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;

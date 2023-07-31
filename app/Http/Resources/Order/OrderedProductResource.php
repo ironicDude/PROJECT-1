@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Order;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CartedProductResource extends JsonResource
+class OrderedProductResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,13 +15,12 @@ class CartedProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'product_id' => $this->datedProduct->product_id,
-            'cart_id' => $this->cart_id,
-            'price' => $this->datedProduct->purchasedProduct->price,
             'name' => $this->datedProduct->purchasedProduct->product->name,
-            'subtotal' => $this->subtotal,
+            'order_id' => $this->order_id,
+            'id' => $this->id,
+            'product_id' => $this->datedProduct->product_id,
             'quantity' => $this->quantity,
-            'otc' => $this->datedProduct->purchasedProduct->product->otc,
+            'subtotal' => $this->subtotal,
         ];
     }
 }
