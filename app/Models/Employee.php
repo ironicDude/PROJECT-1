@@ -10,7 +10,7 @@ class Employee extends User
 {
     use HasFactory;
     protected static $singleTableType = 'employee';
-    protected static $persisted = ['salary', 'personal_email', 'date_of_joining', 'role_id'];
+    protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
     protected $fillable = [
         'first_name',
         'last_name',
@@ -18,16 +18,16 @@ class Employee extends User
         'password',
         'address',
         'date_of_birth',
-        'gender_id',
+        'gender',
         'image',
+        'account_status',
         'salary',
         'personal_email',
         'date_of_joining',
-        'role_id'
     ];
 
     public function isAdministrator(){
-        return $this->role->role == 'administrator';
+        return $this->roles->first()->role == 'administrator';
     } //end of isAdministrator
 
 
@@ -48,15 +48,44 @@ class Employee extends User
 
     public function getRole()
     {
-        return $this->role->role;
+        return $this->roles->first();
     }
 
-    
+    public function setSalary(float $salary)
+    {
+        $this->salary = $salary;
+        $this->save();
+        return $this->salary;
+    }
+
+    public function setPersonalEmail(string $email)
+    {
+        $this->personal_email = $email;
+        $this->save();
+        return $this->personal_email;
+    }
+
+    public function setRole(string $role)
+    {
+        $role = Role::where('name', $role)->firstOrFail();
+
+        $this->roles()->sync([$role->id]);
+
+        return $role;
+    }
+
+    public function updateEmployeeInfo(array $newInfo)
+    {
+        $this->setPersonalEmail($newInfo['personalEmail']);
+        return new EmployeeResource($this);
+    }
+
     /**
      * Relationships
      */
-    public function role(){
-        return $this->belongsTo(Role::class, 'role_id', 'id');
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class,'employee_role', 'employee_id', 'role_id');
     }
 
     public function orders()

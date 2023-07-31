@@ -89,7 +89,7 @@ class LoginRequest extends FormRequest
 
         // Check if the user's account status is "Active" and log them out if not so
         $user = Auth::user();
-        if ($user->accountStatus->status != 'Active') {
+        if ($user->account_status != 'Active') {
             Auth::guard('web')->logout();
             throw new AccountDeactivatedException();
         }

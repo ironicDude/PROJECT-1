@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('methods', function (Blueprint $table) {
+        Schema::create('employee_role', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('employee_id')->constrained()->references('id')->on('users');
+            $table->foreignId('role_id')->constrained()->references('id')->on('roles');
             $table->timestamps();
-            $table->string('name')->unique();
         });
     }
 
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('methods');
+        Schema::dropIfExists('employee_role');
     }
 };

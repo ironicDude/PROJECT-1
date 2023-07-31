@@ -21,7 +21,7 @@ class Customer extends User
         'password',
         'address',
         'date_of_birth',
-        'gender_id',
+        'gender',
         'image',
         'money',
     ];
@@ -49,6 +49,11 @@ class Customer extends User
         return $cart;
     }
 
+    public function getMoney()
+    {
+        return $this->momey;
+    }
+
     /**
      * Relationships
      */
@@ -61,11 +66,5 @@ class Customer extends User
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id', 'id');
-    }
-
-
-    public function getMoney()
-    {
-        return $this->momey;
     }
 }

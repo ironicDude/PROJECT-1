@@ -7,6 +7,7 @@ use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
 use App\Exceptions\ItemNotInCartException;
 use App\Exceptions\LimitedStockException;
+use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
 use App\Exceptions\NullQuantityException;
@@ -25,6 +26,7 @@ use App\Models\PurchasedProduct;
 use App\Models\User;
 use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ItemNotFoundException;
 
 class CartController extends Controller
@@ -40,14 +42,15 @@ class CartController extends Controller
      */
     public function store(PurchasedProduct $purchasedProduct, Request $request)
     {
-        $cart = Auth::user()->createCart();
         $this->authorize('storeInCart', $purchasedProduct);
-
-        $request->validate([
-            'quantity' => 'required|numeric|min:1',
+        $validator = Validator::make($request->all(), [
+            'quantity' => 'required|integer|min:1'
         ]);
-
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try {
+            $cart = Auth::user()->createCart();
             $item = $cart->addItem($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
@@ -84,11 +87,12 @@ class CartController extends Controller
     public function updateQuantity(Request $request, Cart $cart, PurchasedProduct $purchasedProduct)
     {
         $this->authorize('manageCart', $cart);
-
-        $request->validate([
-            'quantity' => 'required|numeric|min:1',
+        $validator = Validator::make($request->all(), [
+            'quantity' => 'required|integer|min:1'
         ]);
-
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try {
             $quantity = $cart->updateQuantity($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
@@ -112,10 +116,12 @@ class CartController extends Controller
      */
     public function storeAddress(Request $request, Cart $cart)
     {
-        // Validate the request to ensure the address is provided.
-        $request->validate([
-            'address' => 'required',
+        $validator = Validator::make($request->all(), [
+            'address' => 'required|string'
         ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         $this->authorize('manageCart', $cart);
         $address = $cart->storeAdress($request->address);
         return self::customResponse('Address stored', $address, 200);
@@ -161,11 +167,12 @@ class CartController extends Controller
     {
         $this->authorize('manageCart', $cart);
 
-        // Validate the request to ensure the address is provided.
-        $request->validate([
-            'address' => 'required',
+        $validator = Validator::make($request->all(), [
+            'address' => 'nullable|string'
         ]);
-
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try {
             $cart->checkout($request->address);
         } catch (NullAddressException $e) {
@@ -234,8 +241,26 @@ class CartController extends Controller
     public function storePrescriptions(Request $request, Cart $cart)
     {
         $this->authorize('manageCart', $cart);
-        $prescriptionNames = $cart->storePrescriptions($request);
+        $validator = Validator::make($request->all(), [
+            'files' => 'required|array|max:5',
+            'files.*' => 'max:4096|mimes:png,jpg,pdf,jpeg',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $prescriptionNames = $cart->storePrescriptions($request->file('files'));
         return self::customResponse('Prescriptions stored', $prescriptionNames, 200);
+    }
+
+    public function deletePrescriptions(Cart $cart)
+    {
+        $this->authorize('manageCart', $cart);
+        try{
+           $prescriptions = $cart->deletePrescriptions();
+        } catch(NoPrescriptionsException $e){
+            return self::customResponse($e->getMessage(), null, 422);
+        }
+        return self::customResponse('Prescriptions deleted', $prescriptions, 200);
     }
 
     /**

@@ -19,6 +19,7 @@ use App\Models\PurchasedProduct;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -40,6 +41,18 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|nullable',
+            'otc' => 'boolean',
+            'minPrice' => 'min:0',
+            'maxPrice' => 'min:0',
+            'rating' => 'between:0,5|numeric',
+            'availability' => 'boolean',
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try{
             // Retrieve a list of products based on the provided search parameters.
             $products = Product::index($request);

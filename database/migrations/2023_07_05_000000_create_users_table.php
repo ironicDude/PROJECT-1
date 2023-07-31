@@ -21,17 +21,16 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->foreignId('account_status_id')->default(1)->constrained();
+            $table->string('account_status')->default('Active');
             $table->string('type');
             $table->integer('mobile')->nullable();
-            $table->foreignId('gender_id')->default(3)->constrained();
+            $table->string('gender')->default('I prefer not to say');
             $table->date('date_of_birth');
             $table->string('image')->nullable();
             $table->decimal('salary', 10, 2)->nullable();
             $table->string('personal_email')->nullable();
-            $table->date('date_of_joining')->default(now());
+            $table->date('date_of_joining')->nullable()->default(now());
             $table->decimal('money', 10, 2)->nullable();
-            $table->foreignId('role_id')->nullable()->constrained();
         });
     }
 

@@ -112,6 +112,10 @@ Route::post('/cart/{cart}/prescriptions/store', [CartController::class, 'storePr
                 ->name('cart.prescriptions.store')
                 ->middleware('auth');
 
+Route::delete('/cart/{cart}/prescriptions/delete', [CartController::class, 'deletePrescriptions'])
+                ->name('cart.prescriptions.delete')
+                ->middleware('auth');
+
 // Check if prescriptions are uploaded for the cart for the authenticated user
 Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkPrescriptionsUpload'])
                 ->name('cart.prescriptions.show')

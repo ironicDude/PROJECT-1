@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\PurchasedProduct;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
+use Illuminate\Support\Facades\Validator;
+
 class PurchasedProductController extends Controller
 {
     use CustomResponse;
@@ -41,7 +43,12 @@ class PurchasedProductController extends Controller
     public function setMinimumStockLevel(PurchasedProduct $purchasedProduct, Request $request)
     {
         $this->authorize('getAndSet', PurchasedProduct::class);
-        $request->validate(['minimumStockLevel' => 'required']);
+        $validator = Validator::make($request->all(), [
+            'minimumStockLevel' => 'required|integer'
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         $level = $purchasedProduct->setMinimumStockLevel($request->minimumStockLevel);
         return self::customResponse('Minimum stock level', $level, 200);
     }
@@ -49,7 +56,12 @@ class PurchasedProductController extends Controller
     public function setOrderLimit(PurchasedProduct $purchasedProduct, Request $request)
     {
         $this->authorize('getAndSet', PurchasedProduct::class);
-        $request->validate(['orderLimit' => 'required']);
+        $validator = Validator::make($request->all(), [
+            'orderLimit' => 'required|integer'
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         $orderLimit = $purchasedProduct->setOrderLimit($request->orderLimit);
         return self::customResponse('Order limit', $orderLimit, 200);
     }

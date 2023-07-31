@@ -57,7 +57,7 @@ class UserController extends Controller
             Cache::put($cacheKey, time(), $interval);
 
             // Get the current account status of the user.
-            $accountStatus = $user->accountStatus->status;
+            $accountStatus = $user->account_status;
 
             // Toggle the user's account status between 'Active' and 'Blocked'.
             if ($accountStatus == 'Active') {
@@ -82,5 +82,180 @@ class UserController extends Controller
         return self::customResponse('address returned', Auth::user()->address, 200);
     }
 
-    
+    public function setAddress(Request $request)
+    {
+        // Validate the incoming request data using the specified validation rules.
+        $validator = Validator::make($request->all(), [
+            'address' => 'required|string|max:255',
+        ]);
+
+        // If the validation fails, return a JSON response with the validation errors and status code 422 (Unprocessable Entity).
+        if ($validator->fails()) {
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $address = Auth::user()->setAddress($request->address);
+        return self::customResponse('Address returned', $address, 200);
+    }
+
+    public function getImage(User $user)
+    {
+        $image = $user->getImage();
+        return self::customResponse('Image returned', $image, 200);
+    }
+
+    public function setImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Adjust the allowed mime types and max file size as needed (2 MB in this example)
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $image = Auth::user()->setImage($request->file('image'));
+        return self::customResponse('Image set', $image, 200);
+    }
+
+
+    public function getFirstName(User $user)
+    {
+        $firstName =  $user->getFirstName();
+        return self::customResponse('First name returned', $firstName, 200);
+    }
+
+    public function setFirstName(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'firstName' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('Validation Error', $validator->errors(), 422);
+        }
+
+        $firstName = Auth::user()->setFirstName($request->input('firstName'));
+        return self::customResponse('First name set', $firstName, 200);
+    }
+
+
+    public function getLastName(User $user)
+    {
+        $lastName =  $user->getLastName();
+        return self::customResponse('Last name set', $lastName, 200);
+    }
+
+    public function setLastName(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'lastName' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('Validation Error', $validator->errors(), 422);
+        }
+
+        $lastName = Auth::user()->setLastName($request->input('lastName'));
+        return self::customResponse('Last name returned', $lastName, 200);
+    }
+
+
+    public function getMobile(User $user)
+    {
+        $mobile =  $user->getMobile();
+        return self::customResponse('Mobile set', $mobile, 200);
+    }
+
+    public function setMobile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'mobile' => 'required|numeric|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('Validation Error', $validator->errors(), 422);
+        }
+
+        $mobile = Auth::user()->setMobile($request->input('mobile'));
+        return self::customResponse('Mobile returned', $mobile, 200);
+    }
+
+
+    public function getDateOfBirth(User $user)
+    {
+        $dateOfBirth =  $user->getDateOfBirth();
+        return self::customResponse('Date of birth set', $dateOfBirth, 200);
+    }
+
+    public function setDateOfBirth(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date|before:-10 years|date_format:Y-m-d',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('Validation Error', $validator->errors(), 422);
+        }
+
+        $dateOfBirth = Auth::user()->setDateOfBirth($request->date);
+        return self::customResponse('Date of birth returned', $dateOfBirth, 200);
+    }
+
+
+    public function getGender(User $user)
+    {
+        $gender =  $user->getGender();
+        return self::customResponse('Gender set', $gender, 200);
+    }
+
+    public function setGender(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'gender' => 'required|string|in:Male,Female,I prefer not to say',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('Validation Error', $validator->errors(), 422);
+        }
+
+        $gender = Auth::user()->setGender($request->input('gender'));
+        return self::customResponse('Gender returned', $gender, 200);
+    }
+
+
+    public function getAccountStatus(User $user)
+    {
+        $accountStatus =  $user->getAccountStatus();
+        return self::customResponse('Account status set', $accountStatus, 200);
+    }
+
+    public function getType(User $user)
+    {
+        $type =  $user->getType();
+        return self::customResponse('Type set', $type, 200);
+    }
+
+    public function updateInfo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'firstName' => 'required|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:' . User::class,
+            'dateOfBirth' => 'required|date|before:-10years',
+            'gender' => 'required|string|in:Male,Female,I prefer not to say',
+            'mobile' => 'required|string|max:20',
+        ]);
+
+        // If the validation fails, return a JSON response with the validation errors and status code 422 (Unprocessable Entity).
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $newInfo = $request->toArray();
+        $userInfo = Auth::user()->updateInfo($newInfo);
+        return self::customResponse('User with new info', $userInfo, 200);
+    }
+
+
 }

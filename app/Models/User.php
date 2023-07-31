@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Http\Resources\AllergyCollection;
 use App\Http\Resources\AllergyResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,7 +17,11 @@ use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
 use Carbon\Carbon;
+use Database\Seeders\GenderSeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -37,9 +42,9 @@ class User extends Authenticatable
         'address',
         'date_of_birth',
         'type',
-        'gender_id',
+        'gender',
         'image',
-        'account_status_id'
+        'account_status'
     ];
     /**
      * The attributes that are mass assignable.
@@ -54,9 +59,9 @@ class User extends Authenticatable
         'address',
         'type',
         'date_of_birth',
-        'user_role_id',
-        'gender_id',
+        'gender',
         'image',
+        'account_status'
     ];
 
     /**
@@ -80,41 +85,25 @@ class User extends Authenticatable
     ];
 
     /**
-     * Deactivate the user's account by changing the 'account_status_id' to "Blocked".
-     *
-     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Blocked" status
-     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
      *
      * @return void
      */
     public function deactivate(): void
     {
-        // Retrieve the 'id' value for the "Blocked" status from the 'account_statuses' table.
-        $blockedStatusId = AccountStatus::where('status', 'Blocked')->value('id');
-
-        // Update the 'account_status_id' attribute of the current user model to the "Blocked" status ID.
-        $this->account_status_id = $blockedStatusId;
+        $this->account_status = 'Blocked';
 
         // Save the updated user model to persist the changes in the database.
         $this->save();
     }
 
     /**
-     * Activate the user's account by changing the 'account_status_id' to "Active".
      *
-     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Active" status
-     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
      *
      * @return void
      */
     public function activate(): void
     {
-        // Retrieve the 'id' value for the "Active" status from the 'account_statuses' table.
-        $activeStatusId = AccountStatus::where('status', 'Active')->value('id');
-
-        // Update the 'account_status_id' attribute of the current user model to the "Active" status ID.
-        $this->account_status_id = $activeStatusId;
-
+        $this->account_status = 'Active';
         // Save the updated user model to persist the changes in the database.
         $this->save();
     }
@@ -203,7 +192,7 @@ class User extends Authenticatable
 
     public function getGender()
     {
-        return $this->gender->gender;
+        return $this->gender;
     }
 
     public function getDateOfBirth()
@@ -213,7 +202,13 @@ class User extends Authenticatable
 
     public function getImage()
     {
-        return $this->image;
+        $imageName = $this->image;
+        // dd($imageName);
+        $imageContent = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
+        $encodedContent = base64_encode($imageContent);
+        $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
+        $imageData = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContent}", 'UTF-8');
+        return $imageData;
     }
 
     public function getId()
@@ -228,7 +223,7 @@ class User extends Authenticatable
 
     public function getAccountStatus()
     {
-        return $this->accountStatus->status;
+        return $this->account_status;
     }
 
      /**
@@ -238,7 +233,14 @@ class User extends Authenticatable
      */
     public function getAddress()
     {
-        return Auth::user()->address;
+        return $this->address;
+    }
+
+    public function setAddress(string $address)
+    {
+        $this->address = $address;
+        $this->save();
+        return $this->address;
     }
 
     public function setFirstName(string $firstName)
@@ -255,39 +257,62 @@ class User extends Authenticatable
         return $this->last_name;
     }
 
-    public function setMobile(string $lastName)
+    public function setMobile(int $mobile)
     {
-        $this->last_name = $lastName;
+        $this->mobile = $mobile;
         $this->save();
-        return $this->last_name;
+        return $this->mobile;
     }
 
     public function setGender(string $gender)
     {
-        $this->gender = Gender::where('gender', $gender)->first();
+        $this->gender = $gender;
         $this->save();
-        return $this->gender->gender;
+        return $this->gender;
     }
 
-    public function setDateOfBirth(Carbon $date)
+    public function setDateOfBirth(string $date)
     {
-        $this->gender = Gender::where('gender', $date)->first();
+        $this->date_of_birth = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
         $this->save();
         return $this->date_of_birth;
+    }
+
+    public function setImage(UploadedFile $image)
+    {
+        if ($this->image) {
+            Storage::disk('local')->delete("images/{$this->image}");
+        }
+        $imageName = "User{$this->id}.{$image->getClientOriginalExtension()}";
+        Storage::disk('local')->put("images/{$imageName}", File::get($image));
+        $this->image = $imageName;
+        $this->save();
+        return $this->getImage();
+    }
+
+    public function updateInfo(array $newInfo)
+    {
+        $this->setFirstName($newInfo['firstName']);
+        $this->setLastName($newInfo['lastName']);
+        $this->setEmail($newInfo['email']);
+        $this->setMobile($newInfo['mobile']);
+        $this->setAddress($newInfo['address']);
+        $this->setDateOFBirth($newInfo['dateOfBirth']);
+        $this->setGender($newInfo['gender']);
+        return new UserResource($this);
+    }
+
+    public function setEmail(string $email)
+    {
+        $this->email = $email;
+        $this->save();
+        return $this->email;
     }
 
 
     /**
      * relationships
      */
-    public function gender()
-    {
-        return $this->belongsTo(Gender::class, 'gender_id', 'id');
-    }
-    public function accountStatus()
-    {
-        return $this->belongsTo(AccountStatus::class, 'account_status_id', 'id');
-    }
     public function ratings()
     {
         return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');

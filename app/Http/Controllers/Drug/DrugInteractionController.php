@@ -13,6 +13,7 @@ use App\Models\Interaction;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class DrugInteractionController extends Controller
 {
@@ -31,6 +32,13 @@ class DrugInteractionController extends Controller
      */
     public function checkInteraction(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+            'interactingId' => 'required|integer',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->erros(), 422);
+        }
         $description = Drug::checkInteraction($request->id, $request->interactingId);
         if (count($description) == 0) {
             return self::customResponse('No interaction found', null, 404);
