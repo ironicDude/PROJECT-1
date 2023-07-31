@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\User\EmployeeController;
+use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\User\UserController;
 use App\Models\Customer;
 use App\Models\Employee;

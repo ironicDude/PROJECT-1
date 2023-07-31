@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\Product\CartController;
 use App\Http\Controllers\Product\AllergyController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\PurchasedProductController;
