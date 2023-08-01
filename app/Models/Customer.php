@@ -21,7 +21,7 @@ class Customer extends User
         'password',
         'address',
         'date_of_birth',
-        'gender_id',
+        'gender',
         'image',
         'money',
     ];
@@ -47,6 +47,11 @@ class Customer extends User
         $cart = Cart::firstOrNew(['id' => $this->id]);
         $cart->save();
         return $cart;
+    }
+
+    public function getMoney()
+    {
+        return $this->momey;
     }
 
     /**

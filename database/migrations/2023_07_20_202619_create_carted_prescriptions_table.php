@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('carted_prescriptions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('cart_id')->references('id')->on('carts');
+            $table->foreignId('cart_id')->conastrained('carts', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('prescription');
         });
     }

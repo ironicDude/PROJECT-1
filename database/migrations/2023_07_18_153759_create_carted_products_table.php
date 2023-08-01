@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('carted_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cart_id')->references('id')->on('carts');
-            $table->foreignId('dated_product_id')->references('id')->on('dated_products');
+            $table->foreignId('cart_id')->conastrained('carts', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('dated_product_id')->nullable()->constrained('dated_products', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->decimal('subtotal', 10, 2);
             $table->integer('quantity');
             $table->timestamps();

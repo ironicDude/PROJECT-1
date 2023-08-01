@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('allergies', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('product_id');
-            $table->foreignId('user_id');
+            $table->foreignId('product_id')->nullable()->constrained('products', 'id')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

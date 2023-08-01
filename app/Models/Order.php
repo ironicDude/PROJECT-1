@@ -14,7 +14,9 @@ class Order extends Model
         'total',
         'shipping_fees',
         'shipping_address',
-        'quantity'
+        'quantity',
+        'method',
+        'status',
     ];
 
     public function getTotal()
@@ -52,16 +54,6 @@ class Order extends Model
     /**
      * relationships
      */
-
-     public function method()
-     {
-        return $this->belongsTo(Method::class, 'method_id', 'id');
-     }
-
-     public function status()
-     {
-        return $this->belongsTo(OrderStatus::class, 'status_id', 'id');
-     }
 
      public function prescriptions()
      {
