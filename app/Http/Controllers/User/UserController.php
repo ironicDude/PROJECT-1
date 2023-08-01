@@ -80,8 +80,10 @@ class UserController extends Controller
     }
 
 
+
     public function getAddress(User $user)
     {
+        $this->authorize('getInfo', $user);
         $address = $user->getAddress();
         return self::customResponse('Address returned', $address, 200);
     }
@@ -166,6 +168,7 @@ class UserController extends Controller
 
     public function getMobile(User $user)
     {
+        $this->authorize('getInfo', $user);
         $mobile =  $user->getMobile();
         return self::customResponse('Mobile set', $mobile, 200);
     }
@@ -187,6 +190,7 @@ class UserController extends Controller
 
     public function getDateOfBirth(User $user)
     {
+        $this->authorize('getInfo', $user);
         $dateOfBirth =  $user->getDateOfBirth();
         return self::customResponse('Date of birth set', $dateOfBirth, 200);
     }
@@ -229,6 +233,7 @@ class UserController extends Controller
 
     public function getAccountStatus(User $user)
     {
+        $this->authorize('getInfo', $user);
         $accountStatus =  $user->getAccountStatus();
         return self::customResponse('Account status set', $accountStatus, 200);
     }
@@ -269,11 +274,12 @@ class UserController extends Controller
 
     public function restore(Request $request, int $userId)
     {
+        $user = User::withTrashed()->findOrFail($userId);
+        $this->authorize('restore', $user);
         if (!$request->hasValidSignature()) {
             abort(401);
         }
         try{
-            $user = User::withTrashed()->findOrFail($userId);
             $result = $user->restoreAccount();
         } catch(AccountPermanentlyDeletedException $e){
             return self::customResponse($e->getMessage(), null, 401);

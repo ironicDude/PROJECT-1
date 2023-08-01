@@ -28,7 +28,7 @@ class Employee extends User
     ];
 
     public function isAdministrator(){
-        return $this->roles->first()->role == 'administrator';
+        return $this->roles->contains('administrator');
     } //end of isAdministrator
 
 
@@ -80,6 +80,7 @@ class Employee extends User
         $this->setPersonalEmail($newInfo['personalEmail']);
         return new EmployeeResource($this);
     }
+
 
     /**
      * Relationships
