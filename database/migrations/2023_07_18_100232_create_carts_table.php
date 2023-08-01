@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             // $table->id('customer_id')->references('id')->on('users');
-            $table->foreignId('id')->unique()->references('id')->on('users');
+            $table->foreignId('id')->unique()->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
             $table->decimal('shipping_fee')->default(0);
             $table->string('address')->nullable();

@@ -4,9 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Exceptions\AccountAlreadyRestoredException;
+use App\Exceptions\AccountPermanentlyDeletedException;
+use App\Exceptions\AccountPermenantelyDeletedException;
 use App\Http\Resources\AllergyResource;
 use App\Http\Resources\User\AllergyCollection;
 use App\Http\Resources\User\UserResource;
+use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,9 +26,13 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class User extends Authenticatable
 {
+    use SoftDeletes;
     use SingleTableInheritanceTrait;
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -44,7 +52,8 @@ class User extends Authenticatable
         'type',
         'gender',
         'image',
-        'account_status'
+        'account_status',
+        'deleted_at',
     ];
     /**
      * The attributes that are mass assignable.
@@ -61,7 +70,7 @@ class User extends Authenticatable
         'date_of_birth',
         'gender',
         'image',
-        'account_status'
+        'account_status',
     ];
 
     /**
@@ -309,7 +318,30 @@ class User extends Authenticatable
         return $this->email;
     }
 
+    public function deleteSoftly()
+    {
+        $this->delete();
+        $url = URL::signedRoute('user.restore', ['user' => $this->id]);
+        // Mail::to($this)->send(new AccountDeleted($this, $url));
+        return $url;
+    }
 
+    public function restoreAccount()
+    {
+        if($this->deleted_at){
+            if ($this->deleted_at->diffInDays(Carbon::now()) < 14) {
+                $this->restore();
+                Auth::logout();
+                return true;
+            }
+            else{
+                throw new AccountPermanentlyDeletedException('Your account has been deleted');
+            }
+        }
+        else{
+            throw new AccountAlreadyRestoredException('Your account is already activated');
+        }
+    }
     /**
      * relationships
      */

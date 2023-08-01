@@ -6,6 +6,7 @@ use App\Http\Controllers\User\UserController;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -77,7 +78,8 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
     Route::put('/update-info', [UserController::class, 'updateInfo'])
         ->name('user.update');
 
-
+    Route::delete('/delete', [UserController::class, 'deleteSoftly'])
+        ->name('user.delete');
 
     //EMPLOYEES
     // Employee salary routes
@@ -122,7 +124,9 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
         ->name('customer.order.show');
 });
 
-
+Route::get('/restore/{user}', [UserController::class, 'restore'])
+    ->name('user.restore')
+    ->middleware('signed');
 
 // Create a new Employee with hardcoded data (This is just a temporary route for testing or seeding purposes)
 Route::post('create', function () {

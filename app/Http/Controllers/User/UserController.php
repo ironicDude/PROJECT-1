@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Events\UserAccountStatusChanged;
+use App\Exceptions\AccountAlreadyRestoredException;
+use App\Exceptions\AccountPermanentlyDeletedException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ use App\Notifications\UserAccountStatusChangedNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use App\Policies\UserPolicy;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -257,5 +260,26 @@ class UserController extends Controller
         return self::customResponse('User with new info', $userInfo, 200);
     }
 
+    public function deleteSoftly()
+    {
+        $user = Auth::user()->deleteSoftly();
+        return self::customResponse('We are sorry to hear that you want to leave us. On the bright side, you can still restore your account if you log in within 14 days from now.', $user, 200);
+    }
+
+    public function restore(Request $request, int $userId)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(401);
+        }
+        try{
+            $user = User::withTrashed()->findOrFail($userId);
+            $result = $user->restoreAccount();
+        } catch(AccountPermanentlyDeletedException $e){
+            return self::customResponse($e->getMessage(), null, 401);
+        } catch(AccountAlreadyRestoredException $e){
+            return self::customResponse($e->getMessage(), null, 401);
+        }
+        return self::customResponse('Your account has been restored', $result, 202);
+    }
 
 }

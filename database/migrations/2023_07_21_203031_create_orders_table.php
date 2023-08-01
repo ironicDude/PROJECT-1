@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('employee_id')->nullable()->references('id')->on('users');
-            $table->foreignId('customer_id')->constrained()->references('id')->on('users');
+            $table->foreignId('employee_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('customer_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->string('status')->default('Review');
             $table->decimal('shipping_fees', 20, 2)->default(0);
             $table->string('shipping_address');
