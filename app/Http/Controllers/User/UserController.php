@@ -80,9 +80,10 @@ class UserController extends Controller
     }
 
 
-    public function getAddress()
+    public function getAddress(User $user)
     {
-        return self::customResponse('address returned', Auth::user()->address, 200);
+        $address = $user->getAddress();
+        return self::customResponse('Address returned', $address, 200);
     }
 
     public function setAddress(Request $request)
