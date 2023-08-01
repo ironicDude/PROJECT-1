@@ -339,9 +339,9 @@ class Cart extends Model
                 $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);
                 $purchasedProducts[] = $purchasedProduct;
                 if($purchasedProduct->getQuantity() < $purchasedProduct->getMinimumStockLevel()){
-                    $inventoryManager = Employee::where('role_id', 2)->first();
-                    $admin = Employee::where('role_id', '1')->first();
-                    event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
+                    $inventoryManager = Employee::whereRelation('roles','role', 'inventory manager')->first();
+                    $admin = Employee::whereRelation('roles','role', 'administrator')->first();
+                    // event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
                     // $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
                 }
             }
@@ -359,8 +359,8 @@ class Cart extends Model
         // Create a new order entry in the database.
         $order = Order::create([
             'customer_id' => $this->customer->id,
-            'shipping_fees' => $this->shipping_fees ?? 0,
-            'shipping_address' => $this->shipping_address ?? "Damascus",
+            'shipping_fees' => !$this->shipping_fees ? 0 : $this->shipping_fees,
+            'shipping_address' => !$this->address ? 'Damascus' : $this->address,
             'status_id' => 1,
             'method_id' => 1,
         ]);
@@ -497,7 +497,7 @@ class Cart extends Model
      */
     public function show()
     {
-        return new CartResource($this);
+        return $this;
     }
 
 
