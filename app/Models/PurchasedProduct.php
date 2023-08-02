@@ -112,7 +112,7 @@ class PurchasedProduct extends Model
                                 INNER JOIN products AS P ON dp.product_id = p.id
                                 WHERE op.created_at > {$formattedDate}
                                 GROUP BY p.id, p.name
-                                ORDER BY SUM(op.quantity)
+                                ORDER BY SUM(op.quantity) DESC
                                 LIMIT 10");
         return $products;
     }
@@ -125,10 +125,11 @@ class PurchasedProduct extends Model
         $products = DB::select("SELECT p.id, p.name
                                 FROM ordered_products AS op
                                 INNER JOIN dated_products AS dp ON op.dated_product_id = dp.id
-                                INNER JOIN products AS P ON dp.product_id = p.id
+                                INNER JOIN purchased_products AS pp ON dp.product_id = pp.id
+                                INNER JOIN products as p ON pp.id = p.id
                                 WHERE op.created_at > {$formattedDate}
                                 GROUP BY p.id, p.name
-                                ORDER BY SUM(op.quantity)
+                                ORDER BY SUM((op.quantity * (pp.price - dp.purchase_price))) DESC
                                 LIMIT 10");
         return $products;
     }

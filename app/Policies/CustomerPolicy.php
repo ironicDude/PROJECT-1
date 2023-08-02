@@ -18,4 +18,9 @@ class CustomerPolicy
     {
         return $user->id === $customer->id;
     }
+
+    public function viewCountOfNewCustomers(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
 }

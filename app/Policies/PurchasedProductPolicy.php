@@ -31,4 +31,14 @@ class PurchasedProductPolicy
         return $user->type == 'employee' && ($user->role->role == 'administrator' || $user->role->role == 'Inventory Manager');
     }
 
+    public function viewBestSellingProducts(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
+
+    public function viewMostProfitableProducts(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
+
 }

@@ -28,7 +28,7 @@ class Employee extends User
     ];
 
     public function isAdministrator(){
-        return $this->roles->contains('administrator');
+        return $this->roles()->where('role', 'administrator')->exists();
     } //end of isAdministrator
 
 

@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Http\Resources\Order\OrderFullResource;
+use App\Http\Resources\Order\OrderOverviewCollection;
 use App\Models\Order;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,7 @@ class OrderController extends Controller
         $orders = $customer->viewOrders();
 
         // Return the collection of orders belonging to the customer.
-        return $orders;
+        return new OrderOverviewCollection($orders);
     }
 
     /**

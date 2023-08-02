@@ -52,7 +52,7 @@ class Order extends Model
         return $data;
     }
 
-    public static function calculateRevenueInDays(int $days)
+    public static function calculateRevenue(int $days)
     {
         $date = Carbon::now()->subDays($days);
         $orders = Order::all()->where('created_at', '>=', $date);
@@ -61,6 +61,13 @@ class Order extends Model
             $total += $order->getTotal();
         }
         return $total;
+    }
+
+    public static function countOrders(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $count = Order::all()->where('created_at', '>=', $date)->count();
+        return $count;
     }
     /**
      * relationships

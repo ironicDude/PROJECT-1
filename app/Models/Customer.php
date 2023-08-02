@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Resources\OrderOverviewCollection;
+use App\Http\Resources\Order\OrderOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
@@ -40,7 +40,7 @@ class Customer extends User
         $orders = $this->orders()->paginate(10);
 
         // Wrap the paginated orders collection in an 'OrderOverviewCollection' resource to customize the response format.
-        return new OrderOverviewCollection($orders);
+        return $orders;
     }
 
     public function createCart()

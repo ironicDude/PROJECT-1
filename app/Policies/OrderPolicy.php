@@ -21,7 +21,12 @@ class OrderPolicy
         return ($user->type === 'employee') || ($user->type === 'customer' && $user->id === $order->customer_id);
     }
 
-    public function viewRevenue(User $user, Order $order)
+    public function viewRevenue(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
+
+    public function viewCountOfOrders(User $user)
     {
         return $user->isEmployee() && $user->isAdministrator();
     }
