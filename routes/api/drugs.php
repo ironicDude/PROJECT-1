@@ -5,8 +5,8 @@ use App\Http\Controllers\Drug\DrugInteractionController;
 use Illuminate\Support\Facades\Route;
 
 // Route to search drugs by keyword or criteria
-Route::get('interaction', [DrugController::class, 'search'])
-    ->name('drug.search');
+Route::get('interaction', [DrugInteractionController::class, 'search'])
+    ->name('drug.interaction.search');
 
 // Route to check if two drugs have any interactions by their IDs
 Route::get('/interaction/check', [DrugInteractionController::class, 'checkInteraction'])

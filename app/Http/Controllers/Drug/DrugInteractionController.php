@@ -66,4 +66,29 @@ class DrugInteractionController extends Controller
         }
         return self::customResponse('Relateed products retrieved', new ProductOverviewCollection($products), 200);
     }
+
+
+    /**
+     * Search for drugs and products based on the provided search string.
+     *
+     * This method receives a search string from the client and performs a search for drugs and products
+     * based on the provided string. It utilizes the Drug and Product models to perform the search.
+     * The results are then returned in a custom response format, providing feedback on the search outcome.
+     *
+     * @param \Illuminate\Http\Request $request The incoming HTTP request containing the search string.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the search results or an error message.
+     */
+    public function search(Request $request)
+    {
+        // Perform the drug and product search using the search method in the Drug and Product models.
+        $drug = Drug::searchNames($request->string, 1);
+        $products = Product::searchNames($request->string, 2);
+
+        if (count($drug) == 0 && count($products) == 0) {
+            return self::customResponse('No matches', null, 404);
+        }
+        $data = array_merge($drug, $products);
+        return self::customResponse('Matches returned', $data, 200);
+    }
+
 }
