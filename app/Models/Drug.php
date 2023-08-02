@@ -43,7 +43,7 @@ class Drug extends Model
 public static function searchNames(string $string, $limit = 1)
 {
 
-    $drug = DB::select("SELECT name, MAX(id) as drug_id
+    $drug = DB::select("SELECT name AS drug_name, MAX(id) as drug_id
                         FROM drugs
                         WHERE name LIKE '%{$string}%'
                         GROUP BY name
