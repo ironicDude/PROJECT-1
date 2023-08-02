@@ -121,7 +121,7 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
 
     // Get prescriptions for a specific order of a customer
     Route::get('customers/orders/{order}/prescriptions', [OrderController::class, 'getPrescriptions'])
-        ->name('customer.order.show');
+        ->name('customer.order.prescriptions.show');
 });
 
 Route::get('/restore/{user}', [UserController::class, 'restore'])
