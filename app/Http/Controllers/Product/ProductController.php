@@ -36,7 +36,7 @@ class ProductController extends Controller
      * If there are matching products, it returns the results in a custom ProductOverviewCollection format.
      *
      * @param \Illuminate\Http\Request $request The incoming HTTP request containing search parameters.
-     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\ProductOverviewCollection
+     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\Product\ProductOverviewCollection
      *         The JSON response containing search results or a suggestion, or a custom collection of products.
      */
     public function index(Request $request)
