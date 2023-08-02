@@ -6,6 +6,7 @@ use App\Http\Resources\OrderOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class Customer extends User
@@ -52,6 +53,13 @@ class Customer extends User
     public function getMoney()
     {
         return $this->momey;
+    }
+
+    public static function countNewbies(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $count = Customer::all()->where('created_at', '>=', $date)->count();
+        return $count;
     }
 
     /**

@@ -343,6 +343,7 @@ class User extends Authenticatable
         }
     }
 
+
     public function isEmployee()
     {
         return $this->type == 'employee';
