@@ -119,12 +119,12 @@ class Product extends Model
      */
     public static function searchNames(string $string, int $limit = 5)
     {
-        $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS drug_name, MAX(d.id) AS drug_id
+        $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS name, MAX(p.id) AS drug_id
                             FROM drugs AS d
                             JOIN products AS p ON d.id = p.drug_id
                             WHERE p.name LIKE '%{$string}%' OR d.name LIKE '%{$string}%'
-                            GROUP BY drug_name
-                            ORDER BY CHAR_LENGTH(drug_name)
+                            GROUP BY CONCAT(p.name,' ', '[', d.name, ']')
+                            ORDER BY CHAR_LENGTH(CONCAT(p.name,' ', '[', d.name, ']'))
                             LIMIT {$limit}");
         return $products;
     }
