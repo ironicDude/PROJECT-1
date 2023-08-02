@@ -16,7 +16,7 @@ class OrderOverviewResource extends JsonResource
     {
         return [
             'order_id' => $this->id,
-            'Status' => $this->status->name,
+            'Status' => $this->status,
             'total' => $this->getTotal(),
             'date' => $this->updated_at->format('Y-m-d'),
         ];
