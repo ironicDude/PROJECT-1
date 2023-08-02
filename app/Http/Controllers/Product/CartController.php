@@ -16,8 +16,8 @@ use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Cart\CartResource;
 use App\Http\Resources\CartedProductResource;
-use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -152,7 +152,7 @@ class CartController extends Controller
     {
         $this->authorize('manageCart', $cart);
         $cart = $cart->show();
-        return self::customResponse('Cart info returned', $cart, 200);
+        return self::customResponse('Cart info returned', new CartResource($cart), 200);
     }
 
     /**

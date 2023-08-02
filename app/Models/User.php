@@ -160,9 +160,9 @@ class User extends Authenticatable
      *
      * @return bool Returns true if the user is a customer and false if not.
      */
-    public static function isCustomer($user)
+    public function isCustomer()
     {
-        return $user->type == 'customer'
+        return $this->type == 'customer'
         ? true
         : false;
     }
@@ -341,6 +341,12 @@ class User extends Authenticatable
         else{
             throw new AccountAlreadyRestoredException('Your account is already activated');
         }
+    }
+
+
+    public function isEmployee()
+    {
+        return $this->type == 'employee';
     }
     /**
      * relationships

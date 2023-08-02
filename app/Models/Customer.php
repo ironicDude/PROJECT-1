@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use App\Http\Resources\OrderOverviewCollection;
+use App\Http\Resources\Order\OrderOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class Customer extends User
@@ -39,7 +40,7 @@ class Customer extends User
         $orders = $this->orders()->paginate(10);
 
         // Wrap the paginated orders collection in an 'OrderOverviewCollection' resource to customize the response format.
-        return new OrderOverviewCollection($orders);
+        return $orders;
     }
 
     public function createCart()
@@ -52,6 +53,13 @@ class Customer extends User
     public function getMoney()
     {
         return $this->momey;
+    }
+
+    public static function countNewbies(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $count = Customer::all()->where('created_at', '>=', $date)->count();
+        return $count;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class Order extends Model
 
     public function getTotal()
     {
-        return $this->orderedProducts()->sum('subtotal');
+        return ($this->orderedProducts()->sum('subtotal') + $this->shipping_fees + $this->delivery_fees);
     }
 
     public function getQuantity()
@@ -51,6 +52,23 @@ class Order extends Model
         return $data;
     }
 
+    public static function calculateRevenue(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $orders = Order::all()->where('created_at', '>=', $date);
+        $total = 0;
+        foreach($orders as $order){
+            $total += $order->getTotal();
+        }
+        return $total;
+    }
+
+    public static function countOrders(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $count = Order::all()->where('created_at', '>=', $date)->count();
+        return $count;
+    }
     /**
      * relationships
      */
