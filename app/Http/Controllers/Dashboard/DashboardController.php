@@ -13,56 +13,88 @@ class DashboardController extends Controller
 {
     use CustomResponse;
 
-    protected function validateInput(Request $request)
+    public function getRevenue(Request $request)
     {
+        $this->authorize('viewRevenue', Order::class);
+
         $validator = Validator::make($request->all(), [
-            'days' => 'nullable|integer'
+            'days' => 'required|integer|min:0'
         ]);
 
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
         }
-        $days = !$request->days ? 0 : $request->days;
-        return $days;
-    }
-
-    public function getRevenue(Request $request)
-    {
-        $this->authorize('viewRevenue', Order::class);
-        $days = $this->validateInput($request);
-        $revenue = Order::calculateRevenue($days);
+        $revenue = Order::calculateRevenue($request->days);
         return self::customResponse('revenue', $revenue, 200);
     }
 
     public function countNewCustomers(Request $request)
     {
         $this->authorize('viewCountOfNewCustomers', Customer::class);
-        $days = $this->validateInput($request);
-        $count = Customer::countNewbies($days);
+        $validator = Validator::make($request->all(), [
+            'days' => 'required|integer|min:0'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $count = Customer::countNewbies($request->days);
         return self::customResponse('count', $count, 200);
     }
 
     public function getBestSellingProducts(Request $request)
     {
         $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
-        $days = $this->validateInput($request);
-        $products = PurchasedProduct::getBestSelling($days);
+        $validator = Validator::make($request->all(), [
+            'days' => 'required|integer|min:0'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $products = PurchasedProduct::getBestSelling($request->days);
         return self::customResponse('Best selling products', $products, 200);
     }
 
     public function getMostProfitableProducts(Request $request)
     {
         $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
-        $days = $this->validateInput($request);
-        $products = PurchasedProduct::getMostProfitable($days);
+        $validator = Validator::make($request->all(), [
+            'days' => 'required|integer|min:0'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $products = PurchasedProduct::getMostProfitable($request->days);
         return self::customResponse('Most Profitable products', $products, 200);
     }
 
     public function countOrders(Request $request)
     {
         $this->authorize('viewCountOfOrders', Order::class);
-        $days = $this->validateInput($request);
-        $count = Order::countOrders($days);
+        $validator = Validator::make($request->all(), [
+            'days' => 'required|integer|min:0'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $count = Order::countOrders($request->days);
         return self::customResponse('Count of orders', $count, 200);
+    }
+
+    public function countNewbiesPerDay(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date|before:tomorrow'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $points = Customer::countNewbiesPerDay($request->date);
+        return self::customResponse('points', $points, 200);
     }
 }

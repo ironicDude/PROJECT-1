@@ -103,23 +103,9 @@ class Product extends Model
         return $dosageForms;
     }
 
-    /**
-     * Search for products by name or drug name.
-     *
-     * This static method is responsible for searching products by their names or the names of their associated drugs based on the provided search string from the request.
-     * It performs a SQL query using Laravel's DB class to select the product name, maximum product ID, and maximum drug ID
-     * for products whose names or associated drug names match the search string (using the LIKE operator with a wildcard '%').
-     * The results are grouped by the concatenated product name and drug name.
-     * The method accepts an optional limit parameter, which determines the maximum number of search results to return (default is 5).
-     * The search results are returned as an array of product objects, each containing the product name, maximum product ID, and maximum drug ID.
-     *
-     * @param \Illuminate\Http\Request $request The incoming HTTP request containing the search string.
-     * @param int $limit The optional limit for the maximum number of search results (default is 5).
-     * @return array An array of product objects, each containing the product name, maximum product ID, and maximum drug ID.
-     */
     public static function searchNames(string $string, int $limit = 5)
     {
-        $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS name, MAX(p.id) AS drug_id
+        $products = DB::select("SELECT CONCAT(p.name,' ', '[', d.name, ']') AS name, MAX(p.id) AS product_id, MAX(d.id) AS drug_id
                             FROM drugs AS d
                             JOIN products AS p ON d.id = p.drug_id
                             WHERE p.name LIKE '%{$string}%' OR d.name LIKE '%{$string}%'
@@ -129,15 +115,6 @@ class Product extends Model
         return $products;
     }
 
-    /**
-     * Retrieve a paginated list of products based on various filter parameters.
-     *
-     * This static method is responsible for querying the products table based on the provided filter parameters from the HTTP request.
-     * The method dynamically applies the filters to the query using the Laravel query builder and the 'where' and 'whereHas' methods.
-     *
-     * @param \Illuminate\Http\Request $request The incoming HTTP request containing the filter parameters.
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator A paginated result set of products matching the filter criteria.
-     */
     public static function index(Request $request)
     {
         // Extract filter parameters from the request.

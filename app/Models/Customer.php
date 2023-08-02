@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Customer extends User
 {
@@ -60,6 +61,28 @@ class Customer extends User
         $date = Carbon::now()->subDays($days);
         $count = Customer::all()->where('created_at', '>=', $date)->count();
         return $count;
+    }
+
+    public static function countNewbiesPerDay(string $date)
+    {
+        $customers = collect();
+        for ($i = 0; $i < 24; $i++) {
+            $start = Carbon::parse($date)->addHours($i);
+            $end = Carbon::parse($date)->addHours($i + 1);
+            $customers_gained = Customer::where('created_at', '>=', $start)
+                ->where('created_at', '<', $end)
+                ->count();
+            $customers_lost = Customer::withTrashed()
+                ->where('deleted_at', '>=', $start)
+                ->where('deleted_at', '<', $end)
+                ->count();
+            $customers->push([
+                'hour' => $i,
+                'customers_gained' => $customers_gained,
+                'customers_lost' => $customers_lost
+            ]);
+        }
+        return $customers;
     }
 
     /**

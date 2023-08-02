@@ -19,4 +19,7 @@ Route::get('/most-profitable', [DashboardController::class, 'getMostProfitablePr
 Route::get('/orders-count', [DashboardController::class, 'countOrders'])
     ->name('orders.count');
 
+Route::get('/newbies-count-per-day', [DashboardController::class, 'countNewbiesPerDay'])
+    ->name('newbies.count.per.day');
+
 });
