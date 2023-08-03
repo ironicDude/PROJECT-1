@@ -36,7 +36,7 @@ class DrugInteractionController extends Controller
             'interactingId' => 'required|integer',
         ]);
         if($validator->fails()){
-            return self::customResponse('errors', $validator->erros(), 422);
+            return self::customResponse('errors', $validator->errors(), 422);
         }
         $description = Drug::checkInteraction($request->id, $request->interactingId);
         if (count($description) == 0) {
@@ -80,6 +80,12 @@ class DrugInteractionController extends Controller
      */
     public function search(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'string' => 'required|string',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         // Perform the drug and product search using the search method in the Drug and Product models.
         $drug = Drug::searchNames($request->string, 1);
         $products = Product::searchNames($request->string, 2);

@@ -117,7 +117,6 @@ public static function searchCategories(string $string, int $limit = 3)
         }
         // Extract the interaction description from the result and respond accordingly with a custom response.
         $description = $interaction->pluck('pivot.description');
-
         return $description;
     }
 
