@@ -15,14 +15,17 @@ use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\DatedProduct;
 use App\Models\Drug;
 use App\Models\DrugCategory;
+use App\Models\Pharmacy;
 use App\Models\PurchasedProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
