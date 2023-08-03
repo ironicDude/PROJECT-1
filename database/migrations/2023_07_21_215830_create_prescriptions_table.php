@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('order_id')->constrained()->references('id')->on('orders');
+            $table->foreignId('order_id')->constrained('orders', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('prescription');
         });
     }

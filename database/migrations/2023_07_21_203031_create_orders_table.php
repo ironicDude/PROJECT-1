@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('employee_id')->nullable()->references('id')->on('users');
-            $table->foreignId('customer_id')->constrained()->references('id')->on('users');
-            $table->foreignId('status_id')->default(1)->constrained()->references('id')->on('order_statuses');
+            $table->foreignId('employee_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('customer_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
+            $table->string('status')->default('Review');
             $table->decimal('shipping_fees', 20, 2)->default(0);
+            $table->decimal('delivery_fees', 20, 2)->default(0);
             $table->string('shipping_address');
-            $table->foreignId('method_id')->default(1)->constrained()->references('id')->on('methods');
+            $table->string('method')->default('Online');
             $table->date('delivery_date')->nullable();
         });
     }

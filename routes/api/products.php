@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\Product\CartController;
 use App\Http\Controllers\Product\AllergyController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\PurchasedProductController;
@@ -50,109 +50,93 @@ Route::get('/', [ProductController::class, 'index'])
 Route::get('/search/names', [ProductController::class, 'searchNames'])
                 ->name('product.name.search');
 
+Route::middleware(['auth', 'forceLogout'])->group(function() {
 // allergy
 // Toggle allergy status of a product for the authenticated user
 Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
-                ->name('product.allergy.toggle')
-                ->middleware('auth');
+                ->name('product.allergy.toggle');
 
 // Check if a product is marked as an allergy for the authenticated user
 Route::get('allergy/check/{product}', [AllergyController::class, 'checkAllergy'])
-                ->name('product.allergy.check')
-                ->middleware('auth');
+                ->name('product.allergy.check');
 
 // Get all products marked as allergies for the authenticated user
 Route::get('allergies/index', [AllergyController::class, 'index'])
-                ->name('product.allergy.get')
-                ->middleware('auth');
+                ->name('product.allergy.get');
 
 
 // cart
 // Add a product to the cart for the authenticated user
 Route::post('cart/store/{purchasedProduct}', [CartController::class, 'store'])
-                ->name('cart.product.store')
-                ->middleware('auth');
+                ->name('cart.product.store');
 
 // Remove a product from the cart for the authenticated user
 Route::delete('cart/{cart}/remove/{purchasedProduct}', [CartController::class, 'remove'])
-                ->name('cart.remove')
-                ->middleware('auth');
+                ->name('cart.remove');
 
 // Update the quantity of a product in the cart for the authenticated user
 Route::put('cart/{cart}/quantity/update/{purchasedProduct}', [CartController::class, 'updateQuantity'])
-                ->name('cart.quantity.update')
-                ->middleware('auth');
+                ->name('cart.quantity.update');
 
 // Show the contents of the cart for the authenticated user
 Route::get('cart/{cart}/show', [CartController::class, 'show'])
-                ->name('cart.show')
-                ->middleware('auth');
+                ->name('cart.show');
 
 // Store address information for the cart checkout for the authenticated user
 Route::put('cart/{cart}/address/store', [CartController::class, 'storeAddress'])
-                ->name('cart.address.store')
-                ->middleware('auth');
+                ->name('cart.address.store');
 
 // Get the stored address information for the cart for the authenticated user
 Route::get('cart/{cart}/address/show', [CartController::class, 'getAddress'])
-                ->name('cart.address.show')
-                ->middleware('auth');
+                ->name('cart.address.show');
 
 // Proceed to checkout for the cart for the authenticated user
 Route::post('cart/{cart}/checkout', [CartController::class, 'checkout'])
-                ->name('cart.checkout')
-                ->middleware('auth');
+                ->name('cart.checkout');
 
 // Get the quantity of a specific product in the cart for the authenticated user
 Route::get('cart/{cart}/quantity/show', [CartController::class, 'getQuantity'])
-                ->name('cart.address.show')
-                ->middleware('auth');
+                ->name('cart.address.show');
 
 // Get the total price of the cart for the authenticated user
 Route::get('cart/{cart}/total/show', [CartController::class, 'getTotal'])
-                ->name('cart.total.show')
-                ->middleware('auth');
+                ->name('cart.total.show');
 
 // Clear the cart for the authenticated user
 Route::delete('cart/{cart}/clear', [CartController::class, 'clear'])
-                ->name('cart.clear')
-                ->middleware('auth');
+                ->name('cart.clear');
 
 // Store prescriptions for the cart for the authenticated user
 Route::post('/cart/{cart}/prescriptions/store', [CartController::class, 'storePrescriptions'])
-                ->name('cart.prescriptions.store')
-                ->middleware('auth');
+                ->name('cart.prescriptions.store');
+
+Route::delete('/cart/{cart}/prescriptions/delete', [CartController::class, 'deletePrescriptions'])
+                ->name('cart.prescriptions.delete');
 
 // Check if prescriptions are uploaded for the cart for the authenticated user
 Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkPrescriptionsUpload'])
-                ->name('cart.prescriptions.show')
-                ->middleware('auth');
+                ->name('cart.prescriptions.show');
 
 // stock levels feature
 Route::get('/purchasedProducts', [PurchasedProductController::class, 'index'])
-                ->name('products.purchasedProducts.get')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.get');
 
 Route::get('/purchasedProducts/{purchasedProduct}/price/get', [PurchasedProductController::class, 'getPrice'])
-                ->name('products.purchasedProducts.price.get')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.price.get');
 
 Route::get('/purchasedProducts/{purchasedProduct}/minimumStockLevel/get', [PurchasedProductController::class, 'getMinimumStockLevel'])
-                ->name('products.purchasedProducts.minimumStockLevel.get')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.minimumStockLevel.get');
 
 Route::get('/purchasedProducts/{purchasedProduct}/orderLimit/get', [PurchasedProductController::class, 'getOrderLimit'])
-                ->name('products.purchasedProducts.orderLimit.get')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.orderLimit.get');
 
 Route::post('/purchasedProducts/{purchasedProduct}/price/set', [PurchasedProductController::class, 'setPrice'])
-                ->name('products.purchasedProducts.price.set')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.price.set');
 
 Route::post('/purchasedProducts/{purchasedProduct}/minimumStockLevel/set', [PurchasedProductController::class, 'setMinimumStockLevel'])
-                ->name('products.purchasedProducts.minimumStockLevel.set')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.minimumStockLevel.set');
 
 Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedProductController::class, 'setOrderLimit'])
-                ->name('products.purchasedProducts.orderLimit.set')
-                ->middleware('auth');
+                ->name('products.purchasedProducts.orderLimit.set');
+});
+

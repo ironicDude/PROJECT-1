@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('ordered_products', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('order_id')->constrained()->references('id')->on('orders');
-            $table->foreignId('dated_product_id')->constrained()->references('id')->on('dated_products');
+            $table->foreignId('order_id')->constrained('orders', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('dated_product_id')->nullable()->constrained('dated_products', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->integer('quantity');
             $table->decimal('subtotal', 20, 2);
         });

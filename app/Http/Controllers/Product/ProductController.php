@@ -10,9 +10,6 @@ use App\Http\Resources\CustomResponse;
 use App\Http\Resources\DrugResource;
 use App\Http\Resources\ProductFullResource;
 use App\Http\Resources\ProductOverviewCollection;
-use App\Models\DatedProduct;
-use App\Models\Employee;
-use App\Models\Pharmacy;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\User;
@@ -26,7 +23,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Psy\Util\Str;
 
 class ProductController extends Controller
 {
@@ -43,11 +39,23 @@ class ProductController extends Controller
      * If there are matching products, it returns the results in a custom ProductOverviewCollection format.
      *
      * @param \Illuminate\Http\Request $request The incoming HTTP request containing search parameters.
-     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\ProductOverviewCollection
+     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\Product\ProductOverviewCollection
      *         The JSON response containing search results or a suggestion, or a custom collection of products.
      */
     public function index(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|nullable',
+            'otc' => 'boolean',
+            'minPrice' => 'min:0',
+            'maxPrice' => 'min:0',
+            'rating' => 'between:0,5|numeric',
+            'availability' => 'boolean',
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try{
             // Retrieve a list of products based on the provided search parameters.
             $products = Product::index($request);

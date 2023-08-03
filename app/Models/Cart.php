@@ -9,6 +9,7 @@ use App\Exceptions\InShortageException;
 use App\Exceptions\ItemAlreadyInCartException;
 use App\Exceptions\ItemNotInCartException;
 use App\Exceptions\LimitedStockException;
+use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NotEnoutMoneyException;
 use App\Exceptions\NullAddressException;
@@ -18,8 +19,8 @@ use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
 use App\Exceptions\UnprocessableQuantityException;
+use App\Http\Resources\Cart\CartResource;
 use App\Http\Resources\CartedProductResource;
-use App\Http\Resources\CartResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ use App\Http\Resources\CustomResponse;
 use App\Http\Resources\PurchasedProductResource;
 use App\Mail\OrderUnderReview;
 use App\Notifications\MinimumStockLevelExceededNotification;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -337,9 +339,9 @@ class Cart extends Model
                 $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);
                 $purchasedProducts[] = $purchasedProduct;
                 if($purchasedProduct->getQuantity() < $purchasedProduct->getMinimumStockLevel()){
-                    $inventoryManager = Employee::where('role_id', 2)->first();
-                    $admin = Employee::where('role_id', '1')->first();
-                    event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
+                    $inventoryManager = Employee::whereRelation('roles','role', 'inventory manager')->first();
+                    $admin = Employee::whereRelation('roles','role', 'administrator')->first();
+                    // event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
                     // $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
                 }
             }
@@ -357,8 +359,8 @@ class Cart extends Model
         // Create a new order entry in the database.
         $order = Order::create([
             'customer_id' => $this->customer->id,
-            'shipping_fees' => $this->shipping_fees ?? 0,
-            'shipping_address' => $this->shipping_address ?? "Damascus",
+            'shipping_fees' => !$this->shipping_fees ? 0 : $this->shipping_fees,
+            'shipping_address' => !$this->address ? 'Damascus' : $this->address,
             'status_id' => 1,
             'method_id' => 1,
         ]);
@@ -425,21 +427,14 @@ class Cart extends Model
      * @param Request $request The HTTP request containing the uploaded prescription files.
      * @return array The names of the stored prescription files.
      */
-    public function storePrescriptions(Request $request)
+    public function storePrescriptions($files)
     {
-        // Validate the request to ensure the prescription files are provided and within size limits.
-        $request->validate([
-            'files' => 'required|array',
-            'files.*' => 'max:4096',
-        ]);
 
-        // Store the uploaded prescription files and associate them with the cart.
-        $files = $request->file('files');
         $fileNames = [];
         foreach ($files as $file) {
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $noSpaceOriginalName = str_replace(' ', '', $originalName);
-            $filename = "{$noSpaceOriginalName}-{$this->customer_id}.{$file->getClientOriginalExtension()}";
+            $filename = "{$noSpaceOriginalName}-{$this->id}.{$file->getClientOriginalExtension()}";
             $fileNames[] = $filename;
             Storage::disk('local')->put($filename, File::get($file));
             $prescription = ['prescription' => $filename];
@@ -448,6 +443,18 @@ class Cart extends Model
 
         // Return the names of the stored prescription files.
         return $fileNames;
+    }
+
+    public function deletePrescriptions()
+    {
+        $prescriptions = $this->cartedPrescriptions;
+        if($prescriptions->count() == 0) throw new NoPrescriptionsException('Cart has no prescriptions stored');
+        foreach($prescriptions as $prescription)
+        {
+            Storage::disk('local')->delete($prescription->prescription);
+            $prescription->delete();
+        }
+        return $prescriptions->pluck('prescription');
     }
 
     /**
@@ -490,7 +497,7 @@ class Cart extends Model
      */
     public function show()
     {
-        return new CartResource($this);
+        return $this;
     }
 
 

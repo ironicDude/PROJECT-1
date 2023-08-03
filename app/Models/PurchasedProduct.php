@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Exceptions\OutOfStockException;
-use App\Http\Resources\PurchasedProductCollection;
+use App\Http\Resources\Product\PurchasedProductCollection;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PurchasedProduct extends Model
 {
@@ -98,6 +100,38 @@ class PurchasedProduct extends Model
     public function getSafeDistance()
     {
         return $this->getQuantity() - $this->getMinimumStockLevel();
+    }
+    public static function getBestSelling(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $formattedDate = $date->format('Y-m-d');
+
+        $products = DB::select("SELECT p.id, p.name
+                                FROM ordered_products AS op
+                                INNER JOIN dated_products AS dp ON op.dated_product_id = dp.id
+                                INNER JOIN products AS P ON dp.product_id = p.id
+                                WHERE op.created_at > {$formattedDate}
+                                GROUP BY p.id, p.name
+                                ORDER BY SUM(op.quantity) DESC
+                                LIMIT 10");
+        return $products;
+    }
+
+    public static function getMostProfitable(int $days)
+    {
+        $date = Carbon::now()->subDays($days);
+        $formattedDate = $date->format('Y-m-d');
+
+        $products = DB::select("SELECT p.id, p.name
+                                FROM ordered_products AS op
+                                INNER JOIN dated_products AS dp ON op.dated_product_id = dp.id
+                                INNER JOIN purchased_products AS pp ON dp.product_id = pp.id
+                                INNER JOIN products as p ON pp.id = p.id
+                                WHERE op.created_at > {$formattedDate}
+                                GROUP BY p.id, p.name
+                                ORDER BY SUM((op.quantity * (pp.price - dp.purchase_price))) DESC
+                                LIMIT 10");
+        return $products;
     }
     /**
      * Relationships

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreignId('product_id')->constrained()->references('id')->on('purchased_products');
             $table->foreignId('purchase_id');//->constrained()->references('id')->on('purchases');
+            $table->decimal('purchase_price', 20, 2)->default(0);
             $table->decimal('discount', 3, 2)->nullable();
             $table->integer('quantity', false, true);
             $table->decimal('purchase_price', 10, 2);

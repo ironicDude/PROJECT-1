@@ -20,4 +20,14 @@ class OrderPolicy
         // If any of these conditions are met, the user is allowed to view the order; otherwise, access is denied.
         return ($user->type === 'employee') || ($user->type === 'customer' && $user->id === $order->customer_id);
     }
+
+    public function viewRevenue(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
+
+    public function viewCountOfOrders(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
 }

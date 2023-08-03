@@ -62,7 +62,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'type' => 'customer',
             'money' => rand(1, 9999999),
-            'gender_id' => Gender::where('gender', $request->gender)->first()->id,
+            'gender' => $request->gender,
             'password' => Hash::make($request->password),
             'date_of_birth' => $request->date_of_birth
         ]);

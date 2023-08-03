@@ -4,8 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Http\Resources\AllergyCollection;
+use App\Exceptions\AccountAlreadyRestoredException;
+use App\Exceptions\AccountPermanentlyDeletedException;
+use App\Exceptions\AccountPermenantelyDeletedException;
 use App\Http\Resources\AllergyResource;
+use App\Http\Resources\User\AllergyCollection;
+use App\Http\Resources\User\UserResource;
+use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,10 +20,19 @@ use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use Carbon\Carbon;
+use Database\Seeders\GenderSeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class User extends Authenticatable
 {
+    use SoftDeletes;
     use SingleTableInheritanceTrait;
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -36,9 +50,10 @@ class User extends Authenticatable
         'address',
         'date_of_birth',
         'type',
-        'gender_id',
+        'gender',
         'image',
-        'account_status_id'
+        'account_status',
+        'deleted_at',
     ];
     /**
      * The attributes that are mass assignable.
@@ -53,9 +68,9 @@ class User extends Authenticatable
         'address',
         'type',
         'date_of_birth',
-        'user_role_id',
-        'gender_id',
+        'gender',
         'image',
+        'account_status',
     ];
 
     /**
@@ -79,41 +94,25 @@ class User extends Authenticatable
     ];
 
     /**
-     * Deactivate the user's account by changing the 'account_status_id' to "Blocked".
-     *
-     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Blocked" status
-     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
      *
      * @return void
      */
     public function deactivate(): void
     {
-        // Retrieve the 'id' value for the "Blocked" status from the 'account_statuses' table.
-        $blockedStatusId = AccountStatus::where('status', 'Blocked')->value('id');
-
-        // Update the 'account_status_id' attribute of the current user model to the "Blocked" status ID.
-        $this->account_status_id = $blockedStatusId;
+        $this->account_status = 'Blocked';
 
         // Save the updated user model to persist the changes in the database.
         $this->save();
     }
 
     /**
-     * Activate the user's account by changing the 'account_status_id' to "Active".
      *
-     * This method updates the 'account_status_id' attribute of the current user model to the ID of the "Active" status
-     * in the 'account_statuses' table. It then saves the updated user model to persist the changes in the database.
      *
      * @return void
      */
     public function activate(): void
     {
-        // Retrieve the 'id' value for the "Active" status from the 'account_statuses' table.
-        $activeStatusId = AccountStatus::where('status', 'Active')->value('id');
-
-        // Update the 'account_status_id' attribute of the current user model to the "Active" status ID.
-        $this->account_status_id = $activeStatusId;
-
+        $this->account_status = 'Active';
         // Save the updated user model to persist the changes in the database.
         $this->save();
     }
@@ -157,23 +156,13 @@ class User extends Authenticatable
 
 
     /**
-     * Get the address of the authenticated user.
-     *
-     * @return string
-     */
-    public function getAddress()
-    {
-        return Auth::user()->address;
-    }
-
-    /**
      * Check if the authenticated user is a customer
      *
      * @return bool Returns true if the user is a customer and false if not.
      */
-    public static function isCustomer($user)
+    public function isCustomer()
     {
-        return $user->type == 'customer'
+        return $this->type == 'customer'
         ? true
         : false;
     }
@@ -185,17 +174,183 @@ class User extends Authenticatable
     }
 
 
+    public function getFirstName()
+    {
+        return $this->first_name;
+    }
+
+    public function getLastName()
+    {
+        return $this->last_name;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
+
+    public function getGender()
+    {
+        return $this->gender;
+    }
+
+    public function getDateOfBirth()
+    {
+        return $this->date_of_birth;
+    }
+
+    public function getImage()
+    {
+        $imageName = $this->image;
+        // dd($imageName);
+        $imageContent = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
+        $encodedContent = base64_encode($imageContent);
+        $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
+        $imageData = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContent}", 'UTF-8');
+        return $imageData;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    public function getAccountStatus()
+    {
+        return $this->account_status;
+    }
+
+     /**
+     * Get the address of the authenticated user.
+     *
+     * @return string
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    public function setAddress(string $address)
+    {
+        $this->address = $address;
+        $this->save();
+        return $this->address;
+    }
+
+    public function setFirstName(string $firstName)
+    {
+        $this->first_name = $firstName;
+        $this->save();
+        return $this->first_name;
+    }
+
+    public function setLastName(string $lastName)
+    {
+        $this->last_name = $lastName;
+        $this->save();
+        return $this->last_name;
+    }
+
+    public function setMobile(int $mobile)
+    {
+        $this->mobile = $mobile;
+        $this->save();
+        return $this->mobile;
+    }
+
+    public function setGender(string $gender)
+    {
+        $this->gender = $gender;
+        $this->save();
+        return $this->gender;
+    }
+
+    public function setDateOfBirth(string $date)
+    {
+        $this->date_of_birth = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+        $this->save();
+        return $this->date_of_birth;
+    }
+
+    public function setImage(UploadedFile $image)
+    {
+        if ($this->image) {
+            Storage::disk('local')->delete("images/{$this->image}");
+        }
+        $imageName = "User{$this->id}.{$image->getClientOriginalExtension()}";
+        Storage::disk('local')->put("images/{$imageName}", File::get($image));
+        $this->image = $imageName;
+        $this->save();
+        return $this->getImage();
+    }
+
+    public function updateInfo(array $newInfo)
+    {
+        $this->setFirstName($newInfo['firstName']);
+        $this->setLastName($newInfo['lastName']);
+        $this->setEmail($newInfo['email']);
+        $this->setMobile($newInfo['mobile']);
+        $this->setAddress($newInfo['address']);
+        $this->setDateOFBirth($newInfo['dateOfBirth']);
+        $this->setGender($newInfo['gender']);
+        return new UserResource($this);
+    }
+
+    public function setEmail(string $email)
+    {
+        $this->email = $email;
+        $this->save();
+        return $this->email;
+    }
+
+    public function deleteSoftly()
+    {
+        $this->delete();
+        $url = URL::signedRoute('user.restore', ['user' => $this->id]);
+        // Mail::to($this)->send(new AccountDeleted($this, $url));
+        return $url;
+    }
+
+    public function restoreAccount()
+    {
+        if($this->deleted_at){
+            if ($this->deleted_at->diffInDays(Carbon::now()) < 14) {
+                $this->restore();
+                Auth::logout();
+                return true;
+            }
+            else{
+                throw new AccountPermanentlyDeletedException('Your account has been deleted');
+            }
+        }
+        else{
+            throw new AccountAlreadyRestoredException('Your account is already activated');
+        }
+    }
+
+
+    public function isEmployee()
+    {
+        return $this->type == 'employee';
+    }
     /**
      * relationships
      */
-    public function gender()
-    {
-        return $this->belongsTo(Gender::class, 'gender_id', 'id');
-    }
-    public function accountStatus()
-    {
-        return $this->belongsTo(AccountStatus::class, 'account_status_id', 'id');
-    }
     public function ratings()
     {
         return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');

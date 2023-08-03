@@ -21,9 +21,9 @@ class UserPolicy
         // Check if the authenticated user is an employee with an administrator role,
         // and the user to be toggled is not an administrator.
         if (
-            $user->type === 'employee' &&
-            $user->role->role === 'administrator' &&
-            $toBeToggledUser->role && $toBeToggledUser->role->role != 'administrator'
+            $user->isEmployee() &&
+            in_array('administrator', $user->roles->pluck('role')->toArray()) &&
+            !in_array('administrator', $toBeToggledUser->roles->pluck('role')->toArray())
         ) {
             // If the conditions are met, allow the activation or deactivation action.
             return Response::allow();
@@ -32,4 +32,15 @@ class UserPolicy
             return Response::denyAsNotFound();
         }
     }
+
+    public function getInfo(User $user, User $userWithInfo)
+    {
+        return $user->isEmployee() || $user->isCustomer() && $user->id == $userWithInfo->id;
+    }
+
+    public function restore(User $user, User $toBeRestoredUser)
+    {
+        return $user->id == $toBeRestoredUser->id;
+    }
+
 }

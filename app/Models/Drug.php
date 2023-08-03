@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Resources\ProductOverviewCollection;
+use App\Http\Resources\Product\ProductOverviewCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AffectedOrganism;
@@ -107,17 +107,16 @@ public static function searchCategories(string $string, int $limit = 3)
     public static function checkInteraction(int $id, int $interactingId)
     {
         // Find the Drug model corresponding to the given ID.
-        $drug = Drug::findOrFail($id);
-
-        // Check for interactions between the two drugs using the interactingDrugs() relationship.
-        $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
-        if(!$interaction){
-            $drug = Drug::findOrFail($interactingId);
+        $drug = Drug::find($id);
+        if($drug){
+            $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $interactingId)->get();
+        }
+        else{
+            $drug = Drug::find($interactingId);
             $interaction = $drug->interactingDrugs()->wherePivot('interacting_drug_id', $id)->get();
         }
         // Extract the interaction description from the result and respond accordingly with a custom response.
         $description = $interaction->pluck('pivot.description');
-
         return $description;
     }
 
