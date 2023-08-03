@@ -45,12 +45,16 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'string|nullable',
+            'name' => 'string',
             'otc' => 'boolean',
             'minPrice' => 'min:0',
             'maxPrice' => 'min:0',
             'rating' => 'between:0,5|numeric',
             'availability' => 'boolean',
+            'dosageForm' => 'string',
+            'route' => 'string',
+            'category' => 'string',
+            'labeller' => 'string',
         ]);
 
         if($validator->fails()){
