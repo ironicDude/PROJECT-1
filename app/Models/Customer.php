@@ -63,28 +63,84 @@ class Customer extends User
         return $count;
     }
 
-    public static function countNewbiesPerDay(string $date)
+    public static function countNewbiesAndBastards(string $date, string $period)
     {
-        $customers = collect();
-        for ($i = 0; $i < 24; $i++) {
-            $start = Carbon::parse($date)->addHours($i);
-            $end = Carbon::parse($date)->addHours($i + 1);
-            $customers_gained = Customer::where('created_at', '>=', $start)
-                ->where('created_at', '<', $end)
-                ->count();
-            $customers_lost = Customer::withTrashed()
-                ->where('deleted_at', '>=', $start)
-                ->where('deleted_at', '<', $end)
-                ->count();
-            $customers->push([
-                'hour' => $i,
-                'customers_gained' => $customers_gained,
-                'customers_lost' => $customers_lost
-            ]);
+        $points = collect();
+        switch ($period) {
+            case 'day':
+                for ($i = 0; $i < 24; $i++) {
+                    $start = Carbon::parse($date)->addHours($i);
+                    $end = Carbon::parse($date)->addHours($i + 1);
+                    $customers_gained = Customer::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $customers_lost = Customer::withTrashed()
+                        ->where('deleted_at', '>=', $start)
+                        ->where('deleted_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'hour' => $i,
+                        'customers_gained' => $customers_gained,
+                        'customers_lost' => $customers_lost
+                    ]);
+                }
+                break;
+            case 'week':
+                for ($i = 1; $i < 8; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $customers_gained = Customer::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $customers_lost = Customer::withTrashed()
+                        ->where('deleted_at', '>=', $start)
+                        ->where('deleted_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'day' => $i,
+                        'customers_gained' => $customers_gained,
+                        'customers_lost' => $customers_lost
+                    ]);
+                }
+                break;
+            case 'month':
+                for ($i = 1; $i < 31; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $customers_gained = Customer::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $customers_lost = Customer::withTrashed()
+                        ->where('deleted_at', '>=', $start)
+                        ->where('deleted_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'day' => $i,
+                        'customers_gained' => $customers_gained,
+                        'customers_lost' => $customers_lost
+                    ]);
+                }
+            case 'year':
+                for ($i = 0; $i < 366; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $customers_gained = Customer::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $customers_lost = Customer::withTrashed()
+                        ->where('deleted_at', '>=', $start)
+                        ->where('deleted_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'day' => $i,
+                        'customers_gained' => $customers_gained,
+                        'customers_lost' => $customers_lost
+                    ]);
+                }
         }
-        return $customers;
-    }
 
+        return $points;
+    }
     /**
      * Relationships
      */
