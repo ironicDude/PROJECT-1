@@ -7,7 +7,6 @@ use App\Exceptions\SuggestionException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomResponse;
-use App\Http\Resources\DrugResource;
 use App\Http\Resources\Product\ProductFullResource;
 use App\Http\Resources\Product\ProductOverviewCollection;
 use App\Models\Product;
