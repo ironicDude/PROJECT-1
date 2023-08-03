@@ -19,7 +19,13 @@ Route::get('/most-profitable', [DashboardController::class, 'getMostProfitablePr
 Route::get('/orders-count', [DashboardController::class, 'countOrders'])
     ->name('orders.count');
 
-Route::get('/newbies-count-per-day', [DashboardController::class, 'countNewbiesandbastards'])
-    ->name('newbies.count.per.day');
+Route::get('/customers-chart', [DashboardController::class, 'chartNewAndLostCustomers'])
+    ->name('customers.chart');
+
+Route::get('/orders-chart', [DashboardController::class, 'chartOrders'])
+    ->name('orders.chart');
+
+Route::get('/revenue-chart', [DashboardController::class, 'chartRevenue'])
+    ->name('orders.chart');
 
 });

@@ -15,7 +15,7 @@ class DashboardController extends Controller
 
     public function getRevenue(Request $request)
     {
-        $this->authorize('viewRevenue', Order::class);
+        // $this->authorize('viewRevenue', Order::class);
 
         $validator = Validator::make($request->all(), [
             'days' => 'required|integer|min:0'
@@ -84,7 +84,7 @@ class DashboardController extends Controller
         return self::customResponse('Count of orders', $count, 200);
     }
 
-    public function countNewbiesAndBastards(Request $request)
+    public function chartNewAndLostCustomers(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'date' => 'required|date|before:tomorrow',
@@ -95,7 +95,38 @@ class DashboardController extends Controller
             return self::customResponse('errors', $validator->errors(), 422);
         }
 
-        $points = Customer::countNewbiesAndBastards($request->date, $request->period);
+        $points = Customer::chartNewbiesAndBastards($request->date, $request->period);
+        return self::customResponse('points', $points, 200);
+    }
+
+    public function chartOrders(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date|before:tomorrow',
+            'period' => 'required|string|in:day,week,month,year',
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $points = Order::chartOrders($request->date, $request->period);
+        return self::customResponse('points', $points, 200);
+    }
+
+
+    public function chartRevenue(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date|before:tomorrow',
+            'period' => 'required|string|in:day,week,month,year',
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $points = Order::chartRevenue($request->date, $request->period);
         return self::customResponse('points', $points, 200);
     }
 }

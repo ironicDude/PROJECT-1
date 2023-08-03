@@ -55,7 +55,7 @@ class Order extends Model
     public static function calculateRevenue(int $days)
     {
         $date = Carbon::now()->subDays($days);
-        $orders = Order::all()->where('created_at', '>=', $date);
+        $orders = Order::where('created_at', '>=', $date)->get();
         $total = 0;
         foreach($orders as $order){
             $total += $order->getTotal();
@@ -69,6 +69,145 @@ class Order extends Model
         $count = Order::all()->where('created_at', '>=', $date)->count();
         return $count;
     }
+
+
+    public static function chartOrders(string $date, string $period)
+    {
+        $points = collect();
+        switch ($period) {
+            case 'day':
+                for ($i = 0; $i < 24; $i++) {
+                    $start = Carbon::parse($date)->addHours($i);
+                    $end = Carbon::parse($date)->addHours($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'hour' => $i,
+                        'ordersMade' => $ordersMade,
+                    ]);
+                }
+                break;
+            case 'week':
+                for ($i = 0; $i < 7; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'day' => $i,
+                        'ordersMade' => $ordersMade,
+                    ]);
+                }
+                break;
+            case 'month':
+                for ($i = 0; $i < 30; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'day' => $i,
+                        'ordersMade' => $ordersMade,
+                    ]);
+                }
+                break;
+            case 'year':
+                for ($i = 0; $i < 365; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)
+                        ->count();
+                    $points->push([
+                        'hour' => $i,
+                        'ordersMade' => $ordersMade,
+                    ]);
+                }
+                break;
+        }
+
+        return $points;
+    }
+
+    public static function chartRevenue(string $date, string $period)
+    {
+        $points = collect();
+        switch ($period) {
+            case 'day':
+                for ($i = 0; $i < 24; $i++) {
+                    $start = Carbon::parse($date)->addHours($i);
+                    $end = Carbon::parse($date)->addHours($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)->get();
+                    $revenue = 0;
+                    foreach($ordersMade as $order){
+                        $revenue += $order->getTotal();
+                    }
+                    $points->push([
+                        'hour' => $i,
+                        'revenue' => $revenue,
+                    ]);
+                }
+                break;
+            case 'week':
+                for ($i = 0; $i < 7; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)->get();
+                    $revenue = 0;
+                    foreach($ordersMade as $order){
+                        $revenue += $order->getTotal();
+                    }
+                    $points->push([
+                        'day' => $i,
+                        'revenue' => $revenue,
+                    ]);
+                }
+                break;
+            case 'month':
+                for ($i = 0; $i < 30; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)->get();
+                    $revenue = 0;
+                    foreach($ordersMade as $order){
+                        $revenue += $order->getTotal();
+                    }
+                    $points->push([
+                        'day' => $i,
+                        'revenue' => $revenue,
+                    ]);
+                }
+                break;
+            case 'year':
+                for ($i = 0; $i < 365; $i++) {
+                    $start = Carbon::parse($date)->addDays($i);
+                    $end = Carbon::parse($date)->addDays($i + 1);
+                    $ordersMade = Order::where('created_at', '>=', $start)
+                        ->where('created_at', '<', $end)->get();
+                    $revenue = 0;
+                    foreach($ordersMade as $order){
+                        $revenue += $order->getTotal();
+                    }
+                    $points->push([
+                        'day' => $i,
+                        'revenue' => $revenue,
+                    ]);
+                }
+                break;
+        }
+
+        return $points;
+    }
+
+
+
+
     /**
      * relationships
      */
