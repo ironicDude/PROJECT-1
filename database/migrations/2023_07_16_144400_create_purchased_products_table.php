@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchased_products', function (Blueprint $table) {
-            $table->foreignId('id')->unique()->constrained()->references('id')->on('products');
+            $table->id();
+            $table->foreignId('product_id')->constrained()->references('id')->on('products');
+            $table->foreignId('purchase_id')->constrained()->references('id')->on('purchases');
             $table->timestamps();
             $table->decimal('price', 10, 2);
             $table->integer('order_limit');

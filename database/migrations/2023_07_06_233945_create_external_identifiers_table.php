@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('external_identifiers', function (Blueprint $table) {
             $table->id();
             $table->string('drugbank_id', 12)->unique();
-            $table->boolean('is_primary');
+            $table->string('is_primary');
             $table->string('resource', 9);
             $table->string('url', 500);
             $table->foreignId('drug_id')->constrained()->cascadeOnDelete();

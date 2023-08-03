@@ -8,5 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Purchase extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'id', 'employee_id', 'total'
+    ];
 
 }

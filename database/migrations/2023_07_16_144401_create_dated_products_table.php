@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('purchase_id');//->constrained()->references('id')->on('purchases');
             $table->decimal('discount', 3, 2)->nullable();
             $table->integer('quantity', false, true);
+            $table->decimal('purchase_price', 10, 2);
             $table->date('expiry_date');
             $table->date('manufacturing_date')->nullable();
         });

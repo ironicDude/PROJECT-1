@@ -13,7 +13,7 @@ class PurchasedProduct extends Model
 {
     use HasFactory;
 
-
+    protected $guarded = [];
 
     public function getEarliestExpiryDateProducts(int $quantity)
     {

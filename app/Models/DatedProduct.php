@@ -9,6 +9,8 @@ class DatedProduct extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
 
 
 

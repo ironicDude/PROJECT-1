@@ -10,6 +10,17 @@ use App\Http\Resources\CustomResponse;
 use App\Models\Interaction;
 use App\Models\PurchasedProduct;
 
+//order
+Route::post('/create/purchase', [ProductController::class, 'purchase'])
+    ->name('product.purchase');
+
+Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
+    ->name('product.get.purchase');
+
+Route::post('/prices', [ProductController::class, 'withPrices'])
+    ->name('product.prices');
+
+
 // search
 // Show a specific product's information
 Route::get('/get/{product}', [ProductController::class, 'show'])
