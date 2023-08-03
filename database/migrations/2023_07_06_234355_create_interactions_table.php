@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('interactions', function (Blueprint $table) {
             $table->bigInteger('id');
             $table->foreignId('interacting_drug_id')->constrained();
-            $table->string('description', 300);
+            $table->string('description');
+            $table->string('name');
             $table->foreignId('drug_id')->constrained();
             $table->timestamps();
         });

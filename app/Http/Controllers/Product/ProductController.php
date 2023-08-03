@@ -7,18 +7,22 @@ use App\Exceptions\SuggestionException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\DrugResource;
 use App\Http\Resources\Product\ProductFullResource;
 use App\Http\Resources\Product\ProductOverviewCollection;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Drug;
 use App\Models\DrugCategory;
 use App\Models\PurchasedProduct;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -199,6 +203,108 @@ class ProductController extends Controller
             return self::customResponse('Matches returned', $dosageForms, 200);
         }
     }
+
+    public function withPrices(Request $request)
+    {
+        $request->validate([
+            'products' => ['array', 'present'],
+            'products.*' => ['required', 'exists:products,id'],
+        ]);
+        try {
+            // Get an array of product IDs from the request
+            $productIds = $request['products'];
+            $products = Product::query()->whereIn('products.id', $productIds)
+                ->join('prices', 'prices.drug_id', '=', 'products.drug_id')
+                ->select('products.*', 'prices.*', DB::raw('prices.cost * 1.3 AS price'))
+                ->paginate(15);
+
+            // $products contain a collection of products along with their prices
+            return self::customResponse("Product with Prices", $products);
+        }catch (\Throwable $e){
+            return $e;
+        }
+    }
+
+
+    public function getPurchase($id){
+        $data['purchase'] = Purchase::query()->find($id);
+        $data['purchase_products'] = PurchasedProduct::query()->where('purchase_id', '=', $id)->get();
+        $data['dated_products'] = DatedProduct::query()->where('purchase_id', '=', $id)->get();
+        return $data;
+    }
+
+
+    public function purchase(Request $request){
+        $request->validate([
+            'products' => ['array', 'present'],
+            'products.*.id' => ['required', 'exists:products,id'],
+            'products.*.quantity' => ['required', 'min:1'],
+            'products.*.unit' => ['required'],
+            'employee_id' => ['required', 'exists:users,id'],
+            'pharmacy_id' => ['required', 'exists:pharmacies,id']
+        ]);
+
+        try {
+            // Get an array of product IDs from the request
+            $products = $request['products'];
+
+            // Fetch the products and their corresponding prices based on the requested product IDs
+            $productIds = array_column($products, 'id');
+            $productsData = Product::query()->whereIn('products.id', $productIds)
+                ->join('prices', 'prices.drug_id', '=', 'products.drug_id')
+                ->select('products.*',DB::raw('prices.cost * 1.3 AS price'), 'prices.unit')
+                ->get();
+            $purchase_id = Purchase::query()->create([
+                'employee_id' => $request['employee_id'],
+                'total' => 0.0
+            ])['id'];
+            $total = 0.0;
+            $purchased_products = [];
+            $dated_products = [];
+            // Create 'PurchasedProduct' records for each product
+            foreach ($productsData as $productData) {
+                // Find the product in the $products array based on ID and unit
+                $selectedProduct = collect($products)->firstWhere('id', $productData->id);
+
+                // If a product with the same ID and unit is found in the request, create the 'PurchasedProduct' record
+
+                if ($selectedProduct && $selectedProduct['unit'] === $productData->unit) {
+                    $purchased_products[] = PurchasedProduct::query()->create([
+                        'purchase_id' => $purchase_id,
+                        'product_id' => $productData->id,
+                        'price' => $productData->price,
+                        'order_limit' => 5,
+                        'minimum_stock_level' => 1,
+                    ]);
+                    $total +=  ($productData->price/ 1.3) * $selectedProduct['quantity'];
+
+                    $dated_products[] = DatedProduct::query()->create([
+                        'purchase_id' => $purchase_id,
+                        'product_id' => $productData->id,
+                        'quantity' => $selectedProduct['quantity'],
+                        'purchase_price'=>$productData->price/ 1.3,
+                        'expiry_date' => Carbon::now()->addYears(3),
+                        'manufacturing_date' => Carbon::now(),
+                    ]);
+                }
+            }
+            // update purchase total
+            Purchase::query()->find($purchase_id)->update([
+                'total' => $total
+            ]);
+
+            $pharmacy = Pharmacy::query()->find($request['pharmacy_id']);
+            $pharmacy->money = $pharmacy->money - $total;
+            $pharmacy->save();
+            $data['purchased_products'] = $purchased_products;
+            $data['purchase'] = Purchase::query()->find($purchase_id);
+            $data['dated_products'] = $dated_products;
+            return self::customResponse("Purchased Products created successfully.", $data);
+        } catch (\Throwable $e) {
+            return $e;
+        }
+    }
+
 
 
 
