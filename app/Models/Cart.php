@@ -153,6 +153,7 @@ class Cart extends Model
                 $this->delete();
             }
         });
+        return $product;
     }
 
     public function updateQuantity(PurchasedProduct $product, int $newQuantity)

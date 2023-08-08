@@ -60,17 +60,19 @@ class ProductController extends Controller
             'labeller' => 'string',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return self::customResponse('errors', $validator->errors(), 422);
         }
-        try{
+        try {
             // Retrieve a list of products based on the provided search parameters.
             $products = Product::index($request);
-        } catch(NameNotFoundException $e){
-            return self::customResponse($e->getMessage(), null, 404 );
-        } catch(SuggestionException $e){
-            $data = ['product name' => $e->suggestedName,
-                    'product id' => $e->suggestedNameId];
+        } catch (NameNotFoundException $e) {
+            return self::customResponse($e->getMessage(), null, 404);
+        } catch (SuggestionException $e) {
+            $data = [
+                'product name' => $e->suggestedName,
+                'product id' => $e->suggestedNameId
+            ];
             return self::customResponse($e->getMessage(), $data, 404);
         }
         // If matching products are found, return them in a custom ProductOverviewCollection format.
@@ -207,6 +209,7 @@ class ProductController extends Controller
         }
     }
 
+    ////////////////////////////////// EISSAWI ///////////////////////////////////////////////
     public function withPrices(Request $request)
     {
         $request->validate([
@@ -223,13 +226,14 @@ class ProductController extends Controller
 
             // $products contain a collection of products along with their prices
             return self::customResponse("Product with Prices", $products);
-        }catch (\Throwable $e){
+        } catch (\Throwable $e) {
             return $e;
         }
     }
 
 
-    public function getPurchase($id){
+    public function getPurchase($id)
+    {
         $data['purchase'] = Purchase::query()->find($id);
         $data['purchase_products'] = PurchasedProduct::query()->where('purchase_id', '=', $id)->get();
         $data['dated_products'] = DatedProduct::query()->where('purchase_id', '=', $id)->get();
@@ -237,7 +241,8 @@ class ProductController extends Controller
     }
 
 
-    public function purchase(Request $request){
+    public function purchase(Request $request)
+    {
         $request->validate([
             'products' => ['array', 'present'],
             'products.*.id' => ['required', 'exists:products,id'],
@@ -255,7 +260,7 @@ class ProductController extends Controller
             $productIds = array_column($products, 'id');
             $productsData = Product::query()->whereIn('products.id', $productIds)
                 ->join('prices', 'prices.drug_id', '=', 'products.drug_id')
-                ->select('products.*',DB::raw('prices.cost * 1.3 AS price'), 'prices.unit')
+                ->select('products.*', DB::raw('prices.cost * 1.3 AS price'), 'prices.unit')
                 ->get();
             $purchase_id = Purchase::query()->create([
                 'employee_id' => $request['employee_id'],
@@ -279,13 +284,13 @@ class ProductController extends Controller
                         'order_limit' => 5,
                         'minimum_stock_level' => 1,
                     ]);
-                    $total +=  ($productData->price/ 1.3) * $selectedProduct['quantity'];
+                    $total += ($productData->price / 1.3) * $selectedProduct['quantity'];
 
                     $dated_products[] = DatedProduct::query()->create([
                         'purchase_id' => $purchase_id,
                         'product_id' => $productData->id,
                         'quantity' => $selectedProduct['quantity'],
-                        'purchase_price'=>$productData->price/ 1.3,
+                        'purchase_price' => $productData->price / 1.3,
                         'expiry_date' => Carbon::now()->addYears(3),
                         'manufacturing_date' => Carbon::now(),
                     ]);
