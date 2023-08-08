@@ -5,9 +5,7 @@ namespace App\Models;
 use App\Exceptions\NameNotFoundException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\SuggestionException;
-use App\Http\Resources\ProductCollection;
-use App\Http\Resources\ProductOverviewCollection;
-use App\Http\Resources\ProductOverviewResource;
+use App\Http\Resources\Product\ProductOverviewResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Drug;
@@ -232,7 +230,20 @@ class Product extends Model
         return $this->purchasedProduct ?? true;
     }
 
+    public function rate(int $rating)
+    {
+        Rating::create([
+            'user_id' => Auth::user()->id,
+            'product_id' => $this->id,
+            'rating' => $rating,
+        ]);
+        return new ProductOverviewResource($this);
+    }
 
+    public function getRating()
+    {
+        return $this->ratings()->average('rating');
+    }
 
     /**
      * Relationships
@@ -254,7 +265,7 @@ class Product extends Model
 
     public function ratings()
     {
-        return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot(['rating', 'reviews']);
+        return $this->hasMany(Rating::class, 'product_id', 'id');
     }
 
     public function purchasedProduct()

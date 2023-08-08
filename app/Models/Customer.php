@@ -9,10 +9,12 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 
 class Customer extends User
 {
     use HasFactory;
+    use SingleTableInheritanceTrait;
     protected static $singleTableType = 'customer';
     protected static $persisted = ['money'];
 

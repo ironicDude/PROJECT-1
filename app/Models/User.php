@@ -348,12 +348,13 @@ class User extends Authenticatable
     {
         return $this->type == 'employee';
     }
+
     /**
      * relationships
      */
     public function ratings()
     {
-        return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');
+        return $this->hasMany(Rating::class, 'user_id', 'id');
     }
     public function allergies()
     {

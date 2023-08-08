@@ -138,5 +138,13 @@ Route::post('/purchasedProducts/{purchasedProduct}/minimumStockLevel/set', [Purc
 
 Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedProductController::class, 'setOrderLimit'])
                 ->name('products.purchasedProducts.orderLimit.set');
+
+//rating
+Route::post('/{product}/rate/', [ProductController::class, 'rate'])
+                ->name('product.rate');
+                
+Route::get('/{product}/rating/get', [ProductController::class, 'getRating'])
+                ->name('product.rate.get');
+
 });
 
