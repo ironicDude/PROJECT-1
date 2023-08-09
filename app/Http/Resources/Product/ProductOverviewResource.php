@@ -40,14 +40,4 @@ class ProductOverviewResource extends JsonResource
         ];
     }//end of toArray
 
-
-    /**
-     * Get any additional data that should be returned with the resource array.
-     *
-     * @return array
-     */
-    public function with($request)
-    {
-
-    }
 }
