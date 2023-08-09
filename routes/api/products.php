@@ -4,6 +4,7 @@ use App\Http\Controllers\Product\CartController;
 use App\Http\Controllers\Product\AllergyController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\PurchasedProductController;
+use App\Http\Controllers\Product\RatingController;
 use App\Http\Controllers\Product\WishlistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -141,18 +142,19 @@ Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedPr
                 ->name('products.purchasedProducts.orderLimit.set');
 
 //rating
-Route::post('/{product}/rate/', [ProductController::class, 'rate'])
+Route::post('/{product}/rate/', [RatingController::class, 'rate'])
                 ->name('product.rate');
 
-Route::get('/{product}/rating/get', [ProductController::class, 'getRating'])
+Route::get('/{product}/rating/get', [RatingController::class, 'getRating'])
                 ->name('product.rate.get');
 
+Route::get('user/{product}/rating/get', [RatingController::class, 'getUserRatingToProduct'])
+                ->name('user.product.rating.get');
 //wishlist
 Route::post('/wishlist/toggle/{product}/', [WishlistController::class, 'toggleWishlistProduct'])
                 ->name('product.wishlist.toggle');
 
 Route::get('/wishlist/check/{product}', [WishlistController::class, 'checkIfWishlisted'])
                 ->name('product.wishlist.check');
-
 });
 

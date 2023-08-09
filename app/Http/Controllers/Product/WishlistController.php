@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\Product\ProductOverviewCollection;
+
 class WishlistController extends Controller
 {
     use CustomResponse;
@@ -41,6 +43,6 @@ class WishlistController extends Controller
             return self::customResponse('no products in the wishlist', null, 404);
         }
 
-        return self::customResponse('products in the wishlist returned', $products, 200);
+        return self::customResponse('products in the wishlist returned', new ProductOverviewCollection($products), 200);
     }
 }

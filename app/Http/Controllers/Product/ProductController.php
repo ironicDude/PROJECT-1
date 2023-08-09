@@ -314,27 +314,4 @@ class ProductController extends Controller
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function rate(Product $product, Request $request)
-    {
-        $validator = Validator::make($request->all(),
-        [
-            'rating' => 'required|integer|min:1|max:5'
-        ]);
-
-        if($validator->fails()){
-            return self::customResponse('errors', $validator->errors(), 422);
-        }
-        $product = $product->rate($request->rating);
-        return self::customResponse('Product rated', $product, 200);
-    }
-
-    public function getRating(Product $product)
-    {
-        $rating = $product->getRating();
-        if(!$rating){
-            return self::customResponse('This product has not been rated yet', null, 200);
-        }
-        return self::customResponse('Rating returned', $rating, 200);
-    }
-
 }

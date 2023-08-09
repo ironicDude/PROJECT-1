@@ -12,13 +12,8 @@ class ProductOverviewCollection extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
-        return [
-            'data' => $this->collection,
-            // 'links' => [
-            //     'self' => 'link-value',
-            // ],
-        ];
+        return $this->collection->toArray();
     }
 }

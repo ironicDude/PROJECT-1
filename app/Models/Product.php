@@ -232,6 +232,7 @@ class Product extends Model
 
     public function rate(int $rating)
     {
+        $this->ratings()->where('user_id', Auth::user()->id)->delete();
         Rating::create([
             'user_id' => Auth::user()->id,
             'product_id' => $this->id,
@@ -245,6 +246,10 @@ class Product extends Model
         return $this->ratings()->average('rating');
     }
 
+    public function getUserRatingToProduct(int $userId)
+    {
+        return $this->ratings()->where('user_id', $userId)->average('rating');
+    }
 
     /**
      * Relationships

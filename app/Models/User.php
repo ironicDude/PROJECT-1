@@ -8,6 +8,7 @@ use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
 use App\Exceptions\AccountPermenantelyDeletedException;
 use App\Http\Resources\AllergyResource;
+use App\Http\Resources\Product\ProductOverviewCollection;
 use App\Http\Resources\User\AllergyCollection;
 use App\Http\Resources\User\UserResource;
 use App\Http\Resources\User\Wishlist\WishlistResource;
@@ -169,8 +170,8 @@ class User extends Authenticatable
 
     public function getAllergies()
     {
-        $allergies = $this->allergies;
-        return new AllergyCollection($allergies);
+        $products = $this->allergies;
+        return $products;
     }
 
 
@@ -350,13 +351,10 @@ class User extends Authenticatable
     }
 
     public function getWishlistedProducts()
-    {
-        $this->load('wishlistedProducts:id');
-        $products = $this->wishlistedProducts->arr(function($product){
-            return $product->id;
-        });
-        return $products;
-    }
+{
+    $products = $this->wishlistedProducts;
+    return $products;
+}
 
     public function wishlistedProduct(Product $product)
     {
