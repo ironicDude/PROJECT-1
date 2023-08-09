@@ -10,6 +10,7 @@ use App\Exceptions\AccountPermenantelyDeletedException;
 use App\Http\Resources\AllergyResource;
 use App\Http\Resources\User\AllergyCollection;
 use App\Http\Resources\User\UserResource;
+use App\Http\Resources\User\Wishlist\WishlistResource;
 use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -130,7 +131,6 @@ class User extends Authenticatable
     {
         return $this->allergies->contains($product);
     }
-
     /**
      * Check if the user is indirectly allergic to a given product.
      *
@@ -349,6 +349,20 @@ class User extends Authenticatable
         return $this->type == 'employee';
     }
 
+    public function getWishlistedProducts()
+    {
+        $this->load('wishlistedProducts:id');
+        $products = $this->wishlistedProducts->arr(function($product){
+            return $product->id;
+        });
+        return $products;
+    }
+
+    public function wishlistedProduct(Product $product)
+    {
+        return $this->wishlistedProducts->contains($product);
+    }
+
     /**
      * relationships
      */
@@ -356,6 +370,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Rating::class, 'user_id', 'id');
     }
+
+    public function wishlistedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlisted_products', 'user_id', 'product_id');
+    }
+
     public function allergies()
     {
         return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');

@@ -245,6 +245,7 @@ class Product extends Model
         return $this->ratings()->average('rating');
     }
 
+
     /**
      * Relationships
      */
@@ -276,5 +277,10 @@ class Product extends Model
     public function allergies()
     {
         return $this->belongsToMany(User::class, 'allergies', 'product_id', 'user_id');
+    }
+
+    public function wishlisters()
+    {
+        return $this->belongsToMany(User::class, 'wishlisted_products', 'user_id', 'product_id');
     }
 }

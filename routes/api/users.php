@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\User\EmployeeController;
 use App\Http\Controllers\Order\OrderController;
+use App\Http\Controllers\Product\WishlistController;
 use App\Http\Controllers\User\UserController;
 use App\Models\Customer;
 use App\Models\Employee;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth', 'forceLogout'])->group(function () {
+
+    Route::get('/wishlist', [WishlistController::class, 'getWishlist'])
+                ->name('user.wishlist.get');
 
     // Activate or deactivate a user (employee) based on user_id
     Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])

@@ -170,13 +170,13 @@ class UserController extends Controller
     {
         $this->authorize('getInfo', $user);
         $mobile =  $user->getMobile();
-        return self::customResponse('Mobile set', $mobile, 200);
+        return self::customResponse('Mobile returned', $mobile, 200);
     }
 
     public function setMobile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|numeric|max:20',
+            'mobile' => 'required|numeric|size:10',
         ]);
 
         if ($validator->fails()) {
@@ -184,7 +184,7 @@ class UserController extends Controller
         }
 
         $mobile = Auth::user()->setMobile($request->input('mobile'));
-        return self::customResponse('Mobile returned', $mobile, 200);
+        return self::customResponse('Mobile set', $mobile, 200);
     }
 
 
