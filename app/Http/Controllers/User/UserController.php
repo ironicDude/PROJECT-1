@@ -176,7 +176,7 @@ class UserController extends Controller
     public function setMobile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|string|max:20',
+            'mobile' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -253,7 +253,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:' . User::class,
             'dateOfBirth' => 'required|date|before:-10years',
             'gender' => 'required|string|in:Male,Female,I prefer not to say',
-            'mobile' => 'string|max:20',
+            'mobile' => 'required|integer',
         ]);
 
         // If the validation fails, return a JSON response with the validation errors and status code 422 (Unprocessable Entity).
