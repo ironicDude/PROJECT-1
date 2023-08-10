@@ -49,11 +49,9 @@ class ProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'string',
-            'otc' => '',
             'minPrice' => 'min:0',
             'maxPrice' => 'min:0',
             'rating' => 'between:0,5|numeric',
-            'availability' => '',
             'dosageForm' => 'string',
             'route' => 'string',
             'category' => 'string',
