@@ -53,6 +53,7 @@ Route::get('/search/names', [ProductController::class, 'searchNames'])
                 ->name('product.name.search');
 
 Route::middleware(['auth', 'forceLogout'])->group(function() {
+    
 // allergy
 // Toggle allergy status of a product for the authenticated user
 Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])

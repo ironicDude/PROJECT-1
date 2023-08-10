@@ -1,12 +1,20 @@
 <?php
 
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\Product\AllergyController;
-use App\Http\Controllers\Product\ProductController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Order\OrderController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Resources\CustomResponse;
-use App\Models\Interaction;
 
- 
+Route::middleware(['auth', 'forceLogout'])->group(function () {
+
+Route::get('customer/{customer}', [OrderController::class, 'getCustomerOrders'])
+->name('customer.orders.get');
+
+Route::get('{order}', [OrderController::class, 'show'])
+->name('order.show');
+
+Route::get('{order}/prescriptions', [OrderController::class, 'getPrescriptions'])
+->name('order.prescriptions.get');
+
+Route::get('/', [OrderController::class, 'index'])
+->name('orders.get');
+
+});

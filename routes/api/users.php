@@ -114,23 +114,13 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
     Route::put('/employees/update-info', [EmployeeController::class, 'updateInfo'])
         ->name('employees.update');
 
-    //CUSTOMERS
-    // Get all orders for a specific customer
-    Route::get('customers/{customer}/orders', [OrderController::class, 'index'])
-        ->name('customer.orders.get');
 
-    // Show details of a specific order for a customer
-    Route::get('customers/orders/{order}', [OrderController::class, 'show'])
-        ->name('customer.order.show');
-
-    // Get prescriptions for a specific order of a customer
-    Route::get('customers/orders/{order}/prescriptions', [OrderController::class, 'getPrescriptions'])
-        ->name('customer.order.prescriptions.show');
 });
 
 Route::get('/restore/{user}', [UserController::class, 'restore'])
     ->name('user.restore')
     ->middleware('signed');
+
 
 // Create a new Employee with hardcoded data (This is just a temporary route for testing or seeding purposes)
 Route::post('create', function () {

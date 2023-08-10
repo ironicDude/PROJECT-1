@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\EmployeeResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Models\Employee;
@@ -92,7 +93,7 @@ class EmployeeController extends Controller
         }
 
         $newInfo = $request->toArray();
-        $employeeInfo = Auth::user()->updateEmployeeInfo($newInfo);
+        $employeeInfo = new EmployeeResource(Auth::user()->updateEmployeeInfo($newInfo));
         return self::customResponse('Employee with new info', $employeeInfo, 200);
     }
 
