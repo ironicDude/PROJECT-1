@@ -214,6 +214,9 @@ class User extends Authenticatable
     {
         $imageName = $this->image;
         // dd($imageName);
+        if(!$imageName){
+            return null;
+        }
         $imageContent = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
         $encodedContent = base64_encode($imageContent);
         $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
@@ -323,8 +326,7 @@ class User extends Authenticatable
     {
         $this->delete();
         $url = URL::signedRoute('user.restore', ['user' => $this->id]);
-        // Mail::to($this)->send(new AccountDeleted($this, $url));
-        return $url;
+        Mail::to($this)->send(new AccountDeleted($this, $url));
     }
 
     public function restoreAccount()
