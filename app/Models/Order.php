@@ -20,6 +20,23 @@ class Order extends Model
         'status',
     ];
 
+    public static function getCustomerOrders(int $customerId, string $date = null)
+    {
+        $orders = Order::where('customer_id', $customerId);
+        if($date){
+            $orders = $orders->whereDate('created_at', $date);
+        }
+        return $orders;
+    }
+
+    public static function getAllOrders(string $date = null)
+    {
+        $orders = Order::query();
+        if($date){
+            $orders = $orders->whereDate('created_at', $date);
+        }
+        return $orders;
+    }
     public function getTotal()
     {
         return ($this->orderedProducts()->sum('subtotal') + $this->shipping_fees + $this->delivery_fees);
