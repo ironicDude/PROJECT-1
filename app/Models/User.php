@@ -217,7 +217,7 @@ class User extends Authenticatable
         if(!$imageName){
             return null;
         }
-        $imageContent = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
+        $imageContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
         $encodedContent = base64_encode($imageContent);
         $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
         $imageData = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContent}", 'UTF-8');
@@ -325,8 +325,9 @@ class User extends Authenticatable
     public function deleteSoftly()
     {
         $this->delete();
-        $url = URL::signedRoute('user.restore', ['user' => $this->id]);
-        Mail::to($this)->send(new AccountDeleted($this, $url));
+        $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['user' => $this->id]);
+        $frontUrl = str_replace('localhost:8000', 'localhost:3000', $url);
+        Mail::to($this)->send(new AccountDeleted($this, $frontUrl));
     }
 
     public function restoreAccount()

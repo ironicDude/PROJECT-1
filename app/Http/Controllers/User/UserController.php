@@ -275,7 +275,7 @@ class UserController extends Controller
     public function restore(Request $request, int $userId)
     {
         $user = User::withTrashed()->findOrFail($userId);
-        $this->authorize('restore', $user);
+        // $this->authorize('restore', $user);
         if (!$request->hasValidSignature()) {
             abort(401);
         }

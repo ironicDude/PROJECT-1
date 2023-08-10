@@ -39,7 +39,7 @@ class Order extends Model
     }
     public function getTotal()
     {
-        return ($this->orderedProducts()->sum('subtotal') + $this->shipping_fees + $this->delivery_fees);
+        return ($this->orderedProducts()->sum('subtotal') + $this->shipping_fees);
     }
 
     public function getQuantity()
