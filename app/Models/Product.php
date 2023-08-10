@@ -238,7 +238,7 @@ class Product extends Model
             'product_id' => $this->id,
             'rating' => $rating,
         ]);
-        return new ProductOverviewResource($this);
+        return $this;
     }
 
     public function getRating()
@@ -248,7 +248,7 @@ class Product extends Model
 
     public function getUserRatingToProduct(int $userId)
     {
-        return $this->ratings()->where('user_id', $userId)->average('rating');
+        return $this->ratings()->where('user_id', $userId);
     }
 
     /**

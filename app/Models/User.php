@@ -309,7 +309,7 @@ class User extends Authenticatable
         $this->setAddress($newInfo['address']);
         $this->setDateOFBirth($newInfo['dateOfBirth']);
         $this->setGender($newInfo['gender']);
-        return new UserResource($this);
+        return $this;
     }
 
     public function setEmail(string $email)

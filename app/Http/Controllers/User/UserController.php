@@ -262,7 +262,7 @@ class UserController extends Controller
         }
 
         $newInfo = $request->toArray();
-        $userInfo = Auth::user()->updateInfo($newInfo);
+        $userInfo = new UserResource(Auth::user()->updateInfo($newInfo));
         return self::customResponse('User with new info', $userInfo, 200);
     }
 

@@ -80,7 +80,7 @@ class Employee extends User
     public function updateEmployeeInfo(array $newInfo)
     {
         $this->setPersonalEmail($newInfo['personalEmail']);
-        return new EmployeeResource($this);
+        return $this;
     }
 
 

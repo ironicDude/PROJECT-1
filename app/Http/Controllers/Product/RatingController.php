@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Product\ProductOverviewResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -22,7 +23,7 @@ class RatingController extends Controller
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
         }
-        $product = $product->rate($request->rating);
+        $product = new ProductOverviewResource($product->rate($request->rating));
         return self::customResponse('Product rated', $product, 200);
     }
 
