@@ -27,4 +27,20 @@ class Purchase extends Model
         return $this->datedProducts()->sum('quantity');
     }
 
+
+
+    /**
+     * relationships
+     */
+
+    public function datedProducts()
+    {
+        return $this->hasMany(DatedProduct::class, 'purchase_id', 'id');
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
+    }
+
 }

@@ -38,13 +38,14 @@ class OrderController extends Controller
 
     public function getPrescriptions(Order $order)
     {
+        $this->authorize('viewPrescriptions', $order);
         $data = $order->viewPrescriptions();
         return response()->json(['files'=> $data]);
     }
 
-
     public function index(Request $request)
     {
+        $this->authorize('viewAll', Order::class);
         $validator = Validator::make($request->all(),
         [
             'date' => 'date'
