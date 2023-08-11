@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Order;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderFullCollection;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
@@ -27,7 +28,7 @@ class OrderController extends Controller
             return self::customResponse('errors', $validator->errors(), 422);
         }
         $orders = Order::getCustomerOrders($customer->id, $request->date);
-        return new OrderOverviewCollection($orders->paginate(10));
+        return new OrderFullCollection($orders->paginate(10));
     }
 
     public function show(Order $order)
@@ -55,6 +56,6 @@ class OrderController extends Controller
             return self::customResponse('errors', $validator->errors(), 422);
         }
         $orders = Order::getAllOrders($request->date);
-        return new OrderOverviewCollection($orders->paginate(10));
+        return new OrderFullCollection($orders->paginate(10));
     }
 }

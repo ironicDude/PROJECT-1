@@ -32,7 +32,7 @@ class Customer extends User
 
 
 
- 
+
     public function createCart()
     {
         $cart = Cart::firstOrNew(['id' => $this->id]);
@@ -109,6 +109,7 @@ class Customer extends User
                         'bastards' => $bastards
                     ]);
                 }
+                break;
             case 'year':
                 for ($i = 0; $i < 365; $i++) {
                     $start = Carbon::parse($date)->addDays($i);
@@ -126,6 +127,7 @@ class Customer extends User
                         'bastards' => $bastards
                     ]);
                 }
+                break;
         }
 
         return $points;

@@ -16,11 +16,12 @@ class OrderedProductResource extends JsonResource
     {
         return [
             'name' => $this->datedProduct->purchasedProduct->product->name,
-            'order_id' => $this->order_id,
+            'orderId' => $this->order_id,
             'id' => $this->id,
-            'product_id' => $this->datedProduct->product_id,
+            'productId' => $this->datedProduct->product_id,
             'quantity' => $this->quantity,
             'subtotal' => $this->subtotal,
+            'labeller' => $this->datedProduct->purchasedProduct->product->labeller,
         ];
     }
 }
