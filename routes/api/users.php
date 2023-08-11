@@ -119,7 +119,7 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
 
 Route::get('/restore', [UserController::class, 'restore'])
     ->name('user.restore')
-    ->middleware('signed');
+    ->middleware(['signed', 'throttle:6,1']);
 
 
 // Create a new Employee with hardcoded data (This is just a temporary route for testing or seeding purposes)

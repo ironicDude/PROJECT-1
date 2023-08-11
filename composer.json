@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.8",
         "meilisearch/meilisearch-php": "^1.2",
         "nanigans/single-table-inheritance": "~1.0",
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^7.2",
+        "spatie/laravel-backup": "^8.3"
     },
     "require-dev": {
         "andyabih/laravel-to-uml": "^1.0",
