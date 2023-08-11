@@ -23,4 +23,9 @@ class CustomerPolicy
     {
         return $user->isEmployee() && $user->isAdministrator();
     }
+
+    public function viewCustomersChart(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
 }
