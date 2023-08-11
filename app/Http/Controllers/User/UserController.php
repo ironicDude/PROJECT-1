@@ -277,27 +277,27 @@ class UserController extends Controller
     public function restore(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'email',
+            'email' => 'email|max:255|required',
         ]);
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
         }
-        $user = User::withTrashed()->where('email', $request->email)->first();
-        if(!$user){
-            throw new ModelNotFoundException();
-        }
         // $this->authorize('restore', $user);
         if (!$request->hasValidSignature()) {
             abort(401);
+        }
+        $user = User::withTrashed()->firstWhere('email', $request->email);
+        if(!$user){
+            throw new ModelNotFoundException();
         }
         try{
             $result = $user->restoreAccount();
         } catch(AccountPermanentlyDeletedException $e){
             return self::customResponse($e->getMessage(), null, 401);
         } catch(AccountAlreadyRestoredException $e){
-            return self::customResponse($e->getMessage(), null, 401);
+            return redirect()->intended(env('FRONTEND_URL').'?restored=1');
         }
-        return redirect()->intended(RouteServiceProvider::HOME.'?restored=1');
+        return redirect()->intended(env('FRONTEND_URL').'?restored=1');
     }
 
 }

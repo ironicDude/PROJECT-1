@@ -324,9 +324,9 @@ class User extends Authenticatable
 
     public function deleteSoftly()
     {
+        Auth::logout();
         $this->delete();
         $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['email' => $this->email]);
-        // $frontUrl = str_replace('localhost:8000', 'localhost:3000', $url);
         Mail::to($this)->send(new AccountDeleted($this, $url));
     }
 
@@ -335,8 +335,6 @@ class User extends Authenticatable
         if($this->deleted_at){
             if ($this->deleted_at->diffInDays(Carbon::now()) < 14) {
                 $this->restore();
-                Auth::logout();
-                return true;
             }
             else{
                 throw new AccountPermanentlyDeletedException('Your account has been deleted');
