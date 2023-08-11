@@ -326,8 +326,8 @@ class User extends Authenticatable
     {
         $this->delete();
         $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['email' => $this->email]);
-        $frontUrl = str_replace('localhost:8000', 'localhost:3000', $url);
-        Mail::to($this)->send(new AccountDeleted($this, $frontUrl));
+        // $frontUrl = str_replace('localhost:8000', 'localhost:3000', $url);
+        Mail::to($this)->send(new AccountDeleted($this, $url));
     }
 
     public function restoreAccount()

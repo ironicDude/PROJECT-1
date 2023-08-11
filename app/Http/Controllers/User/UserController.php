@@ -19,6 +19,7 @@ use App\Notifications\UserAccountStatusChangedNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use App\Policies\UserPolicy;
+use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -296,7 +297,7 @@ class UserController extends Controller
         } catch(AccountAlreadyRestoredException $e){
             return self::customResponse($e->getMessage(), null, 401);
         }
-        return self::customResponse('Your account has been restored', $result, 202);
+        return redirect()->intended(RouteServiceProvider::HOME.'?restored=1');
     }
 
 }

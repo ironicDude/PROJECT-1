@@ -31,8 +31,7 @@ class VerifyEmailController extends Controller
     {
         // Check if the user's email is already verified.
         if ($request->user()->hasVerifiedEmail()) {
-            // Return a JSON response indicating that the email is already verified.
-            return response()->json(['message' => 'Email already verified'], 409); // HTTP 409: Conflict.
+            return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
         }
 
         // Mark the user's email as verified in the database.
@@ -42,6 +41,6 @@ class VerifyEmailController extends Controller
         }
 
         // Return a JSON response indicating that the email has been verified.
-        return response()->json(['message' => 'Email verified'], 200);
+        return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
     }
 }
