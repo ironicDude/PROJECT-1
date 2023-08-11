@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Order;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\OrderFullCollection;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
+use App\Http\Resources\Order\OrderFullCollection;
 use App\Http\Resources\Order\OrderFullResource;
-use App\Http\Resources\Order\OrderOverviewCollection;
 use App\Models\Order;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +32,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $this->authorize('show', $order);
+        // $this->authorize('show', $order);
         return self::customResponse('Order returned', new OrderFullResource($order), 200);
     }
 
@@ -46,7 +45,7 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('viewAll', Order::class);
+        // $this->authorize('viewAll', Order::class);
         $validator = Validator::make($request->all(),
         [
             'date' => 'date'
