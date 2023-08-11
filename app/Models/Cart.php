@@ -253,7 +253,7 @@ class Cart extends Model
             $this->clear();
 
             // Send an email to the customer with the order details for review.
-            // Mail::to($customer)->send(new OrderUnderReview($order));
+            Mail::to($customer)->send(new OrderUnderReview($order));
         });
     }
 
