@@ -7,6 +7,7 @@ use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\JsonResponse;
@@ -272,9 +273,18 @@ class UserController extends Controller
         return self::customResponse('We are sorry to hear that you want to leave us. On the bright side, you can still restore your account if you log in within 14 days from now.', $user, 200);
     }
 
-    public function restore(Request $request, int $userId)
+    public function restore(Request $request)
     {
-        $user = User::withTrashed()->findOrFail($userId);
+        $validator = Validator::make($request->all(), [
+            'email' => 'email',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $user = User::withTrashed()->where('email', $request->email)->first();
+        if(!$user){
+            throw new ModelNotFoundException();
+        }
         // $this->authorize('restore', $user);
         if (!$request->hasValidSignature()) {
             abort(401);

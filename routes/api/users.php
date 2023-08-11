@@ -117,7 +117,7 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
 
 });
 
-Route::get('/restore/{user}', [UserController::class, 'restore'])
+Route::get('/restore', [UserController::class, 'restore'])
     ->name('user.restore')
     ->middleware('signed');
 

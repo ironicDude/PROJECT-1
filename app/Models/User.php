@@ -325,7 +325,7 @@ class User extends Authenticatable
     public function deleteSoftly()
     {
         $this->delete();
-        $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['user' => $this->id]);
+        $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['email' => $this->email]);
         $frontUrl = str_replace('localhost:8000', 'localhost:3000', $url);
         Mail::to($this)->send(new AccountDeleted($this, $frontUrl));
     }
@@ -363,6 +363,8 @@ class User extends Authenticatable
     {
         return $this->wishlistedProducts->contains($product);
     }
+
+
 
     /**
      * relationships
