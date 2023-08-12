@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Prescription;
 
 class Order extends Model
 {
@@ -214,7 +215,7 @@ class Order extends Model
 
      public function prescriptions()
      {
-        return $this->hasMany(Prescription::class, 'order_id', 'id');
+        return $this->hasMany(Prescription::class);
      }
 
      public function orderedProducts()

@@ -12,6 +12,9 @@ use App\Models\Order;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
+use Validator;
+
+
 class OrderController extends Controller
 {
     use CustomResponse;
@@ -53,4 +56,65 @@ class OrderController extends Controller
         $data = $order->viewPrescriptions();
         return response()->json(['files'=> $data]);
     }
+
+
+// Update And Delete Order
+public function update(Request $request , Order $order){
+    if ( $order->status == "Review") {  
+    $input = $request->all();
+    $validator = Validator::make($input , [
+        'shipping_fees'=>'required',
+        'delivery_fees'=>'required',
+        'shipping_address'=>'required',
+        'delivery_date'=>'required',
+        // 'total'=>'required',
+        // 'method'=>'required',
+        // 'datetime'=>'required',
+        // 'status'=>'required',
+    ]);
+
+    if ($validator->fails()){
+        return response()->json([
+            'message'=>'You Have Fill Some Data'
+        ]);
+    }
+
+    $order->shipping_fees = $input['shipping_fees'];
+    $order->delivery_date = $input['delivery_fees'];
+    $order->shipping_address = $input['shipping_address'];
+    $order->delivery_date = $input['delivery_date'];
+    // $order->total = $input['total'];
+    // $order->method = $input['method'];
+    // $order->datetime = $input['datetime'];
+    $order->status = $input['status'];
+    $order->save();
+
+    return response()->json([
+        'message'=>'Order Updated Successfully',
+        'Order'=>$input
+    ]);
+}
+else {
+    return response()->json([
+        'message'=>'Cant Edite That Order'
+    ]);
+}
+}
+
+public function destroy( Order $order){
+
+    if ( $order->status != "Review"){
+        return response()->json([
+            'message'=>'You Cant Delete That Order'
+        ]);
+    }else {
+        $order->delete();
+
+        return response()->json([
+            'message'=>'Order Deleted Successfully',
+
+        ]);
+    }
+
+}
 }

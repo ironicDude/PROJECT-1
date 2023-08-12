@@ -93,5 +93,9 @@ class Employee extends User
     public function orders()
     {
         return $this->hasMany(Order::class, 'order_id', 'id');
+    }    
+    public function schedules()
+    {
+        return $this->hasMany(Schedules::class);
     }
 }

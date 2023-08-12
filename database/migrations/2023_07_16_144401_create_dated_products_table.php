@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('purchase_price', 20, 2)->default(0);
             $table->decimal('discount', 3, 2)->nullable();
             $table->integer('quantity', false, true);
-            $table->decimal('purchase_price', 10, 2);
+            // $table->decimal('purchase_price', 10, 2);
             $table->date('expiry_date');
             $table->date('manufacturing_date')->nullable();
         });
