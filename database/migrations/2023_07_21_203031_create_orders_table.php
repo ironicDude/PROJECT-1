@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('status')->default('Review');
             $table->decimal('shipping_fees', 20, 2)->default(0);
             $table->decimal('delivery_fees', 20, 2)->default(0);
-            $table->string('shipping_address');
+            $table->string('shipping_address')->nullable();
             $table->string('method')->default('Online');
             $table->date('delivery_date')->nullable();
         });

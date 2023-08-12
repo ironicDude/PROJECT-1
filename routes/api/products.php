@@ -117,7 +117,7 @@ Route::delete('/cart/{cart}/prescriptions/delete', [CartController::class, 'dele
                 ->name('cart.prescriptions.delete');
 
 // Check if prescriptions are uploaded for the cart for the authenticated user
-Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkIfPrescriptionsAreAdded'])
+Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkForPrescriptions'])
                 ->name('cart.prescriptions.show');
 
 // stock levels feature

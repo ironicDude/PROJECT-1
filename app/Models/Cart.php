@@ -129,14 +129,9 @@ class Cart extends Model
         if($this->getPurchasedProductItems($product)->count() == 0) throw new ProductNotAddedException();
         DB::transaction(function () use ($product) {
             $this->deletePurchasedProductItems($product);
-            // If the last carted product is removed, delete the cart and any associated prescriptions.
             $this->load('cartedProducts');
             if ($this->cartedProducts->count() == 0) {
-                $this->cartedPrescriptions->each(function ($cartedPrescription) {
-                    // Delete the associated prescription file from the storage.
-                    Storage::disk('local')->delete($cartedPrescription->prescription);
-                    $cartedPrescription->delete();
-                });
+                $this->deletePrescriptions();
                 $this->delete();
             }
         });
@@ -436,7 +431,6 @@ class Cart extends Model
     public function deletePrescriptions()
     {
         $prescriptions = $this->cartedPrescriptions;
-        if($prescriptions->count() == 0) throw new NoPrescriptionsException('Cart has no prescriptions stored');
         foreach($prescriptions as $prescription)
         {
             Storage::disk('local')->delete($prescription->prescription);
@@ -450,7 +444,7 @@ class Cart extends Model
      *
      * @return bool True if there are prescriptions uploaded, false otherwise.
      */
-    public function checkIfPrescriptionsAreAdded()
+    public function checkForPrescriptions()
     {
         // Check if there are any carted prescriptions in the cart.
         return $this->cartedPrescriptions->count() > 0 ? true : false;
@@ -461,23 +455,18 @@ class Cart extends Model
     public function clear()
     {
         DB::transaction(function () {
-            // Delete all carted products associated with the cart.
-            $this->cartedProducts->each->delete();
+            $this->deleteProducts();
 
-            // Delete all carted prescriptions and their associated files from storage.
-            $cartedPrescriptions = $this->cartedPrescriptions;
+            $this->deletePrescriptions();
 
-            $cartedPrescriptions->each(function ($cartedPrescription) {
-                Storage::disk('local')->delete($cartedPrescription->prescription);
-                $cartedPrescription->delete();
-            });
-
-            // Delete the cart itself.
             $this->delete();
         });
     }
 
-
+    protected function deleteProducts()
+    {
+        $this->cartedProducts->each->delete();
+    }
     /**
      * Get the cart instance for displaying or further processing.
      *

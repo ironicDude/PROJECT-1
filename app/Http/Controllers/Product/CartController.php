@@ -57,7 +57,7 @@ class CartController extends Controller
         } catch (ProductAlreadyAddedException $e){
             return self::customResponse('Product already added. You can change its quantity.', null, 422);
         }
-        return self::customResponse('Item stored', $product, 200);
+        return self::customResponse('Product stored', $product, 200);
     }
 
     public function remove(Cart $cart, PurchasedProduct $purchasedProduct)
@@ -194,7 +194,7 @@ class CartController extends Controller
     }
 
 
-    public function checkIfPrescriptionsAreAdded(Cart $cart)
+    public function checkForPrescriptions(Cart $cart)
     {
         $this->authorize('manageCart', $cart);
         $status = $cart->checkPrescriptionsUpload();

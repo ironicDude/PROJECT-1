@@ -6,24 +6,17 @@ namespace App\Models;
 
 use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
-use App\Exceptions\AccountPermenantelyDeletedException;
-use App\Http\Resources\AllergyResource;
-use App\Http\Resources\Product\ProductOverviewCollection;
-use App\Http\Resources\User\AllergyCollection;
-use App\Http\Resources\User\UserResource;
-use App\Http\Resources\User\Wishlist\WishlistResource;
+
 use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Gender;
-use App\Models\AccountStatus;
+
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
 use Carbon\Carbon;
-use Database\Seeders\GenderSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
