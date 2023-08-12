@@ -98,4 +98,8 @@ class Employee extends User
     {
         return $this->hasMany(Schedules::class);
     }
+    public function user()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

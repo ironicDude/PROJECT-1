@@ -359,4 +359,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');
     }
+    public function employee_roles()
+    {
+        return $this->hasMany(User::class);
+    }
 }

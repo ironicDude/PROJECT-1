@@ -22,6 +22,7 @@ use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\Applicant_VacancyController;
 use App\Http\Controllers\SchedulesController;
+use App\Http\Controllers\RoleController;
 use App\Mail\StatusMail;
 use Illuminate\Support\Facades\Mail;
 
@@ -70,7 +71,7 @@ Route::post('/send-email-to-customer/{id}', function ($id, Request $request) {
 Route::resource('/applicant',ApplicantController::class);
 Route::resource('/employee',EmployeeController::class);
 Route::resource('/vacancy',VacancyController::class);
-Route::resource('/schedules/{id}',SchedulesController::class);
+// Route::resource('/schedules/{id}',SchedulesController::class);
 // Route::resource('/acceptEmployeeForVacancy',[ Applicant_VacancyController::class,'acceptEmployeeForVacancy']);
 Route::get('/getApplicantsForVacancy/{id}',[ Applicant_VacancyController::class,'getApplicantsForVacancy']);
 Route::post('/acceptApplicant/{applicantId}/{vacancyId}',[ Applicant_VacancyController::class,'acceptApplicant']);
@@ -78,7 +79,8 @@ Route::post('/applytojob',[ Applicant_VacancyController::class,'applytojob']);
 Route::post('/storeapplicantwithvacancyid/{id}',[ Applicant_VacancyController::class,'storeapplicantwithvacancyid']);//تقديم طلب توظيف لشاغر معين
 Route::get('/getapplicanttovacancy/{id}',[ Applicant_VacancyController::class,'getapplicanttovacancy']);// جلب جميع المتقدمين لوظيفة معينة
 Route::post('/changeApplicantStatus/{id}',[ Applicant_VacancyController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
-Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// قبول او رفض متقدم لوظيفة
+Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// اظافة موظف جديد
+Route::post('/assignRole',[ RoleController::class,'assignRole']);// تحديد ادوار للموظفين
 
 
 

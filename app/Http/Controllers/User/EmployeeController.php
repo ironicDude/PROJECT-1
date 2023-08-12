@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -96,5 +97,79 @@ class EmployeeController extends Controller
         return self::customResponse('Employee with new info', $employeeInfo, 200);
     }
 
+    // اظافة موظفين جدد
+    public function addEmployee(Request $request)
+    {
+        $validatedData = $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:employees,email',
+            'password' => 'required|string',
+            'address' => 'required|string',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'account_status' => 'required|string',
+            'salary' => 'required|numeric',
+            'personal_email' => 'required|email',
+            'date_of_joining' => 'required|date',
+        ]);
+    
+        // تخزين الصورة إذا تم تحميلها
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('employee_images', 'public');
+        }
+    
+        // إنشاء موظف جديد باستخدام البيانات المدخلة
+        // $employee = Employee::create([
+        //     'first_name' => $request->input('first_name'),
+        //     'last_name' => $request->input('last_name'),
+        //     'email' => $request->input('email'),
+        //     'password' => bcrypt($request->input('password')),
+        //     'address' => $request->input('address'),
+        //     'date_of_birth' => $request->input('date_of_birth'),
+        //     'gender' => $request->input('gender'),
+        //     'image' => $imagePath,
+        //     'account_status' => $request->input('account_status'),
+        //     'salary' => $request->input('salary'),
+        //     'personal_email' => $request->input('personal_email'),
+        //     'date_of_joining' => $request->input('date_of_joining'),
+        // ]);
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $address = $request->input('address');
+        $date_of_birth = $request->input('date_of_birth');
+        $gender = $request->input('gender');
+        $image = $request->input('image');
+        $account_status = $request->input('account_status');
+        $salary = $request->input('salary');
+        $personal_email = $request->input('personal_email');
+        $date_of_joining = $request->input('date_of_joining');
+    
+        $employee = new Employee();
+    
+        $employee->first_name = $first_name;
+        $employee->last_name = $last_name;
+        $employee->email = $email;
+        $employee->password = $password;
+        $employee->address = $address;
+        $employee->date_of_birth = $date_of_birth;
+        $employee->gender = $gender;
+        $employee->image = $image;
+        $employee->account_status = $account_status;
+        $employee->salary = $salary;
+        $employee->personal_email = $personal_email;
+        $employee->date_of_joining = $date_of_joining;
+        $employee->save();
+    
+        return response()->json([
+            'success'=>'تمت إضافة الموظف بنجاح.',
+        ]);
+    }
+    
+    
 
 }
