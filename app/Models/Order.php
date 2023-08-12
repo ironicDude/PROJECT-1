@@ -24,39 +24,12 @@ use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 class Order extends Model
 {
     use HasFactory;
-    // use SingleTableInheritanceTrait;
-
-    // protected $table = 'orders';
-    // protected static $singleTableTypeField = 'method';
-    // protected static $singleTableSubclasses = [InStoreOrder::class];
-    // protected static $persisted = [
-    //     'id',
-    //     'created_at',
-    //     'updated_at',
-    //     'status',
-    //     'shipping_fees',
-    //     'method',
-    //     'delivery_date',
-    //     'employee_id',
-    //     'customer_id',
-    //     'delivery_fees',
-    //     'shipping_address',
-    // ];
-    protected $fillable = [
-        'customer_id',
-        'total',
-        'shipping_fees',
-        'shipping_address',
-        'quantity',
-        'method',
-        'status',
-    ];
 
     public static function getCustomerOrders(int $customerId, string $date = null)
     {
-        $orders = Order::all();
+        $orders = Order::where('customer_id', $customerId);
         if($date){
-            $orders = $orders->whereDate('created_at', $date);
+            $orders = $orders->where('created_at', $date);
         }
         return $orders;
     }
