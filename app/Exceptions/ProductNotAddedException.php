@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class ItemAlreadyInCartException extends Exception
+class ProductNotAddedException extends Exception
 {
     //
 }

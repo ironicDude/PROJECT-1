@@ -53,7 +53,7 @@ Route::get('/search/names', [ProductController::class, 'searchNames'])
                 ->name('product.name.search');
 
 Route::middleware(['auth', 'forceLogout'])->group(function() {
-    
+
 // allergy
 // Toggle allergy status of a product for the authenticated user
 Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
@@ -117,7 +117,7 @@ Route::delete('/cart/{cart}/prescriptions/delete', [CartController::class, 'dele
                 ->name('cart.prescriptions.delete');
 
 // Check if prescriptions are uploaded for the cart for the authenticated user
-Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkPrescriptionsUpload'])
+Route::get('/cart/{cart}/prescriptions/show', [CartController::class, 'checkIfPrescriptionsAreAdded'])
                 ->name('cart.prescriptions.show');
 
 // stock levels feature

@@ -2,40 +2,27 @@
 
 namespace App\Models;
 
-use App\Events\MinimumStockLevelExceeded;
-use App\Exceptions\CheckoutOutOfStockException;
-use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
 use App\Exceptions\ItemAlreadyInCartException;
 use App\Exceptions\ItemNotInCartException;
-use App\Exceptions\LimitedStockException;
 use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\NotEnoughMoneyException;
-use App\Exceptions\NotEnoutMoneyException;
 use App\Exceptions\NullAddressException;
-use App\Exceptions\NullQuantityException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
+use App\Exceptions\ProductAlreadyInCartException;
+use App\Exceptions\ProductNotAddedException;
 use App\Exceptions\QuantityExceededOrderLimitException;
-use App\Exceptions\SameQuantityException;
-use App\Exceptions\UnprocessableQuantityException;
-use App\Http\Resources\Cart\CartResource;
-use App\Http\Resources\CartedProductResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use App\Http\Resources\CustomResponse;
-use App\Http\Resources\PurchasedProductResource;
 use App\Mail\OrderUnderReview;
-use App\Notifications\MinimumStockLevelExceededNotification;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\ItemNotFoundException;
 
 class Cart extends Model
 {
@@ -49,19 +36,19 @@ class Cart extends Model
     ];
 
 
-    public function addItem(PurchasedProduct $product, int $quantity)
+    public function addProduct(PurchasedProduct $product, int $quantity)
     {
         DB::transaction(function () use ($product, $quantity) {
 
-            if ($this->getPurchasedProductcartedProducts($product)->count() > 0) {
-                throw new ItemAlreadyInCartException();
+            if ($this->getPurchasedProductItems($product)->count() > 0) {
+                throw new ProductAlreadyInCartException();
             }
 
             $this->validateStock($product, $quantity);
 
             $itemsData = $this->chooseItems($product, $quantity);
 
-            $this->createCartedProducts($itemsData);
+            $this->createItems($itemsData);
         });
     }
 
@@ -91,7 +78,7 @@ class Cart extends Model
     {
         $productName = $product->getName();
         $this->updateQuantity($product, $quantity);
-        throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to {$quantity}, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the item from the cart");
+        throw new InShortageException("Unfortunately, {$productName} is in shortage. We modified its quantity in your cart to {$quantity}, which is as high as we can offer at the moment. If you don't prefer a partial fulfillment, you can press delete to remove the product from the cart");
     }
 
     protected function chooseItems(PurchasedProduct $product, int $quantity)
@@ -121,7 +108,7 @@ class Cart extends Model
         ];
     }
 
-    protected function createCartedProducts(array $itemsData)
+    protected function createItems(array $itemsData)
     {
         $items = $itemsData['items'];
         $quantities = $itemsData['quantities'];
@@ -137,11 +124,11 @@ class Cart extends Model
             $counter++;
         }
     }
-    public function removeItem(PurchasedProduct $product)
+    public function removeProduct(PurchasedProduct $product)
     {
-        if($this->getPurchasedProductcartedProducts($product)->count() == 0) throw new ItemNotInCartException();
+        if($this->getPurchasedProductItems($product)->count() == 0) throw new ProductNotAddedException();
         DB::transaction(function () use ($product) {
-            $this->deletePurchasedProductCartedProducts($product);
+            $this->deletePurchasedProductItems($product);
             // If the last carted product is removed, delete the cart and any associated prescriptions.
             $this->load('cartedProducts');
             if ($this->cartedProducts->count() == 0) {
@@ -158,20 +145,20 @@ class Cart extends Model
 
     public function updateQuantity(PurchasedProduct $product, int $newQuantity)
     {
-        $this->deletePurchasedProductCartedProducts($product);
+        $this->deletePurchasedProductItems($product);
         $this->load('cartedProducts');
         // dd($this->cartedProducts);
-        $this->addItem($product, $newQuantity);
+        $this->addProduct($product, $newQuantity);
         return $newQuantity;
     }
 
-    protected function getPurchasedProductcartedProducts(PurchasedProduct $product)
+    protected function getPurchasedProductItems(PurchasedProduct $product)
     {
         $datedProductIds = $product->datedProducts->pluck('id');
         return $this->cartedProducts->whereIn('dated_product_id', $datedProductIds);
     }
 
-    protected function deletePurchasedProductCartedProducts(PurchasedProduct $product)
+    protected function deletePurchasedProductItems(PurchasedProduct $product)
     {
         $datedProductIds = $product->datedProducts->pluck('id');
         $this->cartedProducts->whereIn('dated_product_id', $datedProductIds)->each->delete();
@@ -463,7 +450,7 @@ class Cart extends Model
      *
      * @return bool True if there are prescriptions uploaded, false otherwise.
      */
-    public function checkPrescriptionsUpload()
+    public function checkIfPrescriptionsAreAdded()
     {
         // Check if there are any carted prescriptions in the cart.
         return $this->cartedPrescriptions->count() > 0 ? true : false;

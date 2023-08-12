@@ -18,7 +18,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    storage_path('app')
                 ],
 
                 /*
@@ -116,7 +116,7 @@ return [
              * The disk names on which the backups will be stored.
              */
             'disks' => [
-                'local',
+                'db-backups',
             ],
         ],
 
@@ -185,33 +185,33 @@ return [
             ],
         ],
 
-        'slack' => [
-            'webhook_url' => '',
+        // 'slack' => [
+        //     'webhook_url' => '',
 
-            /*
-             * If this is set to null the default channel of the webhook will be used.
-             */
-            'channel' => null,
+        //     /*
+        //      * If this is set to null the default channel of the webhook will be used.
+        //      */
+        //     'channel' => null,
 
-            'username' => null,
+        //     'username' => null,
 
-            'icon' => null,
+        //     'icon' => null,
 
-        ],
+        // ],
 
-        'discord' => [
-            'webhook_url' => '',
+        // 'discord' => [
+        //     'webhook_url' => '',
 
-            /*
-             * If this is an empty string, the name field on the webhook will be used.
-             */
-            'username' => '',
+        //     /*
+        //      * If this is an empty string, the name field on the webhook will be used.
+        //      */
+        //     'username' => '',
 
-            /*
-             * If this is an empty string, the avatar on the webhook will be used.
-             */
-            'avatar_url' => '',
-        ],
+        //     /*
+        //      * If this is an empty string, the avatar on the webhook will be used.
+        //      */
+        //     'avatar_url' => '',
+        // ],
     ],
 
     /*
