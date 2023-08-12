@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'forceLogout'])->group(function () {
 
-Route::get('customer/{customer}', [OrderController::class, 'getCustomerOrders'])
+Route::get('/customers/{customer}', [OrderController::class, 'getCustomerOrders'])
 ->name('customer.orders.get');
 
 Route::get('{order}', [OrderController::class, 'show'])

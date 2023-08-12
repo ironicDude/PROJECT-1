@@ -18,7 +18,7 @@ class OrderController extends Controller
     use CustomResponse;
     public function getCustomerOrders(Customer $customer, Request $request)
     {
-        $this->authorize('viewOrders', $customer);
+        // $this->authorize('viewCustomerOrders', $customer);
         $validator = Validator::make($request->all(),
         [
             'date' => 'date'

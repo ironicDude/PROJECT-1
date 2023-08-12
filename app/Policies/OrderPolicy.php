@@ -11,6 +11,10 @@ class OrderPolicy
     {
         return $user->isEmployee() || ($user->isCustomer() && $user->id === $order->customer_id);
     }
+    public function viewCustomerOrders(User $user, Order $order)
+    {
+        return $user->isEmployee() || ($user->isCustomer() && $user->id === $order->customer_id);
+    }
 
     public function viewRevenue(User $user)
     {
