@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('quantity', false, true);
             $table->date('expiry_date');
             $table->date('manufacturing_date')->nullable();
+            
         });
     }
 
