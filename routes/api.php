@@ -16,13 +16,15 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Schedule;
 use App\Http\Controllers\PresciptionController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\Applicant_VacancyController;
-use App\Http\Controllers\SchedulesController;
+// use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ScheduleController;
 use App\Mail\StatusMail;
 use Illuminate\Support\Facades\Mail;
 
@@ -79,8 +81,12 @@ Route::post('/applytojob',[ Applicant_VacancyController::class,'applytojob']);
 Route::post('/storeapplicantwithvacancyid/{id}',[ Applicant_VacancyController::class,'storeapplicantwithvacancyid']);//تقديم طلب توظيف لشاغر معين
 Route::get('/getapplicanttovacancy/{id}',[ Applicant_VacancyController::class,'getapplicanttovacancy']);// جلب جميع المتقدمين لوظيفة معينة
 Route::post('/changeApplicantStatus/{id}',[ Applicant_VacancyController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
-Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// اظافة موظف جديد
+// Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// اظافة موظف جديد
+Route::resource('/employee', EmployeeController::class);//  اظافة موظف جديد وتعديل بياناته وحذف موظف
 Route::post('/assignRole',[ RoleController::class,'assignRole']);// تحديد ادوار للموظفين
+Route::resource('/schedule',ScheduleController::class);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::post('/updateMultipleSchedules',[ScheduleController::class,'updateMultipleSchedules']);// تعيين نفس اوقات دوام لعدة موظفين
+
 
 
 

@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
-class Schedules extends Model
+class Schedule extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'employee_id', 'day', 'start_time','end_time'
+        'scheduler_id','employee_id', 'day', 'start_time','end_time'
     ];
-    public function employee()
+    public function user()
     {
-        return $this->belongs(Employee::class);
+        return $this->belongsToMany(User::class);
     }
 }

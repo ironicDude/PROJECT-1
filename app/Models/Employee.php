@@ -96,7 +96,7 @@ class Employee extends User
     }    
     public function schedules()
     {
-        return $this->hasMany(Schedules::class);
+        return $this->hasMany(Schedule::class);
     }
     public function user()
     {

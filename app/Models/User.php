@@ -20,6 +20,7 @@ use App\Models\AccountStatus;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use App\Models\Schedule;
 use Carbon\Carbon;
 use Database\Seeders\GenderSeeder;
 use Illuminate\Http\UploadedFile;
@@ -362,5 +363,9 @@ class User extends Authenticatable
     public function employee_roles()
     {
         return $this->hasMany(User::class);
+    }
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }

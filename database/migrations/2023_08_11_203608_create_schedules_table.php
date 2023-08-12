@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('scheduler_id');
             $table->unsignedBigInteger('employee_id');
             $table->time('start_time');
             $table->time('end_time');
             $table->string('day', 20);
             $table->timestamps();
-
-            $table->foreign('employee_id')->references('id')->on('employee_role')->onDelete('cascade');
+            $table->foreign('scheduler_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
