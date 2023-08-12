@@ -10,6 +10,7 @@ use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
+use App\Exceptions\ProductAlreadyAddedException;
 use App\Exceptions\ProductAlreadyInCartException;
 use App\Exceptions\ProductNotAddedException;
 use App\Exceptions\QuantityExceededOrderLimitException;
@@ -41,7 +42,7 @@ class Cart extends Model
         DB::transaction(function () use ($product, $quantity) {
 
             if ($this->getPurchasedProductItems($product)->count() > 0) {
-                throw new ProductAlreadyInCartException();
+                throw new ProductAlreadyAddedException();
             }
 
             $this->validateStock($product, $quantity);
@@ -279,7 +280,7 @@ class Cart extends Model
         }
 
         // If there are prescription products in the cart but no prescriptions uploaded, throw an exception.
-        if ($this->checkPrescriptionsUpload() == false && $containsPrescriptionProducts) {
+        if ($this->checkForPrescriptions() == false && $containsPrescriptionProducts) {
             throw new PrescriptionRequiredException();
         }
 
@@ -316,7 +317,7 @@ class Cart extends Model
                 // Check if there is enough stock before updating quantities
                 $purchasedProduct = $cartedProduct->datedProduct->purchasedProduct;
                 if (!in_array($purchasedProduct, $purchasedProducts)) {
-                    $quantityInCart = $this->getPurchasedProductcartedProducts($purchasedProduct)->sum('quantity');
+                    $quantityInCart = $this->getPurchasedProductItems($purchasedProduct)->sum('quantity');
                     $this->validateStock($purchasedProduct, $quantityInCart);
                 }
                 $cartedProduct->datedProduct()->decrement('quantity', $cartedProduct->quantity);

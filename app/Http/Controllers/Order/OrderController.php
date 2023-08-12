@@ -27,7 +27,7 @@ class OrderController extends Controller
             return self::customResponse('errors', $validator->errors(), 422);
         }
         $orders = Order::getCustomerOrders($customer->id, $request->date);
-        return new OrderFullCollection($orders->paginate(10));
+        return $orders;
     }
 
     public function show(Order $order)
