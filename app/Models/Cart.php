@@ -341,7 +341,7 @@ class Cart extends Model
     {
 
         // Create a new order entry in the database.
-        $order = Order::create([
+        $order = OnlineOrder::create([
             'customer_id' => $this->customer->id,
             'shipping_fees' => !$this->shipping_fees ? 0 : $this->shipping_fees,
             'shipping_address' => !$this->address ? 'Damascus' : $this->address,

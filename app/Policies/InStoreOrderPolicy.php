@@ -7,7 +7,7 @@ use App\Models\User;
 
 class InStoreOrderPolicy
 {
-   public function createInStoreOrder(User $user, InStoreOrder $inStoreOrder)
+   public function createInStoreOrder(User $user)
    {
         return $user->isEmployee();
    }

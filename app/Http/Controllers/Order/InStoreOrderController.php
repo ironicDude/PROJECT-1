@@ -30,10 +30,9 @@ class InStoreOrderController extends Controller
 
     public function addNewOrder()
     {
-        $this->authorize('manageInStoreOrder', InStoreOrder::class);
+        $this->authorize('createInStoreOrder', InStoreOrder::class);
         $order = InStoreOrder::create([
             'status' => 'Progressing',
-            'method' => 'storely',
             'employee_id' => Auth::user()->id,
         ]);
         return self::customResponse('order created', new OrderFullResource($order), 200);

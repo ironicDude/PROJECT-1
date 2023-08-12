@@ -21,9 +21,9 @@ use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 class InStoreOrder extends Order
 {
     use HasFactory;
-    // use SingleTableInheritanceTrait;
-    // protected static $singleTableType = 'storely';
-    // protected static $persisted = [];
+    use SingleTableInheritanceTrait;
+    protected static $singleTableType = 'Storely';
+    protected static $persisted = [];
 
 
     public function addProduct(PurchasedProduct $product, int $quantity)
