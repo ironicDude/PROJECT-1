@@ -38,6 +38,10 @@ class AuthServiceProvider extends ServiceProvider
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });
 
+        Gate::define('backup', function (User $user) {
+            return $user->isEmployee() && $user->isAdministrator();
+        });
+
         // Gate::define('activateOrDeactivate', function (User $user, User $toBeToggledUser) {
         //     return $user->isAdministrator() && !$toBeToggledUser->isAdministrator()
         //         ? true

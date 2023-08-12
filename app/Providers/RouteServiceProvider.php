@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\PurchasedProduct;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -60,7 +61,15 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('api')
                 ->prefix('api/orders')
-                ->group(base_path('routes/api/orders.php'));
+                ->group(base_path('routes/api/Order/Orders.php'));
+
+            Route::middleware('api')
+                ->prefix('api/orders/in-store-orders')
+                ->group(base_path('routes/api/Order/InStoreOrders.php'));
+
+            Route::middleware('api')
+                ->prefix('api/orders/cart')
+                ->group(base_path('routes/api/Order/Cart.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
@@ -68,6 +77,10 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::model('user_id', User::class, function ($value) {
             return User::where('id', $value)->firstOrFail();
+        });
+
+        Route::model('purchasedProduct', PurchasedProduct::class, function ($value) {
+            return PurchasedProduct::where('id', $value)->firstOrFail();
         });
     }
 }

@@ -56,6 +56,11 @@ return [
             'throw' => false,
         ],
 
+        'db-backups' => [
+            'driver' => 'local',
+            'root' => 'C:\Programming\Laravel\backup',
+        ],
+
     ],
 
     /*
@@ -71,6 +76,13 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+    ],
+
+
+
+    'backups' => [
+        'driver' => 'local',
+        'root' => 'C:\Programming\Laravel\backup',
     ],
 
 ];

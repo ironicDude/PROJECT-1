@@ -2,14 +2,46 @@
 
 namespace App\Models;
 
+use App\Events\MinimumStockLevelExceeded;
+use App\Exceptions\InShortageException;
+use App\Exceptions\NoPrescriptionsException;
+use App\Exceptions\OutOfStockException;
+use App\Exceptions\PrescriptionRequiredException;
+use App\Exceptions\ProductAlreadyAddedException;
+use App\Exceptions\ProductNotAddedException;
+use App\Exceptions\QuantityExceededOrderLimitException;
+use App\Notifications\MinimumStockLevelExceededNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 
 class Order extends Model
 {
     use HasFactory;
+    use SingleTableInheritanceTrait;
 
+    protected $table = 'orders';
+    protected static $singleTableTypeField = 'method';
+    protected static $singleTableSubclasses = [InStoreOrder::class];
+    protected static $persisted = [
+        'id',
+        'created_at',
+        'updated_at',
+        'status',
+        'shipping_fees',
+        'method',
+        'delivery_date',
+        'employee_id',
+        'customer_id',
+        'delivery_fees',
+        'shipping_address',
+    ];
     protected $fillable = [
         'customer_id',
         'total',
@@ -63,9 +95,6 @@ class Order extends Model
                 $data[] = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContents}", 'UTF-8');
             }
         }
-        // $fileFullPaths = array_map(function($path){
-        //     return "C:\Programming\Laravel\PROJECT-1\storage\app\\{$path}";
-        // }, $filePaths);
         return $data;
     }
 
@@ -221,9 +250,6 @@ class Order extends Model
 
         return $points;
     }
-
-
-
 
     /**
      * relationships
