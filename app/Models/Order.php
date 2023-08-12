@@ -24,6 +24,15 @@ use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 class Order extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'customer_id',
+        'total',
+        'shipping_fees',
+        'shipping_address',
+        'quantity',
+        'method',
+        'status',
+    ];
 
     public static function getCustomerOrders(int $customerId, string $date = null)
     {
