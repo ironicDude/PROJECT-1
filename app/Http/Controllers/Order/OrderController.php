@@ -63,14 +63,7 @@ public function update(Request $request , Order $order){
     if ( $order->status == "Review") {  
     $input = $request->all();
     $validator = Validator::make($input , [
-        'shipping_fees'=>'required',
-        'delivery_fees'=>'required',
         'shipping_address'=>'required',
-        'delivery_date'=>'required',
-        // 'total'=>'required',
-        // 'method'=>'required',
-        // 'datetime'=>'required',
-        // 'status'=>'required',
     ]);
 
     if ($validator->fails()){
@@ -78,16 +71,9 @@ public function update(Request $request , Order $order){
             'message'=>'You Have Fill Some Data'
         ]);
     }
-
-    $order->shipping_fees = $input['shipping_fees'];
-    $order->delivery_date = $input['delivery_fees'];
+ 
     $order->shipping_address = $input['shipping_address'];
-    $order->delivery_date = $input['delivery_date'];
-    // $order->total = $input['total'];
-    // $order->method = $input['method'];
-    // $order->datetime = $input['datetime'];
-    $order->status = $input['status'];
-    $order->save();
+ 
 
     return response()->json([
         'message'=>'Order Updated Successfully',
