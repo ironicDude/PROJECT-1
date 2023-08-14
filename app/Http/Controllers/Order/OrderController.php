@@ -45,6 +45,21 @@ class OrderController extends Controller
         return response()->json(['files'=> $data]);
     }
 
+    public function index(Request $request)
+    {
+        // $this->authorize('viewAll', Order::class);
+        $validator = Validator::make($request->all(),
+        [
+            'date' => 'date'
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $orders = Order::getAllOrders($request->date);
+        return new OrderFullCollection($orders->paginate(10));
+    }
+
 
 // Update And Delete Order
 public function update(Request $request , Order $order){
@@ -91,21 +106,6 @@ public function destroy( Order $order){
     }
 }
 
-
-    public function index(Request $request)
-    {
-        // $this->authorize('viewAll', Order::class);
-        $validator = Validator::make($request->all(),
-        [
-            'date' => 'date'
-        ]);
-
-        if($validator->fails()){
-            return self::customResponse('errors', $validator->errors(), 422);
-        }
-        $orders = Order::getAllOrders($request->date);
-        return new OrderFullCollection($orders->paginate(10));
-    }
 
 }
 

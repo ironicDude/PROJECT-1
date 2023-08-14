@@ -50,7 +50,7 @@ Route::resource('prescription',PresciptionController::class);
 Route::post('update/{id}',[PresciptionController::class,'update']);
 Route::post('/send-email-to-customer/{id}', function ($id, Request $request) {
     $customer = Customer::find($id);
-    
+
     if (!$customer) {
         return "الزبون غير موجود.";
     }
@@ -85,12 +85,12 @@ Route::post('/changeApplicantStatus/{id}',[ Applicant_VacancyController::class,'
 // Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// اظافة موظف جديد
 Route::resource('/employee', EmployeeController::class);//  اظافة موظف جديد وتعديل بياناته وحذف موظف
 Route::post('/assignRole',[ RoleController::class,'assignRole']);// تحديد ادوار للموظفين
-Route::resource('/schedule',ScheduleController::class);// تحديد اوقات الدوام وتعديلها وحذفها    
+Route::resource('/schedule',ScheduleController::class);// تحديد اوقات الدوام وتعديلها وحذفها
 Route::post('/updateMultipleSchedules',[ScheduleController::class,'updateMultipleSchedules']);// تعيين نفس اوقات دوام لعدة موظفين
-Route::resource('/orderd_product',Orderd_ProductsController::class);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::post('/create_orderd_product/{id}',[Orderd_ProductsController::class,'create_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::put('/update_orderd_product/{id}',[Orderd_ProductsController::class,'update_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'deleteByDatedProductId']);// تحديد اوقات الدوام وتعديلها وحذفها    
+Route::resource('/orderd_product',Orderd_ProductsController::class);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::post('/create_orderd_product/{id}',[Orderd_ProductsController::class,'create_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::put('/update_orderd_product/{id}',[Orderd_ProductsController::class,'update_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'deleteByDatedProductId']);// تحديد اوقات الدوام وتعديلها وحذفها
 
 
 
