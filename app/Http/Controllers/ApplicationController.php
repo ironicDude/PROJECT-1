@@ -16,31 +16,13 @@ class ApplicationController extends Controller
 
 public function getApplicantsForVacancy($vacancyId)
 {
-    // $vacancy = Vacancy::findOrFail($vacancyId);
     $applicants = Application::where('vacancy_id', $vacancyId)->get();
-    // $applicants = $vacancy->applicants;
 
     return response()->json([
                 'Applicants' =>  $applicants
             ]);
 }
 
-// public function applyForVacancy($applicantId, $vacancyId)
-// {
-//     $applicant = Applicant::find($applicantId);
-//     $vacancy = Vacancy::find($vacancyId);
-
-//     if (!$applicant || !$vacancy) {
-//         return "المتقدم أو الشاغر غير موجود.";
-//     }
-
-//     $applicant->vacancies()->attach($vacancyId, [
-//         'dateTime' => now(),
-//         'status' => 'Pending',
-//     ]);
-
-//     return "تم تقديم طلبك بنجاح.";
-// }
 public function acceptApplicant($vacancyId, $applicantId)
 {
     $vacancy = Vacancy::find($vacancyId);
@@ -60,9 +42,7 @@ public function acceptApplicant($vacancyId, $applicantId)
         'applicant'=>  $applicant,
 
     ]);
-    // $vacancy->applicants()->updateExistingPivot($applicantId, ['status' => 'مقبول']);
 
-    // return "تم قبول المتقدم بنجاح.";
 }
 public function applytojob(Request $request)
 {
@@ -95,13 +75,6 @@ public function applytojob(Request $request)
     $applicant_vacancy->applicant_id = $applicant_id ;
     $applicant_vacancy->vacancy_id  = $vacancy_id ;
     $applicant_vacancy->save();
-
-    // $applicant_id = $applicantId;
-    // $vanacy_id = $vacancyId;
-
-    // $vacancy = Vacancy::findOrFail($vacancyId);
-    // $applicant = Applicant::findOrFail($applicantId);
-
 
     // قم بتحديث حقل العمود الخاص بموظف الشاغر المقبول في جدول الشواغر
     // قم بإرجاع رسالة استجابة توضح نجاح عملية القبول
