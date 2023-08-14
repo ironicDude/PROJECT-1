@@ -95,6 +95,14 @@ class Employee extends User
     public function orders()
     {
         return $this->hasMany(Order::class, 'order_id', 'id');
+    }    
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+    public function user()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     public function purchases()

@@ -16,6 +16,8 @@ use Laravel\Sanctum\HasApiTokens;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use App\Models\Applicant;
+use App\Models\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +35,9 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected static $singleTableTypeField = 'type';
-    protected static $singleTableSubclasses = [Employee::class, Customer::class];
+    // protected static $singleTableSubclasses = [Employee::class, Customer::class];
+    protected static $singleTableSubclasses = [Employee::class, Customer::class ,Applicant::class];
+
     protected static $persisted = [
         'first_name',
         'last_name',
@@ -373,5 +377,13 @@ class User extends Authenticatable
     public function allergies()
     {
         return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');
+    }
+    public function employee_roles()
+    {
+        return $this->hasMany(User::class);
+    }
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }

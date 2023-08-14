@@ -13,6 +13,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+use Validator;
+
+
 class OrderController extends Controller
 {
     use CustomResponse;
@@ -43,6 +46,52 @@ class OrderController extends Controller
         return response()->json(['files'=> $data]);
     }
 
+
+// Update And Delete Order
+public function update(Request $request , Order $order){
+    if ( $order->status == "Review") {  
+    $input = $request->all();
+    $validator = Validator::make($input , [
+        'shipping_address'=>'required',
+    ]);
+
+    if ($validator->fails()){
+        return response()->json([
+            'message'=>'You Have Fill Some Data'
+        ]);
+    }
+ 
+    $order->shipping_address = $input['shipping_address'];
+ 
+
+    return response()->json([
+        'message'=>'Order Updated Successfully',
+        'Order'=>$input
+    ]);
+}
+else {
+    return response()->json([
+        'message'=>'Cant Edite That Order'
+    ]);
+}
+}
+
+public function destroy( Order $order){
+
+    if ( $order->status != "Review"){
+        return response()->json([
+            'message'=>'You Cant Delete That Order'
+        ]);
+    }else {
+        $order->delete();
+
+        return response()->json([
+            'message'=>'Order Deleted Successfully',
+
+        ]);
+    }
+
+
     public function index(Request $request)
     {
         // $this->authorize('viewAll', Order::class);
@@ -57,4 +106,6 @@ class OrderController extends Controller
         $orders = Order::getAllOrders($request->date);
         return new OrderFullCollection($orders->paginate(10));
     }
+
+}
 }

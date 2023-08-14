@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('order_id')->constrained('orders', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('prescription');
+            $table->string('image');
+            $table->string('path');
+            $table->unsignedBigInteger('order_id')->nullable()->default(null);
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            // $table->foreignId('order_id')->constrained('orders', 'id')->cascadeOnDelete()->cascadeOnUpdate()->default(null);
+            // $table->string('prescription');
         });
     }
 
