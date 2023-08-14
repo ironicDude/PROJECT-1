@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Role;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
+
 class Employee extends User
 {
     use SingleTableInheritanceTrait;
     use HasFactory;
+    
     protected static $singleTableType = 'employee';
     protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
     protected $fillable = [

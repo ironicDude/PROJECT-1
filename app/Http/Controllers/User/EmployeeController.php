@@ -122,7 +122,7 @@ class EmployeeController extends Controller
         $validatedData = $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|email|unique:employees,email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string',
             'address' => 'required|string',
             'date_of_birth' => 'required|date',
@@ -153,7 +153,7 @@ class EmployeeController extends Controller
         $personal_email = $request->input('personal_email');
         $date_of_joining = $request->input('date_of_joining');
     
-        $employee = new Employee();
+        $employee = new User();
     
         $employee->first_name = $first_name;
         $employee->last_name = $last_name;

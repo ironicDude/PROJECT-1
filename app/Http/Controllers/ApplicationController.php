@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vacancy;
 use App\Models\Applicant;
-use App\Models\Applicant_Vacancy;
 use App\Mail\ApplicantMail;
 use App\Mail\RejectMail;
 use App\Mail\AcceptMail;
@@ -92,7 +91,7 @@ public function applytojob(Request $request)
     $jobApplication->address = $address;
     $jobApplication->resume = $resumePath;
     $jobApplication->save();
-    $applicant_vacancy = new Applicant_Vacancy();
+    $applicant_vacancy = new Application();
     $applicant_vacancy->applicant_id = $applicant_id ;
     $applicant_vacancy->vacancy_id  = $vacancy_id ;
     $applicant_vacancy->save();
@@ -204,17 +203,19 @@ public function changeApplicantStatus(Request $request,$id)
                     'vacancy_id'=> $vacancy_id,
                     'تم قبول المتقدم .'
                 ]);
+                $response->header('Accept', '*/*');
             }else {
                 $vacancy_id->status = 'غير متاح';
                 $vacancy_id->save();
                 return response()->json('لا يوجد شواغر عذرا .');
                }
-
-        } elseif ($status == 'rejected') {
-            $applicant->status = 'مرفوض';
-            $applicant->save();
-            // Mail::to($applicant->email)->send(new RejectMail());
-            return response()->json('تم رفض المتقدم .');
+               
+            } elseif ($status == 'rejected') {
+                $applicant->status = 'مرفوض';
+                $applicant->save();
+                // Mail::to($applicant->email)->send(new RejectMail());
+                return response()->json('تم رفض المتقدم .');
+                $response->header('Accept', '*/*');
         } else {
             return response()->json('حالة غير صالحة.');
         }
