@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\MinimumStockLevelExceeded;
 use App\Exceptions\InShortageException;
 use App\Exceptions\ItemAlreadyInCartException;
 use App\Exceptions\ItemNotInCartException;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
 use App\Mail\OrderUnderReview;
+use App\Notifications\MinimumStockLevelExceededNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -325,8 +327,8 @@ class Cart extends Model
                 if($purchasedProduct->getQuantity() < $purchasedProduct->getMinimumStockLevel()){
                     $inventoryManager = Employee::whereRelation('roles','role', 'inventory manager')->first();
                     $admin = Employee::whereRelation('roles','role', 'administrator')->first();
-                    // event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
-                    // $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
+                    event(new MinimumStockLevelExceeded($purchasedProduct, $inventoryManager, $admin));
+                    $admin->notify(new MinimumStockLevelExceededNotification($purchasedProduct));
                 }
             }
         });

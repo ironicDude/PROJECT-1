@@ -67,5 +67,7 @@ class Kernel extends HttpKernel
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         'forceLogout' => \App\Http\Middleware\CheckForceLogout::class,
         'checkForPaidOrders' => \App\Http\Middleware\CheckForPaidOrders::class,
+        'checkForModifiableOnlineOrder' => \App\Http\Middleware\CheckForModifiableOnlineOrder::class,
+
     ];
 }
