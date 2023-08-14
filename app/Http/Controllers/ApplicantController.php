@@ -60,7 +60,7 @@ public function show($id)
     $jobApplication->resume = $resumePath;
     $jobApplication->save();
 
-    
+
         $validatedData = $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -75,13 +75,13 @@ public function show($id)
             // 'personal_email' => 'required|email',
             // 'date_of_joining' => 'required|date',
         ]);
-    
+
         // تخزين الصورة إذا تم تحميلها
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('employee_images', 'public');
         }
-    
+
         $first_name = $request->input('first_name');
         $last_name = $request->input('last_name');
         $email = $request->input('email');
@@ -94,30 +94,30 @@ public function show($id)
         // $salary = $request->input('salary');
         // $personal_email = $request->input('personal_email');
         // $date_of_joining = $request->input('date_of_joining');
-    
+
         $employee = new User();
-        
+
         $employee->first_name = $first_name;
         $employee->last_name = $last_name;
         $employee->email = $email;
         // $employee->password = $password;
         $employee->address = $address;
-        $employee->date_of_birth = $date_of_birth;
-        $employee->gender = $gender;
+        // $employee->date_of_birth = $date_of_birth;
+        // $employee->gender = $gender;
         $employee->image = $image;
-        $employee->account_status = $account_status;
-        $employee->salary = $salary;
-        $employee->personal_email = $personal_email;
-        $employee->date_of_joining = $date_of_joining;
+        // $employee->account_status = $account_status;
+        // $employee->salary = $salary;
+        // $employee->personal_email = $personal_email;
+        // $employee->date_of_joining = $date_of_joining;
         $employee->save();
-        
+
         return response()->json([
             'success'=>'تمت إضافة الموظف بنجاح.',
         ]);
 
     // إرسال رسالة تأكيد إلى الطالب
         Mail::to($email)->send(new ApplicantMail());
-     
+
 
     // إعادة استجابة بنجاح
     return response()->json(['message' => 'تم تقديم طلب التوظيف بنجاح']);
@@ -130,7 +130,7 @@ public function destroy($id)
         return response()->json(['error' => 'الطلب غير موجود.'], 404);
     }
 
-    $employee->delete();
+    $applicant->delete();
 
     return response()->json(['success' => 'تم حذف الطلب بنجاح.']);
 }
