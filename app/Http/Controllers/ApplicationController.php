@@ -202,25 +202,30 @@ public function changeApplicantStatus(Request $request,int $id)
                     'vacancy_type'=> $vacancy_type,
                     'vacancy_id'=> $vacancy_id,
                     'message' => 'accepted',
-                ]);
+                ])->header('Access-Control-Allow-Origin', 'http://localhost:3000
+                ');
             }else {
                 $vacancy_id->status = 'غير متاح';
                 $vacancy_id->save();
-                return response()->json(['لا يوجد شواغر عذرا .']);
+                return response()->json(['لا يوجد شواغر عذرا .'])->header('Access-Control-Allow-Origin', 'http://localhost:3000
+                ');
                }
 
             } elseif ($status == 'rejected') {
                 $applicant->status = 'مرفوض';
                 $applicant->save();
                 // Mail::to($applicant->email)->send(new RejectMail());
-                return response()->json(['تم رفض المتقدم .']);
+                return response()->json(['تم رفض المتقدم .'])->header('Access-Control-Allow-Origin', 'http://localhost:3000
+                ');
         } else {
-            return response()->json(['حالة غير صالحة.']);
+            return response()->json(['حالة غير صالحة.'])->header('Access-Control-Allow-Origin', 'http://localhost:3000
+            ');
         }
 
 
     } else {
-        return response()->json(['المتقدم غير موجود.']);
+        return response()->json(['المتقدم غير موجود.'])->header('Access-Control-Allow-Origin', 'http://localhost:3000
+        ');
     }
 }
 
