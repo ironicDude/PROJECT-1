@@ -7,7 +7,8 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
 
 Route::post('/create', [InStoreOrderController::class, 'addNewOrder'])
                 ->name('in-store-order.product.store');
-
+Route::get('/index-desc', [InStoreOrderController::class, 'indexDescendingly'])
+                ->name('in-store-order.index.desc');
     Route::middleware(['checkForPaidOrders'])->group(function () {
 
 Route::post('/store/{inStoreOrder}/{purchasedProduct}', [InStoreOrderController::class, 'store'])

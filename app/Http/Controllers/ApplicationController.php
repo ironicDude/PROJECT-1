@@ -206,7 +206,7 @@ public function changeApplicantStatus(Request $request,int $id)
             }else {
                 $vacancy_id->status = 'غير متاح';
                 $vacancy_id->save();
-                return response()->json('لا يوجد شواغر عذرا .');
+                return response()->json(['لا يوجد شواغر عذرا .']);
                }
 
             } elseif ($status == 'rejected') {
