@@ -9,6 +9,7 @@ use App\Models\Applicant_Vacancy;
 use App\Mail\ApplicantMail;
 use App\Mail\RejectMail;
 use App\Mail\AcceptMail;
+use App\Models\Application;
 use Illuminate\Support\Facades\Mail;
 
 class Applicant_VacancyController extends Controller
@@ -17,7 +18,7 @@ class Applicant_VacancyController extends Controller
 public function getApplicantsForVacancy($vacancyId)
 {
     // $vacancy = Vacancy::findOrFail($vacancyId);
-    $applicants = Applicant_Vacancy::where('vacancy_id', $vacancyId)->get();
+    $applicants = Application::where('vacancy_id', $vacancyId)->get();
     // $applicants = $vacancy->applicants;
 
     return response()->json([
@@ -91,11 +92,11 @@ public function applytojob(Request $request)
     $jobApplication->address = $address;
     $jobApplication->resume = $resumePath;
     $jobApplication->save();
-    $applicant_vacancy = new Applicant_Vacancy();
+    $applicant_vacancy = new Application();
     $applicant_vacancy->applicant_id = $applicant_id ;
     $applicant_vacancy->vacancy_id  = $vacancy_id ;
     $applicant_vacancy->save();
-    
+
     // $applicant_id = $applicantId;
     // $vanacy_id = $vacancyId;
 
@@ -121,7 +122,7 @@ public function storeapplicantwithvacancyid(Request $request,$vacancyId)
     $last_name = $request->input('last_name');
     $email = $request->input('email');
     $mobile = $request->input('mobile');
-    $vacancy_type = $vacancy_id; 
+    $vacancy_type = $vacancy_id;
     $status = $request->input('status');
     $address = $request->input('address');
     $resume = $request->file('resume');
@@ -145,7 +146,7 @@ public function storeapplicantwithvacancyid(Request $request,$vacancyId)
     // $vacancy->save();
     // إرسال رسالة تأكيد إلى الطالب
         // Mail::to($email)->send(new ApplicantMail());
-     
+
 
     // إعادة استجابة بنجاح
     return response()->json(['message' => 'تم تقديم طلب التوظيف بنجاح']);
@@ -154,7 +155,7 @@ public function storeapplicantwithvacancyid(Request $request,$vacancyId)
     //         'message' =>  "تم رفض طلب التوظيف."
     //     ]);
     // }
-    
+
 }
 
 // جلب جميع المتقدمين لوظيفة معينة
@@ -170,7 +171,7 @@ public function getapplicanttovacancy($vacancyType){
         return response()->json(['message' => 'لم يتقدم اي شخص لهذه الوظيفة']);
 
     }
-    
+
 }
 // قبول او رفض متقدم لوظيفة
 public function changeApplicantStatus(Request $request,$id)
@@ -178,7 +179,7 @@ public function changeApplicantStatus(Request $request,$id)
     // $applicantId = $request->applicant_id;
     $applicantId = $id;
     $status = $request->status;
-    
+
     $applicant = Applicant::find($applicantId);
     $vacancy_type = $applicant->vacancy_type;
     // $vacancy_type = Applicant::where('vacancy_type', $vacancy_type)->get();
@@ -186,17 +187,17 @@ public function changeApplicantStatus(Request $request,$id)
     $vacancy_id = Vacancy::find($vacancy_type);
     // $va=$vacancy_id->$id;
     // $vacancy = Vacancy::find($vacancyId);
-    
+
     if ($applicant) {
         if ($status == 'accepted') {
-                if ( $vacancy_id->number_of_vacancies > 0) 
+                if ( $vacancy_id->number_of_vacancies > 0)
                 {
                 $applicant->status = 'مقبول';
                 $applicant->save();
                 $vacancy_id->number_of_vacancies = $vacancy_id->number_of_vacancies - 1;
                 $vacancy_id->save();
                 // $vacancy_id->save();
-                
+
                 // Mail::to($applicant->email)->send(new AcceptMail());
                 return response()->json([
                     'vacancy_type'=> $vacancy_type,
@@ -208,7 +209,7 @@ public function changeApplicantStatus(Request $request,$id)
                 $vacancy_id->save();
                 return response()->json('لا يوجد شواغر عذرا .');
                }
-            
+
         } elseif ($status == 'rejected') {
             $applicant->status = 'مرفوض';
             $applicant->save();
