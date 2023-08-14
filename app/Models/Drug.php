@@ -101,7 +101,7 @@ public static function searchCategories(string $string, int $limit = 3)
         // Merge the product information of both drugs and retrieve the results.
         $products = $firstDrugProducts->union($secondDrugProducts);
 
-        return new ProductOverviewCollection($products);
+        return $products;
     }
 
     public static function checkInteraction(int $id, int $interactingId)

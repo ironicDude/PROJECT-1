@@ -33,4 +33,10 @@ class DatedProduct extends Model
         return $this->hasMany(CartedProduct::class, 'dated_product_id', 'id');
      }
 
+     public function purchase()
+     {
+        return $this->belongsTo(Purchase::class, 'purchase_id', 'id');
+     }
+
+
 }

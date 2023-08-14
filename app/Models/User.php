@@ -6,17 +6,13 @@ namespace App\Models;
 
 use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
-use App\Exceptions\AccountPermenantelyDeletedException;
-use App\Http\Resources\AllergyResource;
-use App\Http\Resources\User\AllergyCollection;
-use App\Http\Resources\User\UserResource;
+
 use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Gender;
-use App\Models\AccountStatus;
+
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
@@ -24,7 +20,6 @@ use App\Models\Applicant;
 use App\Models\Application;
 use App\Models\Schedule;
 use Carbon\Carbon;
-use Database\Seeders\GenderSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -135,7 +130,6 @@ class User extends Authenticatable
     {
         return $this->allergies->contains($product);
     }
-
     /**
      * Check if the user is indirectly allergic to a given product.
      *
@@ -174,8 +168,8 @@ class User extends Authenticatable
 
     public function getAllergies()
     {
-        $allergies = $this->allergies;
-        return new AllergyCollection($allergies);
+        $products = $this->allergies;
+        return $products;
     }
 
 
@@ -218,7 +212,10 @@ class User extends Authenticatable
     {
         $imageName = $this->image;
         // dd($imageName);
-        $imageContent = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
+        if(!$imageName){
+            return null;
+        }
+        $imageContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
         $encodedContent = base64_encode($imageContent);
         $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
         $imageData = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContent}", 'UTF-8');
@@ -313,7 +310,7 @@ class User extends Authenticatable
         $this->setAddress($newInfo['address']);
         $this->setDateOFBirth($newInfo['dateOfBirth']);
         $this->setGender($newInfo['gender']);
-        return new UserResource($this);
+        return $this;
     }
 
     public function setEmail(string $email)
@@ -325,10 +322,10 @@ class User extends Authenticatable
 
     public function deleteSoftly()
     {
+        Auth::logout();
         $this->delete();
-        $url = URL::signedRoute('user.restore', ['user' => $this->id]);
-        // Mail::to($this)->send(new AccountDeleted($this, $url));
-        return $url;
+        $url = URL::temporarySignedRoute('user.restore', now()->addDays(14), ['email' => $this->email]);
+        Mail::to($this)->send(new AccountDeleted($this, $url));
     }
 
     public function restoreAccount()
@@ -336,8 +333,6 @@ class User extends Authenticatable
         if($this->deleted_at){
             if ($this->deleted_at->diffInDays(Carbon::now()) < 14) {
                 $this->restore();
-                Auth::logout();
-                return true;
             }
             else{
                 throw new AccountPermanentlyDeletedException('Your account has been deleted');
@@ -353,13 +348,33 @@ class User extends Authenticatable
     {
         return $this->type == 'employee';
     }
+
+    public function getWishlistedProducts()
+{
+    $products = $this->wishlistedProducts;
+    return $products;
+}
+
+    public function wishlistedProduct(Product $product)
+    {
+        return $this->wishlistedProducts->contains($product);
+    }
+
+
+
     /**
      * relationships
      */
     public function ratings()
     {
-        return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot('rating');
+        return $this->hasMany(Rating::class, 'user_id', 'id');
     }
+
+    public function wishlistedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlisted_products', 'user_id', 'product_id');
+    }
+
     public function allergies()
     {
         return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');

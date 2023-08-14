@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
     public function countNewCustomers(Request $request)
     {
-        $this->authorize('viewCountOfNewCustomers', Customer::class);
+        // $this->authorize('viewCountOfNewCustomers', Customer::class);
         $validator = Validator::make($request->all(), [
             'days' => 'required|integer|min:0'
         ]);
@@ -44,7 +44,7 @@ class DashboardController extends Controller
 
     public function getBestSellingProducts(Request $request)
     {
-        $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
+        // $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
         $validator = Validator::make($request->all(), [
             'days' => 'required|integer|min:0'
         ]);
@@ -58,7 +58,7 @@ class DashboardController extends Controller
 
     public function getMostProfitableProducts(Request $request)
     {
-        $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
+        // $this->authorize('viewBestSellingProducts', PurchasedProduct::class);
         $validator = Validator::make($request->all(), [
             'days' => 'required|integer|min:0'
         ]);
@@ -72,7 +72,7 @@ class DashboardController extends Controller
 
     public function countOrders(Request $request)
     {
-        $this->authorize('viewCountOfOrders', Order::class);
+        // $this->authorize('viewCountOfOrders', Order::class);
         $validator = Validator::make($request->all(), [
             'days' => 'required|integer|min:0'
         ]);
@@ -86,6 +86,7 @@ class DashboardController extends Controller
 
     public function chartNewAndLostCustomers(Request $request)
     {
+        // $this->authorize('viewCustomersChart', Customer::class);
         $validator = Validator::make($request->all(), [
             'date' => 'required|date|before:tomorrow',
             'period' => 'required|string|in:day,week,month,year',
@@ -101,6 +102,7 @@ class DashboardController extends Controller
 
     public function chartOrders(Request $request)
     {
+        // $this->authorize('viewOrdersChart', Order::class);
         $validator = Validator::make($request->all(), [
             'date' => 'required|date|before:tomorrow',
             'period' => 'required|string|in:day,week,month,year',
@@ -117,6 +119,7 @@ class DashboardController extends Controller
 
     public function chartRevenue(Request $request)
     {
+        // $this->authorize('viewRevenueChart', Order::class);
         $validator = Validator::make($request->all(), [
             'date' => 'required|date|before:tomorrow',
             'period' => 'required|string|in:day,week,month,year',

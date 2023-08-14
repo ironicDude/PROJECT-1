@@ -13,7 +13,7 @@ class DeleteOldSoftDeletedRecords extends Command
      *
      * @var string
      */
-    protected $signature = 'app:delete-old-soft-deleted-records';
+    protected $signature = 'app:force-delete';
 
     /**
      * The console command description.
@@ -27,7 +27,7 @@ class DeleteOldSoftDeletedRecords extends Command
      */
     public function handle()
     {
-        $date = Carbon::now()->subDays(14);
+        $date = Carbon::now()->subDays(1);
 
         User::onlyTrashed()
             ->where('deleted_at', '<', $date)

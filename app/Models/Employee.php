@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Role;
+use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 class Employee extends User
 {
+    use SingleTableInheritanceTrait;
     use HasFactory;
     protected static $singleTableType = 'employee';
     protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
@@ -78,7 +80,7 @@ class Employee extends User
     public function updateEmployeeInfo(array $newInfo)
     {
         $this->setPersonalEmail($newInfo['personalEmail']);
-        return new EmployeeResource($this);
+        return $this;
     }
 
 
@@ -101,5 +103,10 @@ class Employee extends User
     public function user()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'employee_id', 'id');
     }
 }

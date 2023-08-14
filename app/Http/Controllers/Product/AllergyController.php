@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Product\ProductOverviewCollection;
 use App\Models\Drug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,6 +81,6 @@ class AllergyController extends Controller
             return self::customResponse('no allergies found', null, 404);
         }
 
-        return self::customResponse('allergies found', $allergies, 200);
+        return self::customResponse('allergies found', new ProductOverviewCollection($allergies), 200);
     }
 }

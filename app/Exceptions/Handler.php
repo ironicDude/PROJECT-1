@@ -55,8 +55,8 @@ class Handler extends ExceptionHandler
             return self::customResponse("The cart is empty", null, 422);
         });
 
-        $this->renderable(function (ItemNotInCartException $e, $request) {
-            return self::customResponse("The item is not in the cart", null, 422);
+        $this->renderable(function (ProductNotAddedException $e, $request) {
+            return self::customResponse("The item is not added", null, 422);
         });
 
         $this->renderable(function (NullQuantityException $e, $request) {
@@ -83,8 +83,8 @@ class Handler extends ExceptionHandler
         //     return self::customResponse("In shortage", null, 422);
         // });
 
-        $this->renderable(function (ItemAlreadyInCartException $e, $request) {
-            return self::customResponse("Product already in cart. You can modify its quantity.", null, 422);
+        $this->renderable(function (ProductAlreadyAddedException $e, $request) {
+            return self::customResponse("Product already added. You can modify its quantity.", null, 422);
         });
     } // end of register
 

@@ -26,6 +26,7 @@ class ProductOverviewResource extends JsonResource
                 'otc' => $this->otc,
                 'price' => ($this->isPurchased() && $this->purchasedProduct) ? $this->purchasedProduct->price : null,
                 'availability' => $this->isPurchased() && $this->purchasedProduct &&$this->purchasedProduct->isAvailable(),
+                'rating' => $this->getRating(),
                 // 'route' => $this->route,
                 // 'generic' => $this->generic,
                 // 'drug' => $this->drug->name,
@@ -39,14 +40,4 @@ class ProductOverviewResource extends JsonResource
         ];
     }//end of toArray
 
-
-    /**
-     * Get any additional data that should be returned with the resource array.
-     *
-     * @return array
-     */
-    public function with($request)
-    {
-
-    }
 }

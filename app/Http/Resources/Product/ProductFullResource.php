@@ -30,6 +30,7 @@ class ProductFullResource extends JsonResource
             'categories' => $this->drug->categories->pluck('name'),
             'externalIdentifiers'=> $this->drug->externalIdentifiers->pluck('url'),
             'synonyms' => $this->drug->synonyms->pluck('synonym'),
+            'rating' => $this->getRating(),
     ];
     }
 }

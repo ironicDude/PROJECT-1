@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\User\EmployeeController;
 use App\Http\Controllers\Order\OrderController;
+use App\Http\Controllers\Product\WishlistController;
 use App\Http\Controllers\User\UserController;
 use App\Models\Customer;
 use App\Models\Employee;
@@ -13,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth', 'forceLogout'])->group(function () {
+
+    Route::get('/wishlist', [WishlistController::class, 'getWishlist'])
+                ->name('user.wishlist.get');
 
     // Activate or deactivate a user (employee) based on user_id
     Route::post('user/{user_id}', [UserController::class, 'activateOrDeactivate'])
@@ -110,23 +115,16 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
     Route::put('/employees/update-info', [EmployeeController::class, 'updateInfo'])
         ->name('employees.update');
 
-    //CUSTOMERS
-    // Get all orders for a specific customer
-    Route::get('customers/{customer}/orders', [OrderController::class, 'index'])
-        ->name('customer.orders.get');
+    Route::post('/backup', [BackupController::class, 'runBackup'])
+        ->name('backup');
 
-    // Show details of a specific order for a customer
-    Route::get('customers/orders/{order}', [OrderController::class, 'show'])
-        ->name('customer.order.show');
 
-    // Get prescriptions for a specific order of a customer
-    Route::get('customers/orders/{order}/prescriptions', [OrderController::class, 'getPrescriptions'])
-        ->name('customer.order.prescriptions.show');
 });
 
-Route::get('/restore/{user}', [UserController::class, 'restore'])
+Route::get('/restore', [UserController::class, 'restore'])
     ->name('user.restore')
-    ->middleware('signed');
+    ->middleware(['signed', 'throttle:6,1']);
+
 
 // Create a new Employee with hardcoded data (This is just a temporary route for testing or seeding purposes)
 Route::post('create', function () {

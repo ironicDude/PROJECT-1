@@ -49,11 +49,9 @@ class ProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'string',
-            'otc' => 'boolean',
             'minPrice' => 'min:0',
             'maxPrice' => 'min:0',
             'rating' => 'between:0,5|numeric',
-            'availability' => 'boolean',
             'dosageForm' => 'string',
             'route' => 'string',
             'category' => 'string',
@@ -209,7 +207,7 @@ class ProductController extends Controller
         }
     }
 
-    ////////////////////////////////// EISSAWI ///////////////////////////////////////////////
+    ////////////////////////////////// EISSAWI //////////////////////////////////////////////////////////////////////////
     public function withPrices(Request $request)
     {
         $request->validate([
@@ -312,9 +310,6 @@ class ProductController extends Controller
             return $e;
         }
     }
-
-
-
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

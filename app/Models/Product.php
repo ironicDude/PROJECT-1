@@ -5,9 +5,7 @@ namespace App\Models;
 use App\Exceptions\NameNotFoundException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\SuggestionException;
-use App\Http\Resources\ProductCollection;
-use App\Http\Resources\ProductOverviewCollection;
-use App\Http\Resources\ProductOverviewResource;
+use App\Http\Resources\Product\ProductOverviewResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Drug;
@@ -232,7 +230,26 @@ class Product extends Model
         return $this->purchasedProduct ?? true;
     }
 
+    public function rate(int $rating)
+    {
+        $this->ratings()->where('user_id', Auth::user()->id)->delete();
+        Rating::create([
+            'user_id' => Auth::user()->id,
+            'product_id' => $this->id,
+            'rating' => $rating,
+        ]);
+        return $this;
+    }
 
+    public function getRating()
+    {
+        return $this->ratings()->average('rating');
+    }
+
+    public function getUserRatingToProduct(int $userId)
+    {
+        return $this->ratings()->where('user_id', $userId);
+    }
 
     /**
      * Relationships
@@ -254,7 +271,7 @@ class Product extends Model
 
     public function ratings()
     {
-        return $this->belongsToMany(User::class, 'ratings', 'product_id', 'user_id')->withPivot(['rating', 'reviews']);
+        return $this->hasMany(Rating::class, 'product_id', 'id');
     }
 
     public function purchasedProduct()
@@ -265,5 +282,10 @@ class Product extends Model
     public function allergies()
     {
         return $this->belongsToMany(User::class, 'allergies', 'product_id', 'user_id');
+    }
+
+    public function wishlisters()
+    {
+        return $this->belongsToMany(User::class, 'wishlisted_products', 'user_id', 'product_id');
     }
 }

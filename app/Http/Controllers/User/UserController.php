@@ -7,6 +7,7 @@ use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,7 @@ use App\Notifications\UserAccountStatusChangedNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use App\Policies\UserPolicy;
+use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -170,13 +172,13 @@ class UserController extends Controller
     {
         $this->authorize('getInfo', $user);
         $mobile =  $user->getMobile();
-        return self::customResponse('Mobile set', $mobile, 200);
+        return self::customResponse('Mobile returned', $mobile, 200);
     }
 
     public function setMobile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|numeric|max:20',
+            'mobile' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -184,7 +186,7 @@ class UserController extends Controller
         }
 
         $mobile = Auth::user()->setMobile($request->input('mobile'));
-        return self::customResponse('Mobile returned', $mobile, 200);
+        return self::customResponse('Mobile set', $mobile, 200);
     }
 
 
@@ -253,7 +255,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:' . User::class,
             'dateOfBirth' => 'required|date|before:-10years',
             'gender' => 'required|string|in:Male,Female,I prefer not to say',
-            'mobile' => 'required|string|max:20',
+            'mobile' => 'required|integer',
         ]);
 
         // If the validation fails, return a JSON response with the validation errors and status code 422 (Unprocessable Entity).
@@ -262,7 +264,7 @@ class UserController extends Controller
         }
 
         $newInfo = $request->toArray();
-        $userInfo = Auth::user()->updateInfo($newInfo);
+        $userInfo = new UserResource(Auth::user()->updateInfo($newInfo));
         return self::customResponse('User with new info', $userInfo, 200);
     }
 
@@ -272,21 +274,30 @@ class UserController extends Controller
         return self::customResponse('We are sorry to hear that you want to leave us. On the bright side, you can still restore your account if you log in within 14 days from now.', $user, 200);
     }
 
-    public function restore(Request $request, int $userId)
+    public function restore(Request $request)
     {
-        $user = User::withTrashed()->findOrFail($userId);
-        $this->authorize('restore', $user);
+        $validator = Validator::make($request->all(), [
+            'email' => 'email|max:255|required',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        // $this->authorize('restore', $user);
         if (!$request->hasValidSignature()) {
             abort(401);
+        }
+        $user = User::withTrashed()->firstWhere('email', $request->email);
+        if(!$user){
+            throw new ModelNotFoundException();
         }
         try{
             $result = $user->restoreAccount();
         } catch(AccountPermanentlyDeletedException $e){
             return self::customResponse($e->getMessage(), null, 401);
         } catch(AccountAlreadyRestoredException $e){
-            return self::customResponse($e->getMessage(), null, 401);
+            return redirect()->intended(env('FRONTEND_URL').'?restored=1');
         }
-        return self::customResponse('Your account has been restored', $result, 202);
+        return redirect()->intended(env('FRONTEND_URL').'?restored=1');
     }
 
 }
