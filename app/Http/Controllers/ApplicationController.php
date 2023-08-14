@@ -213,16 +213,16 @@ public function changeApplicantStatus(Request $request,int $id)
                 $applicant->status = 'مرفوض';
                 $applicant->save();
                 // Mail::to($applicant->email)->send(new RejectMail());
-                return response()->json('تم رفض المتقدم .');
+                return response()->json(['تم رفض المتقدم .']);
         } else {
-            return response()->json('حالة غير صالحة.');
+            return response()->json(['حالة غير صالحة.']);
         }
 
         $applicant->save();
 
-        return response()->json('تم تغيير حالة المتقدم بنجاح.');
+        return response()->json(['تم تغيير حالة المتقدم بنجاح.']);
     } else {
-        return response()->json('المتقدم غير موجود.');
+        return response()->json(['المتقدم غير موجود.']);
     }
 }
 
