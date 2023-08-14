@@ -33,7 +33,7 @@ public function show($id)
             return response()->json([
                 'Applicant' => $applicant
             ]);
-            
+
         }else {
             return response()->json([
                 'Applicant' =>'الموظف غير موجود'
