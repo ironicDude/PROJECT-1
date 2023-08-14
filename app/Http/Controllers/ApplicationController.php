@@ -11,7 +11,7 @@ use App\Mail\AcceptMail;
 use App\Models\Application;
 use Illuminate\Support\Facades\Mail;
 
-class Applicant_VacancyController extends Controller
+class ApplicationController extends Controller
 {
 
 public function getApplicantsForVacancy($vacancyId)
