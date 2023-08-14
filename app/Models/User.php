@@ -36,11 +36,8 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected static $singleTableTypeField = 'type';
-    // protected static $singleTableSubclasses = [Employee::class, Customer::class];
-    protected static $singleTableSubclasses = [Employee::class, Customer::class ,Application::class];
-=======
     protected static $singleTableSubclasses = [Employee::class, Customer::class];
-    protected static $singleTableSubclasses = [Employee::class, Customer::class];
+
 
     protected static $persisted = [
         'first_name',

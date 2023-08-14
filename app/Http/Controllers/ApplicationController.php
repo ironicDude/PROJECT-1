@@ -173,56 +173,31 @@ public function getapplicanttovacancy($vacancyType){
 
 }
 // قبول او رفض متقدم لوظيفة
-public function changeApplicantStatus(Request $request,int $id)
+public function changeApplicantStatus(Request $request, int $applicantId)
 {
-    // $applicantId = $request->applicant_id;
-    $applicantId = $id;
+    $applicant = Applicant::find($applicantId);
+
+    if (!$applicant) {
+        return $this->responseError('Applicant not found.');
+    }
+
     $status = $request->status;
 
-    $applicant = Applicant::find($applicantId);
-    $vacancy_type = $applicant->vacancy_type;
-    // $vacancy_type = Applicant::where('vacancy_type', $vacancy_type)->get();
+    $applicant->changeStatus($applicant, $status);
 
-    $vacancy_id = Vacancy::find($vacancy_type);
-    // $va=$vacancy_id->$id;
-    // $vacancy = Vacancy::find($vacancyId);
-
-    if ($applicant) {
-        if ($status == 'accepted') {
-                if ( $vacancy_id->number_of_vacancies > 0)
-                {
-                $applicant->status = 'مقبول';
-                $applicant->save();
-                $vacancy_id->number_of_vacancies = $vacancy_id->number_of_vacancies - 1;
-                $vacancy_id->save();
-                // $vacancy_id->save();
-
-                // Mail::to($applicant->email)->send(new AcceptMail());
-                return response()->json([
-                    'vacancy_type'=> $vacancy_type,
-                    'vacancy_id'=> $vacancy_id,
-                    'message' => 'accepted',
-                ])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
-            }else {
-                $vacancy_id->status = 'غير متاح';
-                $vacancy_id->save();
-                return response()->json(['لا يوجد شواغر عذرا .'])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
-               }
-
-            } elseif ($status == 'rejected') {
-                $applicant->status = 'مرفوض';
-                $applicant->save();
-                // Mail::to($applicant->email)->send(new RejectMail());
-                return response()->json(['تم رفض المتقدم .'])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
-        } else {
-            return response()->json(['حالة غير صالحة.'])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
-        }
-
-
-    } else {
-        return response()->json(['المتقدم غير موجود.'])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    }
+    return $this->responseSuccess(['message' => 'Status updated successfully.']);
 }
+
+private function responseError($message)
+    {
+        return response()->json(['message' => $message]);
+    }
+
+    private function responseSuccess($data)
+    {
+        return response()->json($data);
+    }
+
 
 
 }
