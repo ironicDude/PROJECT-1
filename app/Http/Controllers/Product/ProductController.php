@@ -5,26 +5,18 @@ namespace App\Http\Controllers\Product;
 use App\Exceptions\NameNotFoundException;
 use App\Exceptions\SuggestionException;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomResponse;
-use App\Http\Resources\DrugResource;
 use App\Http\Resources\Product\ProductFullResource;
 use App\Http\Resources\Product\ProductOverviewCollection;
 use App\Models\Product;
 use App\Models\Purchase;
-use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\Category;
 use App\Models\DatedProduct;
 use App\Models\Drug;
-use App\Models\DrugCategory;
 use App\Models\Pharmacy;
 use App\Models\PurchasedProduct;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller

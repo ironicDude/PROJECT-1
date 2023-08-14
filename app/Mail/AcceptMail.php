@@ -16,11 +16,17 @@ class AcceptMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($user, $password)
     {
-        //
+        $this->user = $user;
+        $this->password = $password;
     }
-
+    public function build()
+    {
+        return $this->view('emails.accept')
+                    ->subject('مرحبًا بك في فرصة التوظيف')
+                    ->with(['user' => $this->user, 'password' => $this->password]);
+    }
     /**
      * Get the message envelope.
      */

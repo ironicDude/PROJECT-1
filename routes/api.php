@@ -22,7 +22,7 @@ use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Order\Orderd_ProductsController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\VacancyController;
-use App\Http\Controllers\Applicant_VacancyController;
+use App\Http\Controllers\ApplicationController;
 // use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScheduleController;
@@ -47,10 +47,11 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::resource('order',OrderController::class);
 Route::resource('prescription',PresciptionController::class);
+Route::get('getImage/{id}',[PresciptionController::class,'getImage']);
 Route::post('update/{id}',[PresciptionController::class,'update']);
 Route::post('/send-email-to-customer/{id}', function ($id, Request $request) {
     $customer = Customer::find($id);
-    
+
     if (!$customer) {
         return "الزبون غير موجود.";
     }
@@ -76,21 +77,22 @@ Route::resource('/employee',EmployeeController::class);
 Route::resource('/vacancy',VacancyController::class);
 // Route::resource('/schedules/{id}',SchedulesController::class);
 // Route::resource('/acceptEmployeeForVacancy',[ Applicant_VacancyController::class,'acceptEmployeeForVacancy']);
-Route::get('/getApplicantsForVacancy/{id}',[ Applicant_VacancyController::class,'getApplicantsForVacancy']);
-Route::post('/acceptApplicant/{applicantId}/{vacancyId}',[ Applicant_VacancyController::class,'acceptApplicant']);
-Route::post('/applytojob',[ Applicant_VacancyController::class,'applytojob']);
-Route::post('/storeapplicantwithvacancyid/{id}',[ Applicant_VacancyController::class,'storeapplicantwithvacancyid']);//تقديم طلب توظيف لشاغر معين
-Route::get('/getapplicanttovacancy/{id}',[ Applicant_VacancyController::class,'getapplicanttovacancy']);// جلب جميع المتقدمين لوظيفة معينة
-Route::post('/changeApplicantStatus/{id}',[ Applicant_VacancyController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
+Route::get('/getApplicantsForVacancy/{id}',[ ApplicationController::class,'getApplicantsForVacancy']);
+Route::get('/getFile/{id}',[ ApplicantController::class,'getFile']);
+Route::post('/acceptApplicant/{applicantId}/{vacancyId}',[ ApplicationController::class,'acceptApplicant']);
+Route::post('/applytojob',[ ApplicationController::class,'applytojob']);
+Route::post('/storeapplicantwithvacancyid/{id}',[ ApplicationController::class,'storeapplicantwithvacancyid']);//تقديم طلب توظيف لشاغر معين
+Route::get('/getapplicanttovacancy/{id}',[ ApplicationController::class,'getapplicanttovacancy']);// جلب جميع المتقدمين لوظيفة معينة
+Route::post('/changeApplicantStatus/{id}',[ ApplicationController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
 // Route::post('/addEmployee',[ EmployeeController::class,'addEmployee']);// اظافة موظف جديد
 Route::resource('/employee', EmployeeController::class);//  اظافة موظف جديد وتعديل بياناته وحذف موظف
 Route::post('/assignRole',[ RoleController::class,'assignRole']);// تحديد ادوار للموظفين
-Route::resource('/schedule',ScheduleController::class);// تحديد اوقات الدوام وتعديلها وحذفها    
+Route::resource('/schedule',ScheduleController::class);// تحديد اوقات الدوام وتعديلها وحذفها
 Route::post('/updateMultipleSchedules',[ScheduleController::class,'updateMultipleSchedules']);// تعيين نفس اوقات دوام لعدة موظفين
-Route::resource('/orderd_product',Orderd_ProductsController::class);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::post('/create_orderd_product/{id}',[Orderd_ProductsController::class,'create_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::put('/update_orderd_product/{id}',[Orderd_ProductsController::class,'update_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها    
-Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'deleteByDatedProductId']);// تحديد اوقات الدوام وتعديلها وحذفها    
+Route::resource('/orderd_product',Orderd_ProductsController::class);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::post('/create_orderd_product/{id}',[Orderd_ProductsController::class,'create_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::put('/update_orderd_product/{id}',[Orderd_ProductsController::class,'update_orderd_product']);// تحديد اوقات الدوام وتعديلها وحذفها
+Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'deleteByDatedProductId']);// تحديد اوقات الدوام وتعديلها وحذفها
 
 
 

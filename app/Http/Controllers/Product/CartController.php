@@ -3,34 +3,23 @@
 namespace App\Http\Controllers\Product;
 
 use App\Exceptions\CheckoutOutOfStockException;
-use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
-use App\Exceptions\ItemNotInCartException;
-use App\Exceptions\LimitedStockException;
 use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
-use App\Exceptions\NullQuantityException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\ProductAlreadyAddedException;
-use App\Exceptions\ProductAlreadyInCartException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Cart\CartResource;
-use App\Http\Resources\CartedProductResource;
 use App\Models\Cart;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
-use App\Models\CartedProduct;
 use App\Models\PurchasedProduct;
-use App\Models\User;
-use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\ItemNotFoundException;
 
 class CartController extends Controller
 {

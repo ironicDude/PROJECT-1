@@ -92,7 +92,7 @@ public function applytojob(Request $request)
     $jobApplication->address = $address;
     $jobApplication->resume = $resumePath;
     $jobApplication->save();
-    $applicant_vacancy = new Application();
+    $applicant_vacancy = new Applicant_Vacancy();
     $applicant_vacancy->applicant_id = $applicant_id ;
     $applicant_vacancy->vacancy_id  = $vacancy_id ;
     $applicant_vacancy->save();

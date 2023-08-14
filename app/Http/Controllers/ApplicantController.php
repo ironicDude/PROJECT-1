@@ -5,8 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Applicant;
 use App\Models\User;
+use App\Models\Employee;
 use App\Mail\ApplicantMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ApplicantController extends Controller
 {
@@ -102,13 +107,13 @@ public function show($id)
         $employee->email = $email;
         // $employee->password = $password;
         $employee->address = $address;
-        // $employee->date_of_birth = $date_of_birth;
-        // $employee->gender = $gender;
+        $employee->date_of_birth = $date_of_birth;
+        $employee->gender = $gender;
         $employee->image = $image;
-        // $employee->account_status = $account_status;
-        // $employee->salary = $salary;
-        // $employee->personal_email = $personal_email;
-        // $employee->date_of_joining = $date_of_joining;
+        $employee->account_status = $account_status;
+        $employee->salary = $salary;
+        $employee->personal_email = $personal_email;
+        $employee->date_of_joining = $date_of_joining;
         $employee->save();
 
         return response()->json([
@@ -122,16 +127,23 @@ public function show($id)
     // إعادة استجابة بنجاح
     return response()->json(['message' => 'تم تقديم طلب التوظيف بنجاح']);
 }
-public function destroy($id)
-{
-    $applicant = Applicant::find($id);
 
-    if (!$applicant) {
-        return response()->json(['error' => 'الطلب غير موجود.'], 404);
+public function getFile($id)
+{
+    $fileData = DB::table('applicants')->where('id', $id)->first();
+
+    if ($fileData) {
+        $filePath = $fileData->resume; // افترض أن اسم العمود هو file_path
+        $fileContents = Storage::disk('public')->get($filePath);
+
+        return response($fileContents)
+            ->header('Content-Type', $fileData->resume)
+            ->header('Content-Disposition', 'inline; filename="' . $fileData->resume . '"');
     }
 
-    $applicant->delete();
+    $employee->delete();
 
     return response()->json(['success' => 'تم حذف الطلب بنجاح.']);
 }
+
 }
