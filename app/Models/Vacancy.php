@@ -19,6 +19,7 @@ class Vacancy extends Model
         'number_of_vacancies',
         'status',
  ];
+<<<<<<< HEAD
      public function applicant_vacancy(){
         return $this->hasMany(Application::class);
      }
@@ -29,5 +30,16 @@ class Vacancy extends Model
      public function employee(){
          return belongsTo(Employee::class);
      }
+=======
 
+     public function applications(){
+         return $this->hasMany(Application::class);
+     }
+
+     public function employee()
+     {
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
+>>>>>>> 7a912d883bbfa2950722df1a48decdffb7a0d132
+
+}
 }

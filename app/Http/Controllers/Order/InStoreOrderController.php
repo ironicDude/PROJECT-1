@@ -12,6 +12,7 @@ use App\Exceptions\ProductAlreadyAddedException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Order\OrderFullCollection;
 use App\Http\Resources\Product\ProductOverviewResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
@@ -158,5 +159,11 @@ class InStoreOrderController extends Controller
         // $this->authorize('manageInStoreOrder', $inStoreOrder);
         $inStoreOrder->destroyOrder();
         return self::customResponse('Order deleted', null, 200);
+    }
+
+    public function indexDescendingly()
+    {
+        $orders = InStoreOrder::indexDescendingly();
+        return new OrderFullCollection($orders);
     }
 }

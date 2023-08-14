@@ -25,6 +25,10 @@ class InStoreOrder extends Order
     protected static $singleTableType = 'Storely';
     protected static $persisted = [];
 
+    public static function indexDescendingly()
+    {
+        $orders = self::orderBy('created_at', 'desc')->paginate(10);
+        return $orders;
+    }
 
-    
 }
