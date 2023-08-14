@@ -201,7 +201,7 @@ public function changeApplicantStatus(Request $request,int $id)
                 return response()->json([
                     'vacancy_type'=> $vacancy_type,
                     'vacancy_id'=> $vacancy_id,
-                    'تم قبول المتقدم .'
+                    'message' => 'accepted',
                 ]);
             }else {
                 $vacancy_id->status = 'غير متاح';
@@ -218,9 +218,7 @@ public function changeApplicantStatus(Request $request,int $id)
             return response()->json(['حالة غير صالحة.']);
         }
 
-        $applicant->save();
 
-        return response()->json(['تم تغيير حالة المتقدم بنجاح.']);
     } else {
         return response()->json(['المتقدم غير موجود.']);
     }
