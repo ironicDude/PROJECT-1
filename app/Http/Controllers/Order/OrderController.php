@@ -13,7 +13,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
-use Validator;
 
 
 class OrderController extends Controller
@@ -49,7 +48,7 @@ class OrderController extends Controller
 
 // Update And Delete Order
 public function update(Request $request , Order $order){
-    if ( $order->status == "Review") {  
+    if ( $order->status == "Review") {
     $input = $request->all();
     $validator = Validator::make($input , [
         'shipping_address'=>'required',
@@ -60,9 +59,9 @@ public function update(Request $request , Order $order){
             'message'=>'You Have Fill Some Data'
         ]);
     }
- 
+
     $order->shipping_address = $input['shipping_address'];
- 
+
 
     return response()->json([
         'message'=>'Order Updated Successfully',
@@ -90,6 +89,7 @@ public function destroy( Order $order){
 
         ]);
     }
+}
 
 
     public function index(Request $request)
@@ -108,4 +108,4 @@ public function destroy( Order $order){
     }
 
 }
-}
+
