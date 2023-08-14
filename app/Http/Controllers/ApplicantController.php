@@ -17,7 +17,6 @@ class ApplicantController extends Controller
 {
     public function index()
 {
-    header('Access-Control-Allow-Origin: *');
         $applicant = Applicant::all();
         return response()->json([
             'Applicant' => $applicant
@@ -25,7 +24,6 @@ class ApplicantController extends Controller
 }
 public function show($id)
 {
-    header('Access-Control-Allow-Origin: *');
 
         $applicant = Applicant::find($id);
         if ($applicant) {
