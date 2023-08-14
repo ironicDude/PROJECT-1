@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Events\MinimumStockLevelExceeded;
 use App\Exceptions\EmptyOrderException;
 use App\Exceptions\InShortageException;
-use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
 use App\Exceptions\ProductAlreadyAddedException;
@@ -16,8 +15,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Prescription;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -54,6 +51,18 @@ class Order extends Model
         'method',
         'status',
     ];
+
+    public function storeShippingAddress(string $shippingAddress)
+    {
+        $this->shipping_address = $shippingAddress;
+        $this->save();
+        return $this->shipping_address;
+    }
+
+    public function getShippingAddress()
+    {
+        return $this->shipping_address;
+    }
 
     public static function getCustomerOrders(int $customerId, string $date = null)
     {
@@ -512,6 +521,23 @@ class Order extends Model
     protected function deleteProducts()
     {
         $this->orderedProducts->each->delete();
+    }
+
+    protected function markAsUpdated()
+    {
+        $this->is_updated = 1;
+        $this->save();
+    }
+
+    protected function markAsUnUpdated()
+    {
+        $this->is_updated = 1;
+        $this->save();
+    }
+
+    public function isUpdated()
+    {
+        return $this->is_updated == 1;
     }
 
     /**

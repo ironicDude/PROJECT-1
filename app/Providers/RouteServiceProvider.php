@@ -68,6 +68,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/api/Order/InStoreOrders.php'));
 
             Route::middleware('api')
+                ->prefix('api/orders/online-orders')
+                ->group(base_path('routes/api/Order/OnlineOrders.php'));
+
+            Route::middleware('api')
                 ->prefix('api/orders/cart')
                 ->group(base_path('routes/api/Order/Cart.php'));
 
