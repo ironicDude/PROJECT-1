@@ -15,7 +15,7 @@ class AllergyResource extends JsonResource
     public function toArray(Request $request): array
     {
         return ['id' => $this->id,
-                'drugId' => $this->drug_id,
-                'name' => $this->name . ' [' . $this->drug->name . ']'];
+                'product_id' => $this->product_id,
+                'name' => $this->name];
     }
 }

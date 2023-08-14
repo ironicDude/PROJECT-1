@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:delete-old-soft-deleted-records');
+        $schedule->command('app:force-delete')->daily();
+        $schedule->command('backup:run')->daily();
     }
 
     /**

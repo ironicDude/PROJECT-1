@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 // class Applicant extends Model
 class Applicant extends User
 
@@ -22,7 +23,8 @@ class Applicant extends User
         'resource',
     ];
     
-        public function applicant_vacancy(){
-            return $this->hasMany(Applicant_Vacancy::class);
+        public function applications(){
+            return $this->hasMany(Application::class);
         }
+
 }

@@ -9,10 +9,12 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 
 class Customer extends User
 {
     use HasFactory;
+    use SingleTableInheritanceTrait;
     protected static $singleTableType = 'customer';
     protected static $persisted = ['money'];
 
@@ -30,19 +32,6 @@ class Customer extends User
 
 
 
-    /**
-     * Get a paginated list of orders associated with this customer.
-     *
-     * @return \Illuminate\Pagination\LengthAwarePaginator The paginated collection of orders.
-     */
-    public function viewOrders()
-    {
-        // Retrieve the orders associated with this customer using the 'orders' relationship and paginate the results with 10 orders per page.
-        $orders = $this->orders()->paginate(10);
-
-        // Wrap the paginated orders collection in an 'OrderOverviewCollection' resource to customize the response format.
-        return $orders;
-    }
 
     public function createCart()
     {
@@ -66,11 +55,12 @@ class Customer extends User
     public static function chartNewbiesAndBastards(string $date, string $period)
     {
         $points = collect();
+        $counter = 0;
         switch ($period) {
             case 'day':
-                for ($i = 0; $i < 24; $i++) {
-                    $start = Carbon::parse($date)->addHours($i);
-                    $end = Carbon::parse($date)->addHours($i + 1);
+                for ($i = 23; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subHours($i);
+                    $end = Carbon::parse($date)->subHours($i - 1);
                     $newbies = Customer::where('created_at', '>=', $start)
                         ->where('created_at', '<', $end)
                         ->count();
@@ -79,16 +69,16 @@ class Customer extends User
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'hour' => $i,
+                        'hour' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
                 break;
             case 'week':
-                for ($i = 0; $i < 7; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
+                for ($i = 6; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
                     $newbies = Customer::where('created_at', '>=', $start)
                         ->where('created_at', '<', $end)
                         ->count();
@@ -97,16 +87,16 @@ class Customer extends User
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
                 break;
             case 'month':
-                for ($i = 0; $i < 31; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
+                for ($i = 29; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
                     $newbies = Customer::where('created_at', '>=', $start)
                         ->where('created_at', '<', $end)
                         ->count();
@@ -115,15 +105,16 @@ class Customer extends User
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
+                break;
             case 'year':
-                for ($i = 0; $i < 365; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
+                for ($i = 364; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
                     $newbies = Customer::where('created_at', '>=', $start)
                         ->where('created_at', '<', $end)
                         ->count();
@@ -132,11 +123,12 @@ class Customer extends User
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
+                break;
         }
 
         return $points;

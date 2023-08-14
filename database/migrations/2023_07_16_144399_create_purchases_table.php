@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->references('id')->on('users');
             $table->decimal('total',30,2);
             $table->decimal('shipping_fees')->nullable()->default(0);
+            $table->integer('quantity');
         });
     }
 

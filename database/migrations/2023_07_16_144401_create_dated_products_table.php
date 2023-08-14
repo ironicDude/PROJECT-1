@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('dated_products', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('product_id')->constrained()->references('id')->on('purchased_products');
-            $table->foreignId('purchase_id');//->constrained()->references('id')->on('purchases');
+            $table->foreignId('product_id')->constrained('purchased_products', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('purchase_id')->nullable()->constrained('purchases', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->decimal('purchase_price', 20, 2)->default(0);
             $table->decimal('discount', 3, 2)->nullable();
             $table->integer('quantity', false, true);
-            // $table->decimal('purchase_price', 10, 2);
             $table->date('expiry_date');
             $table->date('manufacturing_date')->nullable();
+            
         });
     }
 

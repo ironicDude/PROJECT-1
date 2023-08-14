@@ -19,11 +19,12 @@ class Vacancy extends Model
         'number_of_vacancies',
         'status',
  ];
-     public function applicant_vacancy(){
-         return $this->hasMany(Applicant_Vacancy::class);
+     public function applications(){
+         return $this->hasMany(Application::class);
      }
  
      public function employee(){
          return belongsTo(Employee::class);
      }
+
 }
