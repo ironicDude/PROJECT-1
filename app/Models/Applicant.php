@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// class Applicant extends Model
-class Applicant extends User
+class Applicant extends Model
+// class Applicant extends User
 
 {
     use HasFactory;
-    protected static $singleTableType = 'applicant';
-    protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
+    // protected static $singleTableType = 'applicant';
+    // protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
     protected $fillable = [
         'first_name',
         'last_name',
@@ -23,6 +23,6 @@ class Applicant extends User
     ];
     
         public function applicant_vacancy(){
-            return $this->hasMany(Applicant_Vacancy::class);
+            return $this->hasMany(Application::class);
         }
 }

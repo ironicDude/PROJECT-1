@@ -20,7 +20,7 @@ class Vacancy extends Model
         'status',
  ];
      public function applicant_vacancy(){
-         return $this->hasMany(Applicant_Vacancy::class);
+         return $this->hasMany(Application::class);
      }
  
      public function employee(){

@@ -5,19 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vacancy;
 use App\Models\Applicant;
-use App\Models\Applicant_Vacancy;
+use App\Models\Application;
+use App\Models\User;
 use App\Mail\ApplicantMail;
 use App\Mail\RejectMail;
 use App\Mail\AcceptMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
-class Applicant_VacancyController extends Controller
+class ApplicationController extends Controller
 {
 
 public function getApplicantsForVacancy($vacancyId)
 {
     // $vacancy = Vacancy::findOrFail($vacancyId);
-    $applicants = Applicant_Vacancy::where('vacancy_id', $vacancyId)->get();
+    $applicants = Application::where('vacancy_id', $vacancyId)->get();
     // $applicants = $vacancy->applicants;
 
     return response()->json([
@@ -91,7 +94,7 @@ public function applytojob(Request $request)
     $jobApplication->address = $address;
     $jobApplication->resume = $resumePath;
     $jobApplication->save();
-    $applicant_vacancy = new Applicant_Vacancy();
+    $applicant_vacancy = new Application();
     $applicant_vacancy->applicant_id = $applicant_id ;
     $applicant_vacancy->vacancy_id  = $vacancy_id ;
     $applicant_vacancy->save();
@@ -195,8 +198,10 @@ public function changeApplicantStatus(Request $request,$id)
                 $applicant->save();
                 $vacancy_id->number_of_vacancies = $vacancy_id->number_of_vacancies - 1;
                 $vacancy_id->save();
+                $password = Str::random(8); // توليد كلمة مرور عشوائية
+                $hashedPassword = Hash::make($password); // تشفير كلمة المرور
+
                 // $vacancy_id->save();
-                
                 // Mail::to($applicant->email)->send(new AcceptMail());
                 return response()->json([
                     'vacancy_type'=> $vacancy_type,

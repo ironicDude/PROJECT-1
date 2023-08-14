@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -156,4 +157,19 @@ class PresciptionController extends Controller
 
     return response()->json(['message' => 'New image upload failed'], 400);
 }
+
+public function getImage($id)
+{
+    $imageData = DB::table('prescriptions')->where('id', $id)->first();
+
+    if ($imageData) {
+        $imagePath = $imageData->path; // افترض أن اسم العمود هو image_path
+        $imageContents = Storage::disk('public')->get($imagePath);
+
+        return response($imageContents)->header('Content-Type', 'image/jpeg'); // تستبدل نوع الصورة حسب النوع الصحيح
+    }
+
+    return response('Image not found', 404);
+}
+
 }
