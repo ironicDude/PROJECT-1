@@ -16,20 +16,34 @@ class Employee extends User
     
     protected static $singleTableType = 'employee';
     protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'password',
-        'address',
-        'date_of_birth',
-        'gender',
-        'image',
-        'account_status',
-        'salary',
-        'personal_email',
-        'date_of_joining',
-    ];
+
+        protected $fillable = [
+            'first_name',
+            'last_name',
+            'address',
+            'email',
+            'password',
+            'account_status',
+            'type',
+            'mobile',
+            'gender',
+            'date_of_birth',
+            'image',
+            'salary',
+            'personal_email',
+            'date_of_joining',
+            'money'
+        ];
+    
+        protected $hidden = [
+            'password',
+            'remember_token',
+        ];
+    
+        protected $casts = [
+            'email_verified_at' => 'datetime',
+        ];
+
 
     public function isAdministrator(){
         return $this->roles()->where('role', 'administrator')->exists();

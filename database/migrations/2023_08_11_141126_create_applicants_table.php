@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email');
             $table->string('mobile');
             $table->string('status')->default('pending');
-            $table->integer('vacancy_type'); // إضافة حقل نوع الشاغر
             $table->string('resume');
             $table->string('address');
             $table->timestamps();

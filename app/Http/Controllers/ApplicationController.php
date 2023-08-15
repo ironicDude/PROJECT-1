@@ -94,7 +94,7 @@ public function storeapplicantwithvacancyid(Request $request,$vacancyId)
     $last_name = $request->input('last_name');
     $email = $request->input('email');
     $mobile = $request->input('mobile');
-    $vacancy_type = $vacancy_id;
+    // $vacancy_type = $vacancy_id;
     $status = $request->input('status');
     $address = $request->input('address');
     $resume = $request->file('resume');
@@ -108,7 +108,7 @@ public function storeapplicantwithvacancyid(Request $request,$vacancyId)
     $jobApplication->last_name = $last_name;
     $jobApplication->email = $email;
     $jobApplication->mobile = $mobile;
-    $jobApplication->vacancy_type = $vacancy_type;
+    // $jobApplication->vacancy_type = $vacancy_type;
     // $jobApplication->status = $status;
     $jobApplication->address = $address;
     $jobApplication->resume = $resumePath;

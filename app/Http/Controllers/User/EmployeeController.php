@@ -10,7 +10,7 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Hash;
 class EmployeeController extends Controller
 {
     use CustomResponse;
@@ -117,119 +117,147 @@ class EmployeeController extends Controller
     
 
     // اظافة موظف جديد
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string',
-            'address' => 'required|string',
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'account_status' => 'required|string',
-            'salary' => 'required|numeric',
-            'personal_email' => 'required|email',
-            'date_of_joining' => 'required|date',
-        ]);
+//     public function store(Request $request)
+//     {
+//         $validatedData = $request->validate([
+//             'first_name' => 'required|string',
+//             'last_name' => 'required|string',
+//             'email' => 'required|email|unique:users,email',
+//             'password' => 'required|string',
+//             'address' => 'required|string',
+//             'date_of_birth' => 'required|date',
+//             'gender' => 'required|string',
+//             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+//             'account_status' => 'required|string',
+//             'salary' => 'required|numeric',
+//             'personal_email' => 'required|email',
+//             'date_of_joining' => 'required|date',
+//         ]);
     
-        // تخزين الصورة إذا تم تحميلها
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('employee_images', 'public');
-        }
+//         // تخزين الصورة إذا تم تحميلها
+//         $imagePath = null;
+//         if ($request->hasFile('image')) {
+//             $imagePath = $request->file('image')->store('employee_images', 'public');
+//         }
     
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
-        $email = $request->input('email');
-        $password = $request->input('password');
-        $address = $request->input('address');
-        $date_of_birth = $request->input('date_of_birth');
-        $gender = $request->input('gender');
-        $image = $request->input('image');
-        $account_status = $request->input('account_status');
-        $salary = $request->input('salary');
-        $personal_email = $request->input('personal_email');
-        $date_of_joining = $request->input('date_of_joining');
+//         $first_name = $request->input('first_name');
+//         $last_name = $request->input('last_name');
+//         $email = $request->input('email');
+//         $password = $request->input('password');
+//         $address = $request->input('address');
+//         $date_of_birth = $request->input('date_of_birth');
+//         $gender = $request->input('gender');
+//         $image = $request->input('image');
+//         $account_status = $request->input('account_status');
+//         $salary = $request->input('salary');
+//         $personal_email = $request->input('personal_email');
+//         $date_of_joining = $request->input('date_of_joining');
     
-        $employee = new User();
+//         $employee = new User();
     
-        $employee->first_name = $first_name;
-        $employee->last_name = $last_name;
-        $employee->email = $email;
-        $employee->password = $password;
-        $employee->address = $address;
-        $employee->date_of_birth = $date_of_birth;
-        $employee->gender = $gender;
-        $employee->image = $image;
-        $employee->account_status = $account_status;
-        $employee->salary = $salary;
-        $employee->personal_email = $personal_email;
-        $employee->date_of_joining = $date_of_joining;
-        $employee->save();
+//         $employee->first_name = $first_name;
+//         $employee->last_name = $last_name;
+//         $employee->email = $email;
+//         $employee->password = $password;
+//         $employee->address = $address;
+//         $employee->date_of_birth = $date_of_birth;
+//         $employee->gender = $gender;
+//         $employee->image = $image;
+//         $employee->account_status = $account_status;
+//         $employee->salary = $salary;
+//         $employee->personal_email = $personal_email;
+//         $employee->date_of_joining = $date_of_joining;
+//         $employee->save();
         
-        return response()->json([
-            'success'=>'تمت إضافة الموظف بنجاح.',
-        ]);
-    } 
-    // تعديل بينات موظف
-    public function update(Request $request, $id)
+//         return response()->json([
+//             'success'=>'تمت إضافة الموظف بنجاح.',
+//         ]);
+//     } 
+//     // تعديل بينات موظف
+//     public function update(Request $request, $id)
+// {
+//     $employee = User::find($id);
+
+//     if (!$employee) {
+//         return response()->json(['error' => 'الموظف غير موجود.'], 404);
+//     }
+
+//     $validatedData = $request->validate([
+//         'first_name' => 'required|string',
+//         'last_name' => 'required|string',
+//         'email' => 'required|email|unique:employees,email,' . $id,
+//         'password' => 'required|string',
+//         'address' => 'required|string',
+//         'date_of_birth' => 'required|date',
+//         'gender' => 'required|string',
+//         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+//         'account_status' => 'required|string',
+//         'salary' => 'required|numeric',
+//         'personal_email' => 'required|email',
+//         'date_of_joining' => 'required|date',
+//     ]);
+
+//     // تخزين الصورة إذا تم تحميلها
+//     if ($request->hasFile('image')) {
+//         $imagePath = $request->file('image')->store('employee_images', 'public');
+//         $employee->image = $imagePath;
+//     }
+
+//     $employee->first_name = $request->input('first_name');
+//     $employee->last_name = $request->input('last_name');
+//     $employee->email = $request->input('email');
+//     $employee->password = $request->input('password');
+//     $employee->address = $request->input('address');
+//     $employee->date_of_birth = $request->input('date_of_birth');
+//     $employee->gender = $request->input('gender');
+//     $employee->account_status = $request->input('account_status');
+//     $employee->salary = $request->input('salary');
+//     $employee->personal_email = $request->input('personal_email');
+//     $employee->date_of_joining = $request->input('date_of_joining');
+//     $employee->save();
+
+//     return response()->json(['success' => 'تم تحديث بيانات الموظف بنجاح.']);
+// }
+// public function destroy($id)
+// {
+//     $employee = User::find($id);
+
+//     if (!$employee) {
+//         return response()->json(['error' => 'الموظف غير موجود.'], 404);
+//     }
+
+//     $employee->delete();
+
+//     return response()->json(['success' => 'تم حذف الموظف بنجاح.']);
+// }
+
+
+public function store(Request $request)
 {
-    $employee = User::find($id);
+    $user = new User();
 
-    if (!$employee) {
-        return response()->json(['error' => 'الموظف غير موجود.'], 404);
-    }
-
-    $validatedData = $request->validate([
-        'first_name' => 'required|string',
-        'last_name' => 'required|string',
-        'email' => 'required|email|unique:employees,email,' . $id,
-        'password' => 'required|string',
-        'address' => 'required|string',
-        'date_of_birth' => 'required|date',
-        'gender' => 'required|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'account_status' => 'required|string',
-        'salary' => 'required|numeric',
-        'personal_email' => 'required|email',
-        'date_of_joining' => 'required|date',
-    ]);
-
+    $user->first_name = $request->input('first_name');
+    $user->last_name = $request->input('last_name');
+    $user->address = $request->input('address');
+    $user->email = $request->input('email');
+    $user->password = Hash::make($request->input('password'));
+    $user->account_status = $request->input('account_status');
+    $user->type = $request->input('type');
+    $user->mobile = $request->input('mobile');
+    $user->gender = $request->input('gender');
+    $user->date_of_birth = $request->input('date_of_birth');
     // تخزين الصورة إذا تم تحميلها
     if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('employee_images', 'public');
-        $employee->image = $imagePath;
+        $file = $request->file('image');
+        $user->image = file_get_contents($file);
     }
+    $user->salary = $request->input('salary');
+    $user->personal_email = $request->input('personal_email');
+    $user->date_of_joining = $request->input('date_of_joining');
+    $user->money = $request->input('money');
 
-    $employee->first_name = $request->input('first_name');
-    $employee->last_name = $request->input('last_name');
-    $employee->email = $request->input('email');
-    $employee->password = $request->input('password');
-    $employee->address = $request->input('address');
-    $employee->date_of_birth = $request->input('date_of_birth');
-    $employee->gender = $request->input('gender');
-    $employee->account_status = $request->input('account_status');
-    $employee->salary = $request->input('salary');
-    $employee->personal_email = $request->input('personal_email');
-    $employee->date_of_joining = $request->input('date_of_joining');
-    $employee->save();
+    $user->save();
 
-    return response()->json(['success' => 'تم تحديث بيانات الموظف بنجاح.']);
+    return "User stored successfully.";
 }
-public function destroy($id)
-{
-    $employee = User::find($id);
-
-    if (!$employee) {
-        return response()->json(['error' => 'الموظف غير موجود.'], 404);
-    }
-
-    $employee->delete();
-
-    return response()->json(['success' => 'تم حذف الموظف بنجاح.']);
-}
-
-
 }
