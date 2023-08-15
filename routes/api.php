@@ -8,6 +8,7 @@ use App\Http\Controllers\PresciptionController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Order\Orderd_ProductsController;
 use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\RoleController;
@@ -75,7 +76,7 @@ Route::post('/storeapplicantwithvacancyid/{id}',[ ApplicationController::class,'
 
 Route::get('/getapplicanttovacancy/{id}',[ ApplicationController::class,'getapplicanttovacancy']);// جلب جميع المتقدمين لوظيفة معينة
 
-Route::post('/changeApplicantStatus/{id}',[ ApplicationController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
+// Route::post('/changeApplicantStatus/{id}',[ ApplicationController::class,'changeApplicantStatus']);// قبول او رفض متقدم لوظيفة
 
 Route::resource('/employee', EmployeeController::class);//  اظافة موظف جديد وتعديل بياناته وحذف موظف
 
@@ -115,4 +116,8 @@ Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'
         //             ]);
         //         });
 
+        // use App\Http\Controllers\ApplicantController;
 
+        Route::put('/changeApplicantStatus/{id}', [ApplicantController::class, 'changeApplicantStatus']);
+        Route::post('/create-user', [UserController::class, 'createUser']);
+        Route::get('/users', [UserController::class, 'getAllUsers']);

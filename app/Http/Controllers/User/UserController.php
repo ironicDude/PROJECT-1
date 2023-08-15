@@ -299,5 +299,22 @@ class UserController extends Controller
         }
         return redirect()->intended(env('FRONTEND_URL').'?restored=1');
     }
+    public function createUser(Request $request)
+    {
+        $data = $request->all([
+            'first_name', 'last_name', 'address', 'email', 'password', 'mobile', 'gender', 'date_of_birth', 'type',
+            'email_verified_at', 'account_status', 'image', 'salary', 'date_of_joining', 'personal_email', 'money'
+        ]);
 
+        $user = User::createUser($data);
+
+        return response()->json(['message' => 'تم إنشاء المستخدم بنجاح.']);
+    }
+    
+    public function getAllUsers()
+    {
+        $users = User::getAllUsers(); // استدعاء دالة النموذج لاسترجاع المستخدمين
+        return response()->json(['users' => $users]);
+    }
+    
 }

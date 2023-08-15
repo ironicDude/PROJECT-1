@@ -146,20 +146,20 @@ public function getapplicanttovacancy($vacancyType){
 
 }
 // قبول او رفض متقدم لوظيفة
-public function changeApplicantStatus(Request $request, int $applicantId)
-{
-    $applicant = Applicant::find($applicantId);
+// public function changeApplicantStatus(Request $request, int $applicantId)
+// {
+//     $applicant = Applicant::find($applicantId);
 
-    if (!$applicant) {
-        return $this->responseError('Applicant not found.');
-    }
+//     if (!$applicant) {
+//         return $this->responseError('Applicant not found.');
+//     }
 
-    $status = $request->status;
+//     $status = $request->status;
 
-    $applicant->changeStatus($applicant, $status);
+//     $applicant->changeStatus($applicant, $status);
 
-    return $this->responseSuccess(['message' => 'Status updated successfully.']);
-}
+//     return $this->responseSuccess(['message' => 'Status updated successfully.']);
+// }
 
 private function responseError($message)
     {
@@ -170,7 +170,57 @@ private function responseError($message)
     {
         return response()->json($data);
     }
+    public function changeApplicantStatus(Request $request,int $id)
+    {
+        // $applicantId = $request->applicant_id;
+        $applicantId = $id;
+        $status = $request->status;
+    
+        $applicant = Applicant::find($applicantId);
+        $vacancy_type = $applicant->vacancy_type;
+        // $vacancy_type = Applicant::where('vacancy_type', $vacancy_type)->get();
+    
+        $vacancy_id = Vacancy::find($vacancy_type);
+        // $va=$vacancy_id->$id;
+        // $vacancy = Vacancy::find($vacancyId);
+    
+        if ($applicant) {
+            if ($status == 'accepted') {
+                    if ( $vacancy_id->number_of_vacancies > 0)
+                    {
+                    $applicant->status = 'مقبول';
+                    $applicant->save();
+                    $vacancy_id->number_of_vacancies = $vacancy_id->number_of_vacancies - 1;
+                    $vacancy_id->save();
+                    // $vacancy_id->save();
+    
+                    // Mail::to($applicant->email)->send(new AcceptMail());
+                    return response()->json([
+                        'vacancy_type'=> $vacancy_type,
+                        'vacancy_id'=> $vacancy_id,
+                        'message' => 'accepted',
+                    ]);
+                }else {
+                    $vacancy_id->status = 'غير متاح';
+                    $vacancy_id->save();
+                    return response()->json(['لا يوجد شواغر عذرا .']);
+                   }
+    
+                } elseif ($status == 'rejected') {
+                    $applicant->status = 'مرفوض';
+                    $applicant->save();
+                    // Mail::to($applicant->email)->send(new RejectMail());
+                    return response()->json(['تم رفض المتقدم .']);
+            } else {
+                return response()->json(['حالة غير صالحة.']);
+            }
+    
+    
+        } else {
+            return response()->json(['المتقدم غير موجود.']);
+        }
+    }
 
-
+    
 
 }

@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
@@ -35,9 +34,11 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';
+    protected static $singleTableType = 'user'; // اسم النموذج الأساسي
     protected static $singleTableTypeField = 'type';
+    // protected static $singleTableSubclasses = [Employee::class, Customer::class];
+    // protected static $singleTableSubclasses = [Employee::class, Customer::class ,Application::class];
     protected static $singleTableSubclasses = [Employee::class, Customer::class];
-
 
     protected static $persisted = [
         'first_name',
@@ -49,10 +50,13 @@ class User extends Authenticatable
         'password',
         'address',
         'date_of_birth',
+        'salary',
         'type',
         'gender',
         'image',
+        'money',
         'account_status',
+        'date_of_joining',
         'deleted_at',
     ];
     /**
@@ -63,7 +67,6 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
-
         'email',
         'password',
         'address',
@@ -71,7 +74,11 @@ class User extends Authenticatable
         'date_of_birth',
         'gender',
         'image',
+        'salary',
+        'money',
+        'date_of_joining',
         'account_status',
+        'mobile',
     ];
 
     /**
@@ -387,5 +394,15 @@ class User extends Authenticatable
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
+    }
+    public static function createUser($data)
+    {
+        $data['password'] = bcrypt($data['password']); // تشفير كلمة المرور
+
+        return self::create($data);
+    }
+    public static function getAllUsers()
+    {
+        return self::all();
     }
 }

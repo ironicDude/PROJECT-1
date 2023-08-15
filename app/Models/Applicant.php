@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Vacancy;
 
 
 class Applicant extends Model
@@ -19,30 +20,31 @@ class Applicant extends Model
         'status',
         'address',
         'resource',
+        'status', 'vacancy_type'
     ];
 
 
-    public function changeStatus($applicant, $status)
-    {
-        $vacancy = Vacancy::find($applicant->vacancy_type);
+    // public function changeStatus($applicant, $status)
+    // {
+    //     $vacancy = Vacancy::find($applicant->vacancy_type);
 
-        if (!$vacancy) {
-            throw new \Exception('Vacancy type not found.');
-        }
+    //     if (!$vacancy) {
+    //         throw new \Exception('Vacancy type not found.');
+    //     }
 
-        switch ($status) {
-            case 'accepted':
-                $this->handleAcceptedStatus($applicant, $vacancy);
-                break;
+    //     switch ($status) {
+    //         case 'accepted':
+    //             $this->handleAcceptedStatus($applicant, $vacancy);
+    //             break;
 
-            case 'rejected':
-                $this->handleRejectedStatus($applicant);
-                break;
+    //         case 'rejected':
+    //             $this->handleRejectedStatus($applicant);
+    //             break;
 
-            default:
-                throw new \InvalidArgumentException('Invalid status.');
-        }
-    }
+    //         default:
+    //             throw new \InvalidArgumentException('Invalid status.');
+    //     }
+    // }
 
     private function handleAcceptedStatus($applicant, $vacancy)
     {
@@ -71,4 +73,14 @@ class Applicant extends Model
         return $this->hasMany(Application::class);
     }
 
+    public function changeStatus($status)
+    {
+        if ($status == 'accepted') {
+            $this->status = 'مقبول';
+        } elseif ($status == 'rejected') {
+            $this->status = 'مرفوض';
+        }
+        $this->save();
+    }
+    
 }

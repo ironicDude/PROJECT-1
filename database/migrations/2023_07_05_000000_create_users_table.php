@@ -1,11 +1,15 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
@@ -13,24 +17,30 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('address');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('account_status', ['active', 'inactive']);
-            $table->enum('type', ['admin', 'user']);
-            $table->string('mobile');
-            $table->enum('gender', ['male', 'female']);
+            $table->rememberToken();
+            $table->timestamps();
+            $table->string('account_status')->default('Active');
+            $table->string('type');
+            $table->integer('mobile')->nullable();
+            $table->string('gender')->default('I prefer not to say');
             $table->date('date_of_birth');
             $table->string('image')->nullable();
-            $table->decimal('salary', 8, 2);
+            $table->string('path')->nullable();
+            $table->decimal('salary', 10, 2)->nullable();
             $table->string('personal_email')->nullable();
-            $table->date('date_of_joining');
-            $table->decimal('money', 8, 2);
+            $table->date('date_of_joining')->nullable()->default(now());
+            $table->decimal('money', 10, 2)->nullable();
             $table->softDeletes();
-            $table->timestamps();
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('users');
     }
-}
+};

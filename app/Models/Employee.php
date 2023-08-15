@@ -8,42 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Role;
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
-
 class Employee extends User
 {
     use SingleTableInheritanceTrait;
     use HasFactory;
-    
     protected static $singleTableType = 'employee';
+    
     protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
-
-        protected $fillable = [
-            'first_name',
-            'last_name',
-            'address',
-            'email',
-            'password',
-            'account_status',
-            'type',
-            'mobile',
-            'gender',
-            'date_of_birth',
-            'image',
-            'salary',
-            'personal_email',
-            'date_of_joining',
-            'money'
-        ];
-    
-        protected $hidden = [
-            'password',
-            'remember_token',
-        ];
-    
-        protected $casts = [
-            'email_verified_at' => 'datetime',
-        ];
-
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'address',
+        'date_of_birth',
+        'gender',
+        'image',
+        'type',
+        'account_status',
+        'salary',
+        'personal_email',
+        'date_of_joining',
+    ];
 
     public function isAdministrator(){
         return $this->roles()->where('role', 'administrator')->exists();

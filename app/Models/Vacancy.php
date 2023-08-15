@@ -18,6 +18,7 @@ class Vacancy extends Model
         'deadline',
         'number_of_vacancies',
         'status',
+        'number_of_vacancies', 'status'
  ];
 
 
@@ -29,5 +30,16 @@ class Vacancy extends Model
      {
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
 
+}
+
+
+public function decrementVacancies()
+{
+    if ($this->number_of_vacancies > 0) {
+        $this->number_of_vacancies--;
+        $this->save();
+        return true;
+    }
+    return false;
 }
 }
