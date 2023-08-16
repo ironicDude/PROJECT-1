@@ -18,7 +18,7 @@ class DatedProductResource extends JsonResource
             'name' => $this->purchasedProduct->product->name,
             'purchaseId' => $this->purchase_id,
             'id' => $this->id,
-            'productId' => $this->datedProduct->product_id,
+            'productId' => $this->product_id,
             'quantity' => $this->quantity,
             'cost' => $this->purchase_price,
             'expiryDate' => $this->expiry_date,
