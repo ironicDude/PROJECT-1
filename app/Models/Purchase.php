@@ -21,7 +21,7 @@ class Purchase extends Model
     }
     public function getTotal()
     {
-        return ($this->datedProducts()->sum('purchase_price') + $this->shipping_fees);
+        return ($this->datedProducts()->sum('subtotal') + $this->shipping_fees);
     }
 
     public function getQuantity()
