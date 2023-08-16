@@ -6,24 +6,20 @@ namespace App\Models;
 
 use App\Exceptions\AccountAlreadyRestoredException;
 use App\Exceptions\AccountPermanentlyDeletedException;
-use App\Exceptions\AccountPermenantelyDeletedException;
-use App\Http\Resources\AllergyResource;
-use App\Http\Resources\Product\ProductOverviewCollection;
-use App\Http\Resources\User\AllergyCollection;
-use App\Http\Resources\User\UserResource;
-use App\Http\Resources\User\Wishlist\WishlistResource;
+
 use App\Mail\AccountDeleted;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Gender;
-use App\Models\AccountStatus;
+
 use Nanigans\SingleTableInheritance\SingleTableInheritanceTrait;
 use App\Models\Employee;
 use App\Models\Customer;
+use App\Models\Applicant;
+use App\Models\Application;
+use App\Models\Schedule;
 use Carbon\Carbon;
-use Database\Seeders\GenderSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -41,6 +37,8 @@ class User extends Authenticatable
     protected $table = 'users';
     protected static $singleTableTypeField = 'type';
     protected static $singleTableSubclasses = [Employee::class, Customer::class];
+
+
     protected static $persisted = [
         'first_name',
         'last_name',
@@ -65,6 +63,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
+
         'email',
         'password',
         'address',
@@ -380,5 +379,9 @@ class User extends Authenticatable
     public function allergies()
     {
         return $this->belongsToMany(Product::class, 'allergies', 'product_id', 'user_id');
+    }
+    public function employee_roles()
+    {
+        return $this->hasMany(User::class);
     }
 }

@@ -18,9 +18,9 @@ return new class extends Migration
             $table->foreignId('delivery_employee_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->foreignId('customer_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->string('status')->default('Review');
-            $table->decimal('shipping_fees', 20, 2)->default(0);
             $table->decimal('delivery_fees', 20, 2)->default(0);
-            $table->string('shipping_address');
+            $table->boolean('is_updated')->default(0);
+            $table->string('shipping_address')->nullable();
             $table->string('method')->default('Online');
             $table->date('delivery_date')->nullable();
         });

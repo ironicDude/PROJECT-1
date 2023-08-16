@@ -19,6 +19,7 @@ class OrderFullResource extends JsonResource
             'date' => $this->updated_at->format('Y-m-d'),
             'time' => $this->updated_at->format('g:i A'),
             'customer_id' => $this->customer_id,
+            'employee_id' => $this->employee_id,
             'status' => $this->status,
             'total' => $this->getTotal(),
             'shipping_fees' => $this->shipping_fees,

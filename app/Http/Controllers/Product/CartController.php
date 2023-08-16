@@ -3,44 +3,28 @@
 namespace App\Http\Controllers\Product;
 
 use App\Exceptions\CheckoutOutOfStockException;
-use App\Exceptions\EmptyCartException;
 use App\Exceptions\InShortageException;
-use App\Exceptions\ItemNotInCartException;
-use App\Exceptions\LimitedStockException;
 use App\Exceptions\NoPrescriptionsException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
-use App\Exceptions\NullQuantityException;
 use App\Exceptions\OutOfStockException;
 use App\Exceptions\PrescriptionRequiredException;
+use App\Exceptions\ProductAlreadyAddedException;
 use App\Exceptions\QuantityExceededOrderLimitException;
 use App\Exceptions\SameQuantityException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Cart\CartResource;
-use App\Http\Resources\CartedProductResource;
 use App\Models\Cart;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
-use App\Models\CartedProduct;
 use App\Models\PurchasedProduct;
-use App\Models\User;
-use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\ItemNotFoundException;
 
 class CartController extends Controller
 {
     use CustomResponse;
 
-    /**
-     * Add a product to the cart.
-     *
-     * @param PurchasedProduct $product The product to be added to the cart.
-     * @param Request $request The HTTP request containing the product details.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the add operation.
-     */
     public function store(PurchasedProduct $purchasedProduct, Request $request)
     {
         $this->authorize('storeInCart', $purchasedProduct);
@@ -52,39 +36,26 @@ class CartController extends Controller
         }
         try {
             $cart = Auth::user()->createCart();
-            $item = $cart->addItem($purchasedProduct, $request->quantity);
+            $product = $cart->addProduct($purchasedProduct, $request->quantity);
         } catch (QuantityExceededOrderLimitException $e) {
             return self::customResponse('For some regulatory purposes, you cannot order as many of this product', null, 422);
         } catch (OutOfStockException $e) {
             return self::customResponse('Out of stock', null, 422);
         } catch (InShortageException $e){
             return self::customResponse($e->getMessage(), null, 422);
+        } catch (ProductAlreadyAddedException $e){
+            return self::customResponse('Product already added. You can change its quantity.', null, 422);
         }
-        return self::customResponse('Item stored', $item, 200);
+        return self::customResponse('Product stored', $product, 200);
     }
 
-    /**
-     * Remove a product from the cart.
-     *
-     * @param Cart $cart the cart to remove the product from
-     * @param CartedProduct $cartedProduct the product to be removed
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the remove operation.
-     */
     public function remove(Cart $cart, PurchasedProduct $purchasedProduct)
     {
         $this->authorize('manageCart', $cart);
-        $item = $cart->removeItem($purchasedProduct);
-        return self::customResponse('Item removed', $item, 200);
+        $product = $cart->removeProduct($purchasedProduct);
+        return self::customResponse('Product removed', $product, 200);
     }
 
-    /**
-     * Update the quantity of a carted product in the cart.
-     *
-     * @param Request       $request        The HTTP request containing the new quantity.
-     * @param Cart          $cart           The cart containing the carted product.
-     * @param CartedProduct $cartedProduct  The carted product to update.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the update operation.
-     */
     public function updateQuantity(Request $request, Cart $cart, PurchasedProduct $purchasedProduct)
     {
         $this->authorize('manageCart', $cart);
@@ -108,13 +79,6 @@ class CartController extends Controller
         return self::customResponse('Quantity updated', $quantity, 200);
     }
 
-    /**
-     * Store the shipping address in the cart.
-     *
-     * @param Request $request The HTTP request containing the shipping address.
-     * @param Cart    $cart    The cart to store the address.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the address storage operation.
-     */
     public function storeAddress(Request $request, Cart $cart)
     {
         $validator = Validator::make($request->all(), [
@@ -128,12 +92,6 @@ class CartController extends Controller
         return self::customResponse('Address stored', $address, 200);
     }
 
-    /**
-     * Get the shipping address from the cart.
-     *
-     * @param Cart $cart The cart to get the shipping address from.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the shipping address.
-     */
     public function getAddress(Cart $cart)
     {
         $this->authorize('manageCart', $cart);
@@ -141,12 +99,6 @@ class CartController extends Controller
         return self::customResponse('Address returned', $address, 200);
     }
 
-    /**
-     * Show the cart information for the authenticated user.
-     *
-     * @param Cart $cart The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the cart information.
-     */
 
     public function show(Cart $cart)
     {
@@ -154,14 +106,6 @@ class CartController extends Controller
         $cart = $cart->show();
         return self::customResponse('Cart info returned', new CartResource($cart), 200);
     }
-
-    /**
-     * Process the checkout for the cart.
-     *
-     * @param Request $request The HTTP request containing the checkout details.
-     * @param Cart    $cart    The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the checkout operation.
-     */
 
 
     public function checkout(Request $request, Cart $cart)
@@ -190,13 +134,6 @@ class CartController extends Controller
         return self::customResponse('Purchase complete', null, 200);
     }
 
-    /**
-     * Get the total quantity of carted products in the cart.
-     *
-     * @param Cart $cart The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the total quantity of carted products.
-     */
-
     public function getQuantity(Cart $cart)
     {
         $this->authorize('manageCart', $cart);
@@ -204,12 +141,6 @@ class CartController extends Controller
         return self::customResponse('Quantity returned', $quantity, 200);
     }
 
-    /**
-     * Get the total value of the cart.
-     *
-     * @param Cart $cart The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the total value of the cart.
-     */
 
     public function getTotal(Cart $cart)
     {
@@ -218,12 +149,6 @@ class CartController extends Controller
         return self::customResponse('Total returned', $total, 200);
     }
 
-    /**
-     * Clear the cart by removing all items from it.
-     *
-     * @param Cart $cart The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the clear operation.
-     */
 
     public function clear(Cart $cart)
     {
@@ -232,13 +157,6 @@ class CartController extends Controller
         return self::customResponse('Cart cleared', null, 200);
     }
 
-    /**
-     * Store prescriptions uploaded by the user in the cart.
-     *
-     * @param Request $request The HTTP request containing the prescription files.
-     * @param Cart    $cart    The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the prescription storage operation.
-     */
     public function storePrescriptions(Request $request, Cart $cart)
     {
         $this->authorize('manageCart', $cart);
@@ -264,13 +182,8 @@ class CartController extends Controller
         return self::customResponse('Prescriptions deleted', $prescriptions, 200);
     }
 
-    /**
-     * Check if any prescriptions are uploaded
-     *
-     * @param Cart $cart The cart instance for the authenticated user.
-     * @return \Illuminate\Http\JsonResponse The JSON response with the result of the clear operation.
-     */
-    public function checkPrescriptionsUpload(Cart $cart)
+
+    public function checkForPrescriptions(Cart $cart)
     {
         $this->authorize('manageCart', $cart);
         $status = $cart->checkPrescriptionsUpload();
