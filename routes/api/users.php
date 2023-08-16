@@ -118,6 +118,9 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
     Route::post('/backup', [BackupController::class, 'runBackup'])
         ->name('backup');
 
+    Route::get('/employees/payments/{employee}', [EmployeeController::class, 'getPayments'])
+        ->name('employees.payments.get');
+
 
 });
 

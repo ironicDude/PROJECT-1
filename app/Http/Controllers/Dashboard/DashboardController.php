@@ -132,4 +132,17 @@ class DashboardController extends Controller
         $points = Order::chartRevenue($request->date, $request->period);
         return self::customResponse('points', $points, 200);
     }
+
+    public function chartProfit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'year' => 'required|digits:4|integer|min:1900|max:' . date('Y')
+        ]);
+
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+        $points = Order::chartProfit($request->year);
+        return self::customResponse('Points', $points, 200);
+    }
 }

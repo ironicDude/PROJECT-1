@@ -26,6 +26,9 @@ Route::get('/orders-chart', [DashboardController::class, 'chartOrders'])
     ->name('orders.chart');
 
 Route::get('/revenue-chart', [DashboardController::class, 'chartRevenue'])
-    ->name('orders.chart');
+    ->name('revenue.chart');
+
+Route::get('/profit-chart', [DashboardController::class, 'chartProfit'])
+    ->name('profit.chart');
 
 // });

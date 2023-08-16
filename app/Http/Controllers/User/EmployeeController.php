@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Payment\PaymentCollection;
 use App\Http\Resources\User\EmployeeResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomResponse;
@@ -97,24 +98,30 @@ class EmployeeController extends Controller
         $employeeInfo = new EmployeeResource(Auth::user()->updateEmployeeInfo($newInfo));
         return self::customResponse('Employee with new info', $employeeInfo, 200);
     }
+
+    public function getPayments(Employee $employee)
+    {
+        $this->authorize('viewPayments', $employee);
+        return self::customResponse('Payments returned', new PaymentCollection($employee->receivedPayments), 200);
+    }
 // جلب جميع الموظفين
     public function index()
     {
         $schedules = User::all();
         return response()->json($schedules);
     }
-  
+
         public function show($id)
         {
             $employee = User::find($id);
-    
+
             if (!$employee) {
                 return response()->json(['error' => 'الموظف غير موجود.'], 404);
             }
-    
+
             return response()->json($employee);
         }
-    
+
 
     // اظافة موظف جديد
     public function store(Request $request)
@@ -133,13 +140,13 @@ class EmployeeController extends Controller
             'personal_email' => 'required|email',
             'date_of_joining' => 'required|date',
         ]);
-    
+
         // تخزين الصورة إذا تم تحميلها
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('employee_images', 'public');
         }
-    
+
         $first_name = $request->input('first_name');
         $last_name = $request->input('last_name');
         $email = $request->input('email');
@@ -152,9 +159,9 @@ class EmployeeController extends Controller
         $salary = $request->input('salary');
         $personal_email = $request->input('personal_email');
         $date_of_joining = $request->input('date_of_joining');
-    
+
         $employee = new User();
-    
+
         $employee->first_name = $first_name;
         $employee->last_name = $last_name;
         $employee->email = $email;
@@ -168,11 +175,11 @@ class EmployeeController extends Controller
         $employee->personal_email = $personal_email;
         $employee->date_of_joining = $date_of_joining;
         $employee->save();
-        
+
         return response()->json([
             'success'=>'تمت إضافة الموظف بنجاح.',
         ]);
-    } 
+    }
     // تعديل بينات موظف
     public function update(Request $request, $id)
 {

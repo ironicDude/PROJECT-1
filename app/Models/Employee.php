@@ -13,7 +13,7 @@ class Employee extends User
 {
     use SingleTableInheritanceTrait;
     use HasFactory;
-    
+
     protected static $singleTableType = 'employee';
     protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
     protected $fillable = [
@@ -85,6 +85,10 @@ class Employee extends User
         return $this;
     }
 
+    public static function getAdmin()
+    {
+        return self::whereRelation('roles', 'role', 'administrator')->first();
+    }
 
     /**
      * Relationships
@@ -97,7 +101,7 @@ class Employee extends User
     public function orders()
     {
         return $this->hasMany(Order::class, 'order_id', 'id');
-    }    
+    }
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
@@ -110,5 +114,15 @@ class Employee extends User
     public function purchases()
     {
         return $this->hasMany(Purchase::class, 'employee_id', 'id');
+    }
+
+    public function madePayments()
+    {
+        return $this->hasMany(Payment::class, 'payer_id', 'id');
+    }
+
+    public function receivedPayments()
+    {
+        return $this->hasMany(Payment::class, 'employee_id', 'id');
     }
 }
