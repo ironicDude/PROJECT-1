@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->foreignId('employee_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('delivery_employee_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->foreignId('customer_id')->nullable()->constrained('users', 'id')->nullOnDelete()->cascadeOnUpdate();
             $table->string('status')->default('Review');
             $table->decimal('shipping_fees', 20, 2)->default(0);
