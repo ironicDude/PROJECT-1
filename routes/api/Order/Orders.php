@@ -21,9 +21,9 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
         ->name('orders.get');
 
     Route::get('/delivery_boys', [AssignOrdersController::class, 'delivery_boys'])
-        ->name;
-
+        ->name('delivery.boys');
+        
     Route::post('/assign', [AssignOrdersController::class, 'assign'])
-        ->name;
+        ->name('order.assign');
 
 });

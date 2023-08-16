@@ -3,7 +3,7 @@
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-// Route::middleware(['auth', 'forceLogout'])->group(function () {
+Route::middleware(['auth', 'forceLogout'])->group(function () {
 Route::get('/revenue', [DashboardController::class, 'getRevenue'])
     ->name('revenue.get');
 
@@ -31,4 +31,4 @@ Route::get('/revenue-chart', [DashboardController::class, 'chartRevenue'])
 Route::get('/profit-chart', [DashboardController::class, 'chartProfit'])
     ->name('profit.chart');
 
-// });
+});

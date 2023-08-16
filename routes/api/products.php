@@ -14,18 +14,6 @@ use App\Models\PurchasedProduct;
 
 //order
 
-Route::post('/create/purchase', [ProductController::class, 'purchase'])
-    ->name('product.purchase');
-
-Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
-    ->name('product.get.purchase');
-
-Route::post('/prices', [ProductController::class, 'withPrices'])
-    ->name('product.prices');
-
-Route::get('/all/prices', [ProductController::class, 'allProductsWithPrices'])
-    ->name('products.all.prices');
-
 
 // search
 // Show a specific product's information
@@ -58,6 +46,18 @@ Route::get('/search/names', [ProductController::class, 'searchNames'])
 
 Route::middleware(['auth', 'forceLogout'])->group(function() {
 
+    Route::post('/create/purchase', [ProductController::class, 'purchase'])
+    ->name('product.purchase');
+
+Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
+    ->name('product.get.purchase');
+
+Route::post('/prices', [ProductController::class, 'withPrices'])
+    ->name('product.prices');
+
+Route::get('/all/prices', [ProductController::class, 'allProductsWithPrices'])
+    ->name('products.all.prices');
+    
 // allergy
 // Toggle allergy status of a product for the authenticated user
 Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
