@@ -66,7 +66,7 @@ class Order extends Model
 
     public static function getCustomerOrders(int $customerId, string $date = null)
     {
-        $orders = Order::where('customer_id', $customerId);
+        $orders = self::where('customer_id', $customerId);
         if ($date) {
             $orders = $orders->where('updated_at', $date);
         }
@@ -75,7 +75,7 @@ class Order extends Model
 
     public static function getAllOrders(string $date = null)
     {
-        $orders = Order::query();
+        $orders = self::query();
         if ($date) {
             $orders = $orders->whereDate('updated_at', $date);
         }
@@ -112,7 +112,7 @@ class Order extends Model
     public static function calculateRevenue(int $days)
     {
         $date = Carbon::now()->subDays($days);
-        $orders = Order::where('updated_at', '>=', $date)->get();
+        $orders = self::where('updated_at', '>=', $date)->get();
         $total = 0;
         foreach ($orders as $order) {
             $total += $order->getTotal();
@@ -123,7 +123,7 @@ class Order extends Model
     public static function countOrders(int $days)
     {
         $date = Carbon::now()->subDays($days);
-        $count = Order::all()->where('updated_at', '>=', $date)->count();
+        $count = self::all()->where('updated_at', '>=', $date)->count();
         return $count;
     }
 
@@ -137,7 +137,7 @@ class Order extends Model
                 for ($i = 23; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subHours($i);
                     $end = Carbon::parse($date)->subHours($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)
                         ->count();
                     $points->push([
@@ -150,7 +150,7 @@ class Order extends Model
                 for ($i = 6; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)
                         ->count();
                     $points->push([
@@ -163,7 +163,7 @@ class Order extends Model
                 for ($i = 29; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)
                         ->count();
                     $points->push([
@@ -176,7 +176,7 @@ class Order extends Model
                 for ($i = 364; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)
                         ->count();
                     $points->push([
@@ -199,7 +199,7 @@ class Order extends Model
                 for ($i = 23; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subHours($i);
                     $end = Carbon::parse($date)->subHours($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)->get();
                     $revenue = 0;
                     foreach ($ordersMade as $order) {
@@ -216,7 +216,7 @@ class Order extends Model
                 for ($i = 6; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)->get();
                     $revenue = 0;
                     foreach ($ordersMade as $order) {
@@ -233,7 +233,7 @@ class Order extends Model
                 for ($i = 29; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)->get();
                     $revenue = 0;
                     foreach ($ordersMade as $order) {
@@ -250,7 +250,7 @@ class Order extends Model
                 for ($i = 364; $i >= 0; $i--) {
                     $start = Carbon::parse($date)->subDays($i);
                     $end = Carbon::parse($date)->subDays($i - 1);
-                    $ordersMade = Order::where('updated_at', '>=', $start)
+                    $ordersMade = self::where('updated_at', '>=', $start)
                         ->where('updated_at', '<', $end)->get();
                     $revenue = 0;
                     foreach ($ordersMade as $order) {
@@ -272,7 +272,7 @@ class Order extends Model
     {
         $points = collect();
         for ($i = 1; $i < 13; $i++) {
-            $ordersMadePerMonth = Order::whereYear('updated_at', $year)->whereMonth('updated_at', $i)->get();
+            $ordersMadePerMonth = self::whereYear('updated_at', $year)->whereMonth('updated_at', $i)->get();
             $spendings = (int) Payment::whereYear('updated_at', $year)->whereMonth('updated_at', $i)->sum('amount');
             $revenue = 0;
             foreach ($ordersMadePerMonth as $order) {
