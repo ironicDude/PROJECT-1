@@ -200,6 +200,18 @@ class ProductController extends Controller
     }
 
     ////////////////////////////////// EISSAWI //////////////////////////////////////////////////////////////////////////
+    public function allProductsWithPrices()
+    {
+        return response()->json([
+            Product::query()->join('prices', function ($join) {
+                $join->on('prices.drug_id', '=', 'products.drug_id')
+                    ->where('prices.id', '=', DB::raw('(select min(id) from prices where drug_id = products.drug_id)'));
+            })
+            ->select('products.*', 'prices.cost','prices.currency','prices.unit', DB::raw('prices.cost * 1.3 AS price'))
+            ->paginate(15)
+        ]);
+    }
+
     public function withPrices(Request $request)
     {
         $request->validate([
@@ -207,12 +219,15 @@ class ProductController extends Controller
             'products.*' => ['required', 'exists:products,id'],
         ]);
         try {
-            // Get an array of product IDs from the request
+
             $productIds = $request['products'];
-            $products = Product::query()->whereIn('products.id', $productIds)
-                ->join('prices', 'prices.drug_id', '=', 'products.drug_id')
-                ->select('products.*', 'prices.*', DB::raw('prices.cost * 1.3 AS price'))
-                ->paginate(15);
+            $products=Product::query()->whereIn('products.id', $productIds)
+                ->join('prices', function ($join) {
+                    $join->on('prices.drug_id', '=', 'products.drug_id')
+                         ->where('prices.id', '=', DB::raw('(select min(id) from prices where drug_id = products.drug_id)'));
+                })
+                ->select('products.*', 'prices.cost','prices.currency','prices.unit', DB::raw('prices.cost * 1.3 AS price'))
+                ->get(15);
 
             // $products contain a collection of products along with their prices
             return self::customResponse("Product with Prices", $products);
@@ -225,7 +240,7 @@ class ProductController extends Controller
     public function getPurchase($id)
     {
         $data['purchase'] = Purchase::query()->find($id);
-        $data['purchase_products'] = PurchasedProduct::query()->where('purchase_id', '=', $id)->get();
+
         $data['dated_products'] = DatedProduct::query()->where('purchase_id', '=', $id)->get();
         return $data;
     }
@@ -245,16 +260,23 @@ class ProductController extends Controller
         try {
             // Get an array of product IDs from the request
             $products = $request['products'];
+            $quantity = 0;
+            foreach ($products as $product)
+                $quantity += $product['quantity'];
 
             // Fetch the products and their corresponding prices based on the requested product IDs
             $productIds = array_column($products, 'id');
             $productsData = Product::query()->whereIn('products.id', $productIds)
-                ->join('prices', 'prices.drug_id', '=', 'products.drug_id')
+                ->join('prices', function ($join) {
+                    $join->on('prices.drug_id', '=', 'products.drug_id')
+                         ->where('prices.id', '=', DB::raw('(select min(id) from prices where drug_id = products.drug_id)'));
+                })
                 ->select('products.*', DB::raw('prices.cost * 1.3 AS price'), 'prices.unit')
                 ->get();
             $purchase_id = Purchase::query()->create([
                 'employee_id' => $request['employee_id'],
-                'total' => 0.0
+                'total' => 0.0,
+                'quantity' => 0
             ])['id'];
             $total = 0.0;
             $purchased_products = [];
@@ -267,13 +289,14 @@ class ProductController extends Controller
                 // If a product with the same ID and unit is found in the request, create the 'PurchasedProduct' record
 
                 if ($selectedProduct && $selectedProduct['unit'] === $productData->unit) {
-                    $purchased_products[] = PurchasedProduct::query()->create([
-                        'purchase_id' => $purchase_id,
-                        'product_id' => $productData->id,
-                        'price' => $productData->price,
-                        'order_limit' => 5,
-                        'minimum_stock_level' => 1,
-                    ]);
+                    if (PurchasedProduct::query()->find($productData->id) == null) {
+                        $purchased_products[] = PurchasedProduct::query()->create([
+                            'id' => $productData->id,
+                            'price' => $productData->price,
+                            'order_limit' => 5,
+                            'minimum_stock_level' => 1,
+                        ]);
+                    }
                     $total += ($productData->price / 1.3) * $selectedProduct['quantity'];
 
                     $dated_products[] = DatedProduct::query()->create([
@@ -288,10 +311,13 @@ class ProductController extends Controller
             }
             // update purchase total
             Purchase::query()->find($purchase_id)->update([
-                'total' => $total
+                'total' => $total,
+                'quantity' => $quantity
             ]);
 
             $pharmacy = Pharmacy::query()->find($request['pharmacy_id']);
+            if($total>$pharmacy->money)
+                return self::customResponse("Please charge your pharmacy money.");
             $pharmacy->money = $pharmacy->money - $total;
             $pharmacy->save();
             $data['purchased_products'] = $purchased_products;

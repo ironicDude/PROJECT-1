@@ -9,6 +9,8 @@ class Purchase extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public static function getAllPurchases(string $date = null)
     {
         $purchases = Purchase::query();

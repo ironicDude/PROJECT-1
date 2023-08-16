@@ -13,6 +13,7 @@ use App\Models\Interaction;
 use App\Models\PurchasedProduct;
 
 //order
+
 Route::post('/create/purchase', [ProductController::class, 'purchase'])
     ->name('product.purchase');
 
@@ -21,6 +22,9 @@ Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
 
 Route::post('/prices', [ProductController::class, 'withPrices'])
     ->name('product.prices');
+
+Route::get('/all/prices', [ProductController::class, 'allProductsWithPrices'])
+    ->name('products.all.prices');
 
 
 // search
