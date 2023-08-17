@@ -173,5 +173,24 @@ public function changeApplicantStatus(Request $request, $id)
 //         return response()->json(['message' => 'حالة غير صالحة.']);
 //     }
 // }
+public function destroy($id)
+{
+    // البحث عن الفاتورة المطلوب حذفها
+    $applicant = Applicant::find($id);
 
+    // التحقق من أن الفاتورة موجودة
+    if (!$applicant) {
+        return response()->json([
+            'message' => 'الفاتورة غير موجودة',
+        ], 404);
+    }
+
+    // حذف الفاتورة
+    $applicant->delete();
+
+    // القيام بأي أعمال أخرى أو إرجاع الاستجابة المناسبة
+    return response()->json([
+        'message' => 'تم حذف الفاتورة بنجاح',
+    ]);
+}
 }

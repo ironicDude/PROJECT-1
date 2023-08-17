@@ -121,3 +121,10 @@ Route::delete('/deleteByDatedProductId/{id}',[Orderd_ProductsController::class,'
         Route::put('/changeApplicantStatus/{id}', [ApplicantController::class, 'changeApplicantStatus']);
         Route::post('/create-user', [UserController::class, 'createUser']);
         Route::get('/users', [UserController::class, 'getAllUsers']);
+// Chat Routes
+use App\Http\Controllers\MessageController;
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/messages', [MessageController::class, 'store']);
+    Route::get('/messages', [MessageController::class, 'index']);
+});
