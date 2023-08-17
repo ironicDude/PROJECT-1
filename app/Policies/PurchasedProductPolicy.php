@@ -18,7 +18,7 @@ class PurchasedProductPolicy
     {
         // Check if the user is a customer.
         // If the user is a customer, they are allowed to store items in the cart (returns true). Otherwise return false
-        return $user->type === 'customer';
+        return $user->isCustomer();
     }
 
     // public function getAll(User $user)
@@ -28,7 +28,7 @@ class PurchasedProductPolicy
 
     public function getAndSet(User $user)
     {
-        return $user->type == 'employee' && ($user->role->role == 'administrator' || $user->role->role == 'Inventory Manager');
+        return $user->isEmployee() && ($user->isAdministrator());
     }
 
     public function viewBestSellingProducts(User $user)
