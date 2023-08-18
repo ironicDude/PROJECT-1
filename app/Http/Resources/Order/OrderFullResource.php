@@ -28,7 +28,7 @@ class OrderFullResource extends JsonResource
             'delivery_date' => $this->delivery_date,
             'quantity' => $this->getQuantity(),
             'products' => new OrderedProductCollection($this->orderedProducts),
-            'prescriptions' => new PrescriptionCollection($this->prescriptions),
+            'prescriptions' => $this->viewPrescriptions(),
 
         ];
     }
