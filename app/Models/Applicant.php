@@ -30,24 +30,19 @@ class Applicant extends Model
 
     public static function make(array $info)
     {
-        $first_name = $info['first_name'];
-        $last_name = $info['last_name'];
-        $email = $info['email'];
-        $mobile = $info['mobile'];
-        $address = $info['address'];
-        $dateOfBirth = $info['date_of_birth'];
-        $gender = $info['gender'];
         $vacancyId = Vacancy::firstWhere('title', $info['vacancy'])->value('id');
 
         $applicant = self::create([
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'email' => $email,
-            'mobile' => $mobile,
-            'address' => $address,
-            'date_of_birth' => $dateOfBirth,
-            'gender' => $gender,
+            'first_name' => $info['first_name'],
+            'last_name' => $info['last_name'],
+            'email' => $info['email'],
+            'mobile' => $info['mobile'],
+            'address' => $info['address'],
+            'date_of_birth' => $info['date_of_birth'],
+            'gender' => $info['gender'],
         ]);
+
+        $applicant->setResume($info['resume']);
 
         Application::create([
             'applicant_id' => $applicant->id,
@@ -55,16 +50,16 @@ class Applicant extends Model
             'status' => 'Review',
         ]);
 
-        Mail::to($applicant)->send(new ApplicantMail);
+        // Mail::to($applicant)->send(new ApplicantMail);
 
         return $applicant;
 
     }
 
-    public function setResume(UploadedFile $resume)
+    protected function setResume(UploadedFile $resume)
     {
         if ($this->resume) {
-            Storage::disk('local')->delete("resume/{$this->resume}");
+            Storage::disk('local')->delete("resumes/{$this->resume}");
         }
         $resumeName = "Applicant{$this->id}.{$resume->getClientOriginalExtension()}";
         Storage::disk('local')->put("resumes/{$resumeName}", File::get($resume));

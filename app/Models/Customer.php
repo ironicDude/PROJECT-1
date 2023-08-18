@@ -133,6 +133,16 @@ class Customer extends User
 
         return $points;
     }
+
+    public static function searchNames(string $string, int $limit = 5)
+    {
+        $customers = DB::select("SELECT CONCAT(u.first_name, u.last_name) AS name, u.id AS id
+                            FROM users AS u
+                            WHERE u.type = 'customer' AND CONCAT(u.first_name, u.last_name) LIKE '%{$string}%'
+                            LIMIT {$limit}");
+        return $customers;
+    }
+
     /**
      * Relationships
      */

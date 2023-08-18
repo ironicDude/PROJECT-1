@@ -41,7 +41,7 @@ class Application extends Model
 
         $this->markAsAccepted();
 
-        Mail::to($applicant)->send(new AcceptMail($employee, $password));
+        // Mail::to($applicant)->send(new AcceptMail($employee, $password));
     }
 
     public function reject()

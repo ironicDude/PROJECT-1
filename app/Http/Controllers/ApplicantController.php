@@ -34,7 +34,8 @@ class ApplicantController extends Controller
             'mobile' => 'required|string',
             'vacancy' => 'required|string',
             'date_of_birth' => 'required|date|before:-18years',
-            'gender' => 'required|string|in:Male,Female'
+            'gender' => 'required|string|in:Male,Female',
+            'resume' => 'required|file|mimes:pdf|max:10000',
         ]);
 
         if ($validator->fails()) {
@@ -44,20 +45,6 @@ class ApplicantController extends Controller
         $applicant = Applicant::make($request->all());
 
         return self::customResponse('applicant created', new ApplicantResource($applicant), 200);
-    }
-
-    public function storeResume(Request $request, Applicant $applicant)
-    {
-        $validator = Validator::make($request->all(), [
-            'resume' => 'required|file|mimes:pdf|max:10000',
-        ]);
-
-        if ($validator->fails()) {
-            return self::customResponse('errors', $validator->errors(), 422);
-        }
-
-        $resume = $applicant->setResume($request->file('resume'));
-        return self::customResponse('Resume set', $resume, 200);
     }
 
     public function getResume(Applicant $applicant)
