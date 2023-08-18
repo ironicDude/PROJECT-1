@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('interactions', function (Blueprint $table) {
-            $table->bigInteger('id');
-            $table->foreignId('interacting_drug_id')->constrained();
-            $table->string('description');
+            $table->id('id');
+            $table->foreignId('drug_id')->constrained('drugs', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('interacting_drug_id')->constrained('interacting_drugs', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('name');
-            $table->foreignId('drug_id')->constrained();
+            $table->string('description');
             $table->timestamps();
         });
     }
