@@ -13,18 +13,9 @@ return new class extends Migration
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('applicant_id');
-            $table->unsignedBigInteger('vacancy_id');
-            $table->date('dateTime')->default('2023-07-11');
-            $table->string('status')->default('null');
-            $table->foreign('applicant_id')
-            ->references('id')
-            ->on('applicants')
-            ->onDelete('cascade');
-            $table->foreign('vacancy_id')
-            ->references('id')
-            ->on('vacancies')
-            ->onDelete('cascade');
+            $table->foreignId('applicant_id')->constrained('applicants', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('vacancy_id')->constrained('vacancies', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('status');
             $table->timestamps();
         });
     }

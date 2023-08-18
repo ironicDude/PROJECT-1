@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Employee;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -16,24 +17,19 @@ class AcceptMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $password)
+    public function __construct(private Employee $employee, private string $password)
     {
-        $this->user = $user;
-        $this->password = $password;
+
     }
-    public function build()
-    {
-        return $this->view('emails.accept')
-                    ->subject('مرحبًا بك في فرصة التوظيف')
-                    ->with(['user' => $this->user, 'password' => $this->password]);
-    }
+
     /**
      * Get the message envelope.
      */
     public function envelope(): Envelope
     {
+        $company = config('app.name');
         return new Envelope(
-            subject: 'Accept Mail',
+            subject: "Ready to Shine? Welcome to {$company} ✨",
         );
     }
 
@@ -43,7 +39,12 @@ class AcceptMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.accept',
+            view: 'emails.accept',
+            with: [
+                'name' => $this->employee->name,
+                'email' => $this->employee->email,
+                'password' => $this->password,
+            ]
         );
     }
 

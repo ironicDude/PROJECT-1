@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email');
             $table->string('mobile');
-            $table->string('status')->default('pending');
-            $table->integer('vacancy_type'); // إضافة حقل نوع الشاغر
-            $table->string('resume');
+            $table->string('resume')->nullable();
             $table->string('address');
+            $table->date('date_of_birth');
+            $table->string('gender');
             $table->timestamps();
         });
     }

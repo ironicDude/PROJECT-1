@@ -2,65 +2,80 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Application\VacancyCollection;
+use App\Http\Resources\Application\VacancyResource;
+use App\Http\Resources\CustomResponse;
 use Illuminate\Http\Request;
 use App\Models\Vacancy;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class VacancyController extends Controller
 {
+    use CustomResponse;
     public function index()
     {
-    
-            $applicant = Vacancy::all();
-            return response()->json([
-                'Applicant' => $applicant
-            ]);
+        $this->authorize('viewAll', Vacancy::class);
+        return new VacancyCollection(Vacancy::paginate(15));
     }
-    public function show($id)
+
+    public function show(Vacancy $vacancy)
     {
-    
-            $applicant = Vacancy::find($id);
-            if ($applicant) {
-                # code...
-                return response()->json([
-                    'Applicant' => $applicant
-                ]);
-            }else {
-                return response()->json([
-                    'Applicant' =>'الموظف غير موجود'
-                ]);
-            }
+        $this->authorize('view', $vacancy);
+        return self::customResponse('vacancy returned', new VacancyResource($vacancy), 200);
     }
-        public function store(Request $request)
+
+    public function store(Request $request)
     {
-        // استقبال بيانات الطلب من النموذج
-        $employee_id = $request->input('employee_id');
-        $title = $request->input('title');
-        $description = $request->input('description');
-        $type = $request->input('type');
-        $salary = $request->input('salary');
-        $posting_date = $request->input('posting_date');
-        $deadline = $request->input('deadline');
-        $number_of_vacancies = $request->input('number_of_vacancies');
-        $status = $request->input('status');
-    
-        // إنشاء سجل الطلب في قاعدة البيانات
-        $jobPost = new Vacancy();
-        $jobPost->employee_id = $employee_id;
-        $jobPost->title= $title;
-        $jobPost->description = $description;
-        $jobPost->type = $type;
-        $jobPost->salary = $salary;
-        $jobPost->posting_date = $posting_date;
-        $jobPost->deadline = $deadline;
-        $jobPost->number_of_vacancies = $number_of_vacancies;
-        // $jobPost->status = $status;
-        $jobPost->save();        
-    
-        // إعادة استجابة بنجاح
-        return response()->json([
-            'message' => 'تم انشاء بوست للتوظيف',
-            '  $jobPost' =>  $jobPost
+        $this->authorize('create', Vacancy::class);
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'type' => 'required|string|max:255',
+            'salary' => 'required|numeric',
+            'posting_date' => 'required|date',
+            'deadline' => 'required|date',
+            'number_of_vacancies' => 'required|integer',
         ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $data = $request->all();
+        $data['employee_id'] = Auth::user()->id;
+        $vacancy = Vacancy::create($data);
+
+        return self::customResponse('Vacancy created', new VacancyResource($vacancy), 200);
     }
+
+    public function destroy(Vacancy $vacancy)
+    {
+        $this->authorize('delete', $vacancy);
+        $vacancy->delete();
+        return self::customResponse('Vacancy deleted', new VacancyResource($vacancy), 200);
+    }
+
+    public function update(Request $request, Vacancy $vacancy)
+    {
+        $this->authorize('update', $vacancy);
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'type' => 'required|string|max:255',
+            'salary' => 'required|numeric',
+            'deadline' => 'required|date',
+            'nubmer_of_vacancies' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
+
+        $vacancy->update($request->all());
+
+        return self::customResponse('Vacancy updated', new VacancyResource($vacancy), 200);
+
+    }
+
 }
