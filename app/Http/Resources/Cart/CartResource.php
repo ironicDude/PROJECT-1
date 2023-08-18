@@ -41,7 +41,7 @@ class CartResource extends JsonResource
         return [
             'cartId' => $this->id,
             'items' => $distinctItems,
-            'prescriptions' => new CartedPrescriptionCollection($this->cartedPrescriptions),
+            'prescriptions' => $this->viewPrescriptions(),
             'delivery' => $this->delivery,
             'Subtotal' => $this->subtotal,
             'Total' => $this->getTotal(),
