@@ -10,7 +10,6 @@
                 <h2 style="color: #333;">Order is Being Reviewed</h2>
                 <div>
                     <p>Order Number: {{ $orderId }}</p>
-                    <p>Price: {{ $total }}</p>
                     <p>Delivery Date: {{ $deliveryDate }}</p>
                 </div>
             </td>

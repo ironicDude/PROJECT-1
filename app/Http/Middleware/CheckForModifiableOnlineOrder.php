@@ -17,7 +17,7 @@ class CheckForModifiableOnlineOrder
     public function handle(Request $request, Closure $next): Response
     {
         $onlineOrder = $request->route('onlineOrder');
-        if($onlineOrder->status != 'Review'){
+        if($onlineOrder->status != 'Review' && $onlineOrder->status != 'Rejected'){
             return self::customResponse('This action cannot be done on an already processed order', null, 422);
         }
         return $next($request);

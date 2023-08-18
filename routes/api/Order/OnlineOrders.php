@@ -3,35 +3,46 @@
 use App\Http\Controllers\Order\OnlineOrderController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'forceLogout', 'checkForModifiableOnlineOrder'])->group(function () {
+Route::middleware(['auth', 'forceLogout'])->group(function () {
 
-Route::post('/store/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'store'])
-                ->name('in-store-order.product.store');
+    Route::middleware(['checkForModifiableOnlineOrder'])->group(function () {
 
-Route::delete('/remove/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'remove'])
-                ->name('in-store-order.product.remove');
+        Route::put('/dispatch/{onlineOrder}', [OnlineOrderController::class, 'dispatch'])
+        ->name('in-store-order.dispatch');
 
-Route::put('/update/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'updateQuantity'])
-                ->name('in-store-order.product.quantity.update');
+        Route::put('/reject/{onlineOrder}', [OnlineOrderController::class, 'reject'])
+        ->name('in-store-order.reject');
 
-Route::post('/checkout/{onlineOrder}', [OnlineOrderController::class, 'checkout'])
-                ->name('in-store-order.checkout');
+        Route::post('/store/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'store'])
+            ->name('in-store-order.product.store');
 
-Route::post('/prescriptions/store/{onlineOrder}', [OnlineOrderController::class, 'storePrescriptions'])
-                ->name('in-store-order.prescriptions.store');
+        Route::delete('/remove/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'remove'])
+            ->name('in-store-order.product.remove');
 
-Route::delete('/prescriptions/delete/{onlineOrder}', [OnlineOrderController::class, 'deletePrescriptions'])
-                ->name('in-store-order.prescriptions.delete');
+        Route::put('/update/{onlineOrder}/{purchasedProduct}', [OnlineOrderController::class, 'updateQuantity'])
+            ->name('in-store-order.product.quantity.update');
 
-Route::get('/prescriptions/show/{onlineOrder}', [OnlineOrderController::class, 'checkForPrescriptions'])
-                ->name('in-store-order.prescriptions.show');
+        Route::post('/checkout/{onlineOrder}', [OnlineOrderController::class, 'checkout'])
+            ->name('in-store-order.checkout');
 
-Route::delete('/delete/{onlineOrder}', [OnlineOrderController::class, 'delete'])
-                ->name('in-store-order.delete');
+        Route::post('/prescriptions/store/{onlineOrder}', [OnlineOrderController::class, 'storePrescriptions'])
+            ->name('in-store-order.prescriptions.store');
 
-Route::put('/shipping-address/store/{onlineOrder}', [OnlineOrderController::class, 'storeShippingAddress'])
-                ->name('cart.address.store');
+        Route::delete('/prescriptions/delete/{onlineOrder}', [OnlineOrderController::class, 'deletePrescriptions'])
+            ->name('in-store-order.prescriptions.delete');
 
-Route::get('/shipping-address/show/{onlineOrder}', [OnlineOrderController::class, 'getShippingAddress'])
-                ->name('cart.address.show');
+        Route::get('/prescriptions/show/{onlineOrder}', [OnlineOrderController::class, 'checkForPrescriptions'])
+            ->name('in-store-order.prescriptions.show');
+
+        Route::delete('/delete/{onlineOrder}', [OnlineOrderController::class, 'delete'])
+            ->name('in-store-order.delete');
+
+        Route::put('/shipping-address/store/{onlineOrder}', [OnlineOrderController::class, 'storeShippingAddress'])
+            ->name('cart.address.store');
+
+        Route::get('/shipping-address/show/{onlineOrder}', [OnlineOrderController::class, 'getShippingAddress'])
+            ->name('cart.address.show');
+
+    });
+
 });

@@ -25,7 +25,7 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),
         [
             'date' => 'date',
-            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered'
+            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered,Rejected'
         ]);
 
         if($validator->fails()){
@@ -41,7 +41,7 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),
         [
             'date' => 'date',
-            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered'
+            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered,Rejected',
         ]);
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);

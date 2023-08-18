@@ -6,7 +6,10 @@ use App\Exceptions\NotEnoughMoneyException;
 use App\Exceptions\NullAddressException;
 use App\Exceptions\ProductAlreadyAddedException;
 use App\Exceptions\ProductNotAddedException;
+use App\Mail\OrderRejected;
+use App\Mail\OrderShipped;
 use App\Mail\OrderUnderReview;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -187,4 +190,44 @@ class OnlineOrder extends Order
         $this->save();
         return $this->address;
     }
+
+    public function dispatch()
+    {
+        $this->claculateDeliveryFees();
+        $this->determineDeliveryDate();
+        $this->markAsDispatched();
+        Mail::to($this->customer)->send(new OrderShipped($this));
+    }
+
+    protected function markAsDispatched()
+    {
+        $this->status = 'Dispatched';
+        $this->save();
+    }
+
+    protected function claculateDeliveryFees()
+    {
+        $this->delivery_fees = 20000;
+        $this->save();
+    }
+
+    protected function determineDeliveryDate()
+    {
+        $this->delivery_date = Carbon::now()->addDay();
+        $this->save();
+    }
+
+    protected function markAsRejected()
+    {
+        $this->status = 'Rejected';
+        $this->save();
+    }
+
+    public function reject(string $reason)
+    {
+        $this->markAsRejected();
+        Mail::to($this->customer)->send(new OrderRejected($this, $reason));
+    }
+
+
 }

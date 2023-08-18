@@ -41,8 +41,8 @@ class VacancyController extends Controller
             return self::customResponse('errors', $validator->errors(), 422);
         }
 
-        $data = $request->all();
-        $vacancy = Auth::user()->vacancies()->create($data);
+        $vacancy = Auth::user()->vacancies()->create($request->all());
+
         return self::customResponse('Vacancy created', new VacancyResource($vacancy), 200);
     }
 
