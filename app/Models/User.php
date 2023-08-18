@@ -54,6 +54,7 @@ class User extends Authenticatable
         'image',
         'account_status',
         'deleted_at',
+        'availability'
     ];
     /**
      * The attributes that are mass assignable.
@@ -72,6 +73,7 @@ class User extends Authenticatable
         'gender',
         'image',
         'account_status',
+        'availability'
     ];
 
     /**

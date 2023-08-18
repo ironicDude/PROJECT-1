@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 
 class AssignOrdersController extends Controller
 {
+    public function getOrders() {
+        return response()->json([
+            order::query()
+            ->where('orders.status','!=','dispatched')
+            ->paginate(15)
+        ]);
+
+    }
     // public function
     public function delivery_boys(){
         // get all the delivery boys who are available
@@ -15,7 +23,8 @@ class AssignOrdersController extends Controller
             ->join('employee_role', 'employee_role.employee_id', '=', 'users.id')
             ->join('roles', 'employee_role.role_id', '=', 'roles.id')
             ->where('roles.role', '=', 'delivery_boy')
-            ->where('users.account_status', '=', 'active')
+            ->where('users.availability', '=', 'available')
+            ->select('users.*')
             ->get();
 
         // check if there are any available delivery boys
@@ -41,11 +50,11 @@ class AssignOrdersController extends Controller
 
         Order::query()->find($request['order_id'])->update([
            'delivery_employee_id' => $request['employee_id'],
-           'status' => "En Route"
+           'status' => "dispatched"
         ]);
-        user::query()->find($request['employee_id'])->update([
-            'account_status' => "busy"
-         ]);
+        $user = User::find($request['employee_id']); // Find the user by id
+        $user->availability = 'busy'; // Set the availability attribute
+        $user->save();
 
         return response()->json(['order' => Order::query()->find($request['order_id'])]);
 

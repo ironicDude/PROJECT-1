@@ -227,7 +227,7 @@ class ProductController extends Controller
                          ->where('prices.id', '=', DB::raw('(select min(id) from prices where drug_id = products.drug_id)'));
                 })
                 ->select('products.*', 'prices.cost','prices.currency','prices.unit', DB::raw('prices.cost * 1.3 AS price'))
-                ->get(15);
+                ->get();
 
             // $products contain a collection of products along with their prices
             return self::customResponse("Product with Prices", $products);
@@ -243,6 +243,15 @@ class ProductController extends Controller
 
         $data['dated_products'] = DatedProduct::query()->where('purchase_id', '=', $id)->get();
         return $data;
+    }
+
+
+    public function getAllPurchases()
+    {
+        return response()->json([
+            purchase::query()->where('purchases.total','!=','0')->paginate(15)
+        ]);
+
     }
 
 
@@ -298,7 +307,9 @@ class ProductController extends Controller
                         ]);
                     }
                     $total += ($productData->price / 1.3) * $selectedProduct['quantity'];
-
+                    $pharmacy = Pharmacy::query()->find($request['pharmacy_id']);
+                    if($total>$pharmacy->money)
+                        return self::customResponse("Please charge your pharmacy money.");
                     $dated_products[] = DatedProduct::query()->create([
                         'purchase_id' => $purchase_id,
                         'product_id' => $productData->id,
@@ -315,9 +326,7 @@ class ProductController extends Controller
                 'quantity' => $quantity
             ]);
 
-            $pharmacy = Pharmacy::query()->find($request['pharmacy_id']);
-            if($total>$pharmacy->money)
-                return self::customResponse("Please charge your pharmacy money.");
+
             $pharmacy->money = $pharmacy->money - $total;
             $pharmacy->save();
             $data['purchased_products'] = $purchased_products;

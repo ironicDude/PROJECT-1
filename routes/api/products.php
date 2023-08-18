@@ -14,99 +14,112 @@ use App\Models\PurchasedProduct;
 
 //order
 
-
-// search
-// Show a specific product's information
-Route::get('/get/{product}', [ProductController::class, 'show'])
-                ->name('product.show');
-
-// Search products by labellers
-Route::get('/search/labellers', [ProductController::class, 'searchLabellers'])
-                ->name('product.labellers.search');
-
-// Search products by routes
-Route::get('/search/routes', [ProductController::class, 'searchRoutes'])
-                ->name('product.routes.search');
-
-// Search products by dosage forms
-Route::get('/search/dosage_forms', [ProductController::class, 'searchDosageForms'])
-                ->name('product.dosage_forms.search');
-
-// Search products by categories
-Route::get('/search/categories', [ProductController::class, 'searchCategories'])
-                ->name('product.categories.search');
-
-// Get all products
-Route::get('/', [ProductController::class, 'index'])
-                ->name('products.get');
-
-// Search products by names
-Route::get('/search/names', [ProductController::class, 'searchNames'])
-                ->name('product.name.search');
-
-Route::middleware(['auth', 'forceLogout'])->group(function() {
-
-    Route::post('/create/purchase', [ProductController::class, 'purchase'])
+Route::post('/create/purchase', [ProductController::class, 'purchase'])
     ->name('product.purchase');
 
 Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
     ->name('product.get.purchase');
+
+Route::get('/get/allPurchases', [ProductController::class, 'getAllPurchases'])
+    ->name('product.get.all.purchases');
 
 Route::post('/prices', [ProductController::class, 'withPrices'])
     ->name('product.prices');
 
 Route::get('/all/prices', [ProductController::class, 'allProductsWithPrices'])
     ->name('products.all.prices');
-    
-// allergy
+
+// search
+// Show a specific product's information
+Route::get('/get/{product}', [ProductController::class, 'show'])
+    ->name('product.show');
+
+// Search products by labellers
+Route::get('/search/labellers', [ProductController::class, 'searchLabellers'])
+    ->name('product.labellers.search');
+
+// Search products by routes
+Route::get('/search/routes', [ProductController::class, 'searchRoutes'])
+    ->name('product.routes.search');
+
+// Search products by dosage forms
+Route::get('/search/dosage_forms', [ProductController::class, 'searchDosageForms'])
+    ->name('product.dosage_forms.search');
+
+// Search products by categories
+Route::get('/search/categories', [ProductController::class, 'searchCategories'])
+    ->name('product.categories.search');
+
+// Get all products
+Route::get('/', [ProductController::class, 'index'])
+    ->name('products.get');
+
+// Search products by names
+Route::get('/search/names', [ProductController::class, 'searchNames'])
+    ->name('product.name.search');
+
+Route::middleware(['auth', 'forceLogout'])->group(function () {
+
+    Route::post('/create/purchase', [ProductController::class, 'purchase'])
+        ->name('product.purchase');
+
+    Route::get('/get/purchase/{id}', [ProductController::class, 'getPurchase'])
+        ->name('product.get.purchase');
+
+    Route::post('/prices', [ProductController::class, 'withPrices'])
+        ->name('product.prices');
+
+    Route::get('/all/prices', [ProductController::class, 'allProductsWithPrices'])
+        ->name('products.all.prices');
+
+    // allergy
 // Toggle allergy status of a product for the authenticated user
-Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
-                ->name('product.allergy.toggle');
+    Route::post('allergy/toggle/{product}', [AllergyController::class, 'toggleAllergy'])
+        ->name('product.allergy.toggle');
 
-// Check if a product is marked as an allergy for the authenticated user
-Route::get('allergy/check/{product}', [AllergyController::class, 'checkAllergy'])
-                ->name('product.allergy.check');
+    // Check if a product is marked as an allergy for the authenticated user
+    Route::get('allergy/check/{product}', [AllergyController::class, 'checkAllergy'])
+        ->name('product.allergy.check');
 
-// Get all products marked as allergies for the authenticated user
-Route::get('allergies/index', [AllergyController::class, 'index'])
-                ->name('product.allergy.get');
+    // Get all products marked as allergies for the authenticated user
+    Route::get('allergies/index', [AllergyController::class, 'index'])
+        ->name('product.allergy.get');
 
-// stock levels feature
-Route::get('/purchasedProducts', [PurchasedProductController::class, 'index'])
-                ->name('products.purchasedProducts.get');
+    // stock levels feature
+    Route::get('/purchasedProducts', [PurchasedProductController::class, 'index'])
+        ->name('products.purchasedProducts.get');
 
-Route::get('/purchasedProducts/{purchasedProduct}/price/get', [PurchasedProductController::class, 'getPrice'])
-                ->name('products.purchasedProducts.price.get');
+    Route::get('/purchasedProducts/{purchasedProduct}/price/get', [PurchasedProductController::class, 'getPrice'])
+        ->name('products.purchasedProducts.price.get');
 
-Route::get('/purchasedProducts/{purchasedProduct}/minimumStockLevel/get', [PurchasedProductController::class, 'getMinimumStockLevel'])
-                ->name('products.purchasedProducts.minimumStockLevel.get');
+    Route::get('/purchasedProducts/{purchasedProduct}/minimumStockLevel/get', [PurchasedProductController::class, 'getMinimumStockLevel'])
+        ->name('products.purchasedProducts.minimumStockLevel.get');
 
-Route::get('/purchasedProducts/{purchasedProduct}/orderLimit/get', [PurchasedProductController::class, 'getOrderLimit'])
-                ->name('products.purchasedProducts.orderLimit.get');
+    Route::get('/purchasedProducts/{purchasedProduct}/orderLimit/get', [PurchasedProductController::class, 'getOrderLimit'])
+        ->name('products.purchasedProducts.orderLimit.get');
 
-Route::post('/purchasedProducts/{purchasedProduct}/price/set', [PurchasedProductController::class, 'setPrice'])
-                ->name('products.purchasedProducts.price.set');
+    Route::post('/purchasedProducts/{purchasedProduct}/price/set', [PurchasedProductController::class, 'setPrice'])
+        ->name('products.purchasedProducts.price.set');
 
-Route::post('/purchasedProducts/{purchasedProduct}/minimumStockLevel/set', [PurchasedProductController::class, 'setMinimumStockLevel'])
-                ->name('products.purchasedProducts.minimumStockLevel.set');
+    Route::post('/purchasedProducts/{purchasedProduct}/minimumStockLevel/set', [PurchasedProductController::class, 'setMinimumStockLevel'])
+        ->name('products.purchasedProducts.minimumStockLevel.set');
 
-Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedProductController::class, 'setOrderLimit'])
-                ->name('products.purchasedProducts.orderLimit.set');
+    Route::post('/purchasedProducts/{purchasedProduct}/orderLimit/set', [PurchasedProductController::class, 'setOrderLimit'])
+        ->name('products.purchasedProducts.orderLimit.set');
 
-//rating
-Route::post('/{product}/rate/', [RatingController::class, 'rate'])
-                ->name('product.rate');
+    //rating
+    Route::post('/{product}/rate/', [RatingController::class, 'rate'])
+        ->name('product.rate');
 
-Route::get('/{product}/rating/get', [RatingController::class, 'getRating'])
-                ->name('product.rate.get');
+    Route::get('/{product}/rating/get', [RatingController::class, 'getRating'])
+        ->name('product.rate.get');
 
-Route::get('user/{product}/rating/get', [RatingController::class, 'getUserRatingToProduct'])
-                ->name('user.product.rating.get');
-//wishlist
-Route::post('/wishlist/toggle/{product}/', [WishlistController::class, 'toggleWishlistProduct'])
-                ->name('product.wishlist.toggle');
+    Route::get('user/{product}/rating/get', [RatingController::class, 'getUserRatingToProduct'])
+        ->name('user.product.rating.get');
+    //wishlist
+    Route::post('/wishlist/toggle/{product}/', [WishlistController::class, 'toggleWishlistProduct'])
+        ->name('product.wishlist.toggle');
 
-Route::get('/wishlist/check/{product}', [WishlistController::class, 'checkIfWishlisted'])
-                ->name('product.wishlist.check');
+    Route::get('/wishlist/check/{product}', [WishlistController::class, 'checkIfWishlisted'])
+        ->name('product.wishlist.check');
 });
-
