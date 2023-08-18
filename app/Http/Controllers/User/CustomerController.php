@@ -13,6 +13,7 @@ class CustomerController extends Controller
     use CustomResponse;
     public function searchNames(Request $request)
     {
+        $this->authorize('searchNames', Customer::class);
         $validator = Validator::make($request->all(),
         [
             'string' => 'required|string',
