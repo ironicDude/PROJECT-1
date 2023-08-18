@@ -16,8 +16,9 @@ class ApplicationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'applicant' => new ApplicantResource($this->applicant),
-            'vacancy' => new VacancyResource($this->vacancy),
+            'applicantFirstName' => $this->applicant->first_name,
+            'applicantLastName' => $this->applicant->last_name,
+            'vacancy' => $this->vacancy->title,
             'status' => $this->status,
             'date' => $this->created_at->format('Y-m-d'),
             'time' => $this->created_at->format('g:i A'),
