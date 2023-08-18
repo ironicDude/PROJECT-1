@@ -46,11 +46,18 @@ class ApplicationController extends Controller
         return self::customResponse('Application accepted', new ApplicationResource($application), 200);
     }
 
-    public function reject(Application $application)
+    public function reject(Application $application, Request $request)
     {
         $this->authorize('reject', $application);
+        $validator = Validator::make($request->all(),
+        [
+            'reason' => 'required|string',
+        ]);
+        if($validator->fails()){
+            return self::customResponse('errors', $validator->errors(), 422);
+        }
         try {
-            $application->reject();
+            $application->reject($request->reason);
         } catch (ApplicationAlreadyAcceptedException $e) {
             return self::customResponse($e->getMessage(), null, 422);
         } catch (ApplicationAlreadyRejectedException $e) {

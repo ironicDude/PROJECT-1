@@ -11,4 +11,9 @@ class EmployeePolicy
     {
         return $user->id == $employee->id || $user->isEmployee() && $user->isAdministrator();
     }
+
+    public function manageRoles(User $user, Employee $employee)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
 }

@@ -16,7 +16,7 @@ class RejectMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(private string $reason)
     {
         //
     }
@@ -27,7 +27,7 @@ class RejectMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reject Mail',
+            subject: "Application Rejected",
         );
     }
 
@@ -37,7 +37,10 @@ class RejectMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.reject',
+            view: 'emails.reject',
+            with: [
+                'reason' => $this->reason
+            ]
         );
     }
 

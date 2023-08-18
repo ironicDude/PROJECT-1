@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\ApplicationAlreadyAcceptedException;
 use App\Exceptions\ApplicationAlreadyRejectedException;
 use App\Mail\AcceptMail;
+use App\Mail\RejectMail;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -48,16 +49,16 @@ class Application extends Model
             'personal_email' => $applicant->email,
             'date_of_joining' => Carbon::now(),
         ]);
-
         $this->markAsAccepted();
-
+        $employee->setRole($vacancy->title);
         Mail::to($applicant)->send(new AcceptMail($employee, $password));
     }
 
-    public function reject()
+    public function reject($reason)
     {
         $this->validateStatus();
         $this->markAsRejected();
+        Mail::to($this->applicant)->send(new RejectMail($reason));
     }
 
     protected function markAsRejected()

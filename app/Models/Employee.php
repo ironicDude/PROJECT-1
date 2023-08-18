@@ -31,7 +31,8 @@ class Employee extends User
         'date_of_joining',
     ];
 
-    public function isAdministrator(){
+    public function isAdministrator()
+    {
         return $this->roles()->where('role', 'administrator')->exists();
     } //end of isAdministrator
 
@@ -72,11 +73,33 @@ class Employee extends User
 
     public function setRole(string $role)
     {
-        $role = Role::where('name', $role)->firstOrFail();
+        $role = Role::where('role', $role)->firstOrFail();
 
         $this->roles()->sync([$role->id]);
 
         return $role;
+    }
+
+    public function updateRole(Role $role, string $newRole)
+    {
+        $newRole = Role::where('role', $newRole)->firstOrFail();
+
+        $this->roles()->detach([$role->id]);
+        $this->roles()->attach([$newRole->id]);
+
+        return $newRole;
+    }
+
+    public function deleteRole(Role $role)
+    {
+
+        $this->roles()->detach([$role->id]);
+
+    }
+
+    public function getRoles()
+    {
+        return $this->roles;
     }
 
     public function updateEmployeeInfo(array $newInfo)
@@ -95,7 +118,7 @@ class Employee extends User
      */
     public function roles()
     {
-        return $this->belongsToMany(Role::class,'employee_role', 'employee_id', 'role_id');
+        return $this->belongsToMany(Role::class, 'employee_role', 'employee_id', 'role_id');
     }
 
     public function orders()

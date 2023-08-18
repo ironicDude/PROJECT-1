@@ -10,7 +10,6 @@ class Role extends Model
 {
     use HasFactory;
 
-
     /**
      * Relationships
      */
