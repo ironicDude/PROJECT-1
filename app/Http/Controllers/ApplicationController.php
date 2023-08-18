@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\ApplicationAlreadyAcceptedException;
 use App\Exceptions\ApplicationAlreadyRejectedException;
 use App\Http\Resources\Application\ApplicationCollection;
+use App\Http\Resources\Application\ApplicationOverviewCollection;
 use App\Http\Resources\Application\ApplicationResource;
 use App\Http\Resources\CustomResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class ApplicationController extends Controller
     public function index()
     {
         $this->authorize('viewAll', Application::class);
-        return new ApplicationCollection(Application::paginate(15));
+        return new ApplicationOverviewCollection(Application::paginate(15));
     }
 
     public function show(Application $application)
