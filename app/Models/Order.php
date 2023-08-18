@@ -65,20 +65,27 @@ class Order extends Model
         return $this->shipping_address;
     }
 
-    public static function getCustomerOrders(int $customerId, string $date = null)
+    public static function getCustomerOrders(int $customerId, string $date = null, string $status = null)
     {
-        $orders = self::where('customer_id', $customerId);
+        $user = User::findOrFail($customerId);
+        $orders = $user->orders();
         if ($date) {
-            $orders = $orders->where('updated_at', $date);
+            $orders = $orders->whereDate('updated_at', $date);
+        }
+        if($status) {
+            $orders = $orders->whereStatus($status);
         }
         return $orders;
     }
 
-    public static function getAllOrders(string $date = null)
+    public static function getAllOrders(string $date = null, string $status = null)
     {
         $orders = self::query();
         if ($date) {
             $orders = $orders->whereDate('updated_at', $date);
+        }
+        if($status) {
+            $orders = $orders->whereStatus($status);
         }
         return $orders;
     }

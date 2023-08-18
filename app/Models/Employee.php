@@ -125,4 +125,10 @@ class Employee extends User
     {
         return $this->hasMany(Payment::class, 'employee_id', 'id');
     }
+
+    public function vacancies()
+    {
+        return $this->hasMany(Vacancy::class, 'employee_id', 'id');
+
+    }
 }

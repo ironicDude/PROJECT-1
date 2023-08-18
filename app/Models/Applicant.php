@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use App\Mail\ApplicantMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class Applicant extends Model
 {
@@ -18,57 +24,72 @@ class Applicant extends Model
         'mobile',
         'status',
         'address',
-        'resource',
+        'date_of_birth',
+        'gender'
     ];
 
-
-    public function changeStatus($applicant, $status)
+    public static function make(array $info)
     {
-        $vacancy = Vacancy::find($applicant->vacancy_type);
+        $vacancyId = Vacancy::firstWhere('title', $info['vacancy'])->value('id');
 
-        if (!$vacancy) {
-            throw new \Exception('Vacancy type not found.');
-        }
+        $applicant = self::create([
+            'first_name' => $info['first_name'],
+            'last_name' => $info['last_name'],
+            'email' => $info['email'],
+            'mobile' => $info['mobile'],
+            'address' => $info['address'],
+            'date_of_birth' => $info['date_of_birth'],
+            'gender' => $info['gender'],
+        ]);
 
-        switch ($status) {
-            case 'accepted':
-                $this->handleAcceptedStatus($applicant, $vacancy);
-                break;
+        $applicant->setResume($info['resume']);
 
-            case 'rejected':
-                $this->handleRejectedStatus($applicant);
-                break;
+        $applicant->applications()->create([
+            'applicant_id' => $applicant->id,
+            'vacancy_id' => $vacancyId,
+            'status' => 'Review',
+        ]);
 
-            default:
-                throw new \InvalidArgumentException('Invalid status.');
-        }
+        Mail::to($applicant)->send(new ApplicantMail);
+
+        return $applicant;
+
     }
 
-    private function handleAcceptedStatus($applicant, $vacancy)
+    protected function setResume(UploadedFile $resume)
     {
-        if ($vacancy->number_of_vacancies > 0) {
-            $applicant->status = 'Accepted';
-            $applicant->save();
-
-            $vacancy->number_of_vacancies--;
-            $vacancy->save();
-        } else {
-            $vacancy->status = 'Not Available';
-            $vacancy->save();
-
-            throw new \Exception('No vacancies available.');
+        if ($this->resume) {
+            Storage::disk('local')->delete("resumes/{$this->resume}");
         }
+        $resumeName = "Applicant{$this->id}.{$resume->getClientOriginalExtension()}";
+        Storage::disk('local')->put("resumes/{$resumeName}", File::get($resume));
+        $this->resume = $resumeName;
+        $this->save();
+        return $this->getResume();
     }
 
-    private function handleRejectedStatus($applicant)
+    public function getResume()
     {
-        $applicant->status = 'Rejected';
-        $applicant->save();
+        $resumeName = $this->resume;
+        if(!$resumeName){
+            return null;
+        }
+        $resumeContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\\resumes\\{$resumeName}");
+        $encodedContent = base64_encode($resumeContent);
+        $resumeData = mb_convert_encoding("data:application/pdf;base64,{$encodedContent}", 'UTF-8');
+        return $resumeData;
+    }
+
+
+    public function generateWorkEmail()
+    {
+        $email = "{$this->first_name}{$this->last_name}{$this->id}@remedya.com";
+        return $email;
     }
 
     public function applications()
     {
-        return $this->hasMany(Application::class);
+        return $this->hasMany(Application::class, 'applicant_id', 'id');
     }
 
 }

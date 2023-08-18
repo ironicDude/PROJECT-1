@@ -18,11 +18,11 @@ class PurchaseFullResource extends JsonResource
             'purchaseId' => $this->id,
             'date' => $this->updated_at->format('Y-m-d'),
             'time' => $this->updated_at->format('g:i A'),
+            'employeeId' => $this->employee_id,
             'total' => $this->getTotal(),
             'quantity' => $this->getQuantity(),
             'shippingFees' => $this->shipping_fees,
             'products' => new DatedProductCollection($this->datedProducts),
-            'employeeId' => $this->employee_id,
         ];
     }
 }

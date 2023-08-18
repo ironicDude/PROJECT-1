@@ -18,16 +18,16 @@ class Vacancy extends Model
         'deadline',
         'number_of_vacancies',
         'status',
- ];
+    ];
 
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'vacancy_id', 'id');
+    }
 
-     public function applications(){
-         return $this->hasMany(Application::class);
-     }
-
-     public function employee()
-     {
+    public function employee()
+    {
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
 
-}
+    }
 }

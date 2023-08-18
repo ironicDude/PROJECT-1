@@ -43,7 +43,7 @@ class ProductController extends Controller
             'name' => 'string',
             'minPrice' => 'min:0',
             'maxPrice' => 'min:0',
-            'rating' => 'between:0,5|numeric',
+            'rating' => 'nullable|min:1|max:5',
             'dosageForm' => 'string',
             'route' => 'string',
             'category' => 'string',

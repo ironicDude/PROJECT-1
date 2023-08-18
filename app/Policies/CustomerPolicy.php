@@ -28,4 +28,9 @@ class CustomerPolicy
     {
         return $user->isEmployee() && $user->isAdministrator();
     }
+
+    public function searchNames(User $user)
+    {
+        return $user->isEmployee();
+    }
 }
