@@ -15,7 +15,7 @@ class Employee extends User
     use HasFactory;
 
     protected static $singleTableType = 'employee';
-    protected static $persisted = ['salary', 'personal_email', 'date_of_joining'];
+    protected static $persisted = ['salary', 'personal_email', 'date_of_joining', 'availability'];
     protected $fillable = [
         'first_name',
         'last_name',
