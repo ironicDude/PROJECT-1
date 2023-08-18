@@ -17,7 +17,7 @@ class RoleController extends Controller
     {
         $validator = Validator::make($request->all(),
         [
-            'status' => 'required|string',
+            'role' => 'required|string',
         ]);
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
@@ -41,7 +41,7 @@ class RoleController extends Controller
     {
         $validator = Validator::make($request->all(),
         [
-            'status' => 'required|string',
+            'role' => 'required|string',
         ]);
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\PurchasedProduct;
+use App\Models\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -95,6 +96,14 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api/applications')
                 ->group(base_path('routes/api/Application/applications.php'));
 
+            Route::middleware('api')
+                ->prefix('api/employees')
+                ->group(base_path('routes/api/User/employees.php'));
+
+            Route::middleware('api')
+                ->prefix('api/roles')
+                ->group(base_path('routes/api/roles.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -106,5 +115,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchasedProduct', PurchasedProduct::class, function ($value) {
             return PurchasedProduct::where('id', $value)->firstOrFail();
         });
+
     }
 }

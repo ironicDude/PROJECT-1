@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\EmployeeIsAlreadyAssignedThisRoleException;
 use App\Http\Resources\User\EmployeeResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -71,19 +72,17 @@ class Employee extends User
         return $this->personal_email;
     }
 
-    public function setRole(string $role)
+    public function setRole(Role $role)
     {
-        $role = Role::where('role', $role)->firstOrFail();
-
-        $this->roles()->sync([$role->id]);
-
+        if ($this->roles->contains($role)) {
+            throw new EmployeeIsAlreadyAssignedThisRoleException('Role is already attached to the user.');
+        }
+        $this->roles()->attach([$role->id]);
         return $role;
     }
 
-    public function updateRole(Role $role, string $newRole)
+    public function updateRole(Role $role, Role $newRole)
     {
-        $newRole = Role::where('role', $newRole)->firstOrFail();
-
         $this->roles()->detach([$role->id]);
         $this->roles()->attach([$newRole->id]);
 

@@ -14,6 +14,6 @@ class EmployeePolicy
 
     public function manageRoles(User $user, Employee $employee)
     {
-        return $user->isEmployee() && $user->isAdministrator();
+        return $user->isEmployee() && $user->isAdministrator() && $user->id != $employee->id;
     }
 }
