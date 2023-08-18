@@ -4,8 +4,14 @@ use App\Http\Controllers\Order\OrderController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/delivery_boys' , [\App\Http\Controllers\AssignOrdersController::class, 'delivery_boys']);
-Route::post('/assign' , [\App\Http\Controllers\AssignOrdersController::class, 'assign']);
+Route::get('/delivery_boys' , [\App\Http\Controllers\AssignOrdersController::class, 'delivery_boys'])
+    ->name('delivery.boy.available');
+
+Route::get('/getOrders' , [\App\Http\Controllers\AssignOrdersController::class, 'getOrders'])
+    ->name('get.all.orders');
+    
+Route::post('/assign' , [\App\Http\Controllers\AssignOrdersController::class, 'assign'])
+    ->name('assign.delivery.boy');
 
 
 Route::middleware(['auth', 'forceLogout'])->group(function () {
