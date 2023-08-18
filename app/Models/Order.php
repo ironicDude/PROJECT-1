@@ -67,9 +67,10 @@ class Order extends Model
 
     public static function getCustomerOrders(int $customerId, string $date = null, string $status = null)
     {
-        $orders = self::where('customer_id', $customerId);
+        $user = User::findOrFail($customerId);
+        $orders = $user->orders();
         if ($date) {
-            $orders = $orders->where('updated_at', $date);
+            $orders = $orders->whereDate('updated_at', $date);
         }
         if($status) {
             $orders = $orders->whereStatus($status);
