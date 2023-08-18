@@ -22,6 +22,7 @@ class ApplicationResource extends JsonResource
             'mobile' => $this->applicant->mobile,
             'resume' => $this->applicant->getResume(),
             'vacancy' => $this->vacancy->title,
+            'address' => $this->applicant->address,
             'status' => $this->status,
             'date' => $this->created_at->format('Y-m-d'),
             'time' => $this->created_at->format('g:i A'),
