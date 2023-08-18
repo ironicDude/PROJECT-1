@@ -23,7 +23,8 @@ class OrderController extends Controller
         // $this->authorize('viewCustomerOrders', $customer);
         $validator = Validator::make($request->all(),
         [
-            'date' => 'date'
+            'date' => 'date',
+            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered'
         ]);
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
@@ -50,62 +51,16 @@ class OrderController extends Controller
         // $this->authorize('viewAll', Order::class);
         $validator = Validator::make($request->all(),
         [
-            'date' => 'date'
+            'date' => 'date',
+            'status' => 'string|in:Review,Progressing,Paid,Dispatched,Delivered'
         ]);
 
         if($validator->fails()){
             return self::customResponse('errors', $validator->errors(), 422);
         }
-        $orders = Order::getAllOrders($request->date);
+        $orders = Order::getAllOrders($request->date, $request->status);
         return new OrderFullCollection($orders->paginate(10));
     }
-
-
-// Update And Delete Order
-public function update(Request $request , Order $order){
-    if ( $order->status == "Review") {
-    $input = $request->all();
-    $validator = Validator::make($input , [
-        'shipping_address'=>'required',
-    ]);
-
-    if ($validator->fails()){
-        return response()->json([
-            'message'=>'You Have Fill Some Data'
-        ]);
-    }
-
-    $order->shipping_address = $input['shipping_address'];
-
-
-    return response()->json([
-        'message'=>'Order Updated Successfully',
-        'Order'=>$input
-    ]);
-}
-else {
-    return response()->json([
-        'message'=>'Cant Edite That Order'
-    ]);
-}
-}
-
-public function destroy( Order $order){
-
-    if ( $order->status != "Review"){
-        return response()->json([
-            'message'=>'You Cant Delete That Order'
-        ]);
-    }else {
-        $order->delete();
-
-        return response()->json([
-            'message'=>'Order Deleted Successfully',
-
-        ]);
-    }
-}
-
 
 }
 
