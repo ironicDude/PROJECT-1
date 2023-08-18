@@ -12,10 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employee_role', function (Blueprint $table) {
+            // $table->id();
+            // $table->foreignId('employee_id')->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            // $table->foreignId('role_id')->constrained('roles', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            // $table->timestamps();
             $table->id();
-            $table->foreignId('employee_id')->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('role_id')->constrained('roles', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->unsignedBigInteger('employee_id');
+            $table->unsignedBigInteger('role_id');
             $table->timestamps();
+            $table->foreign('employee_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
         });
     }
 

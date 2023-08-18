@@ -11,6 +11,10 @@ class OrderPolicy
     {
         return $user->isEmployee() || ($user->isCustomer() && $user->id === $order->customer_id);
     }
+    public function viewCustomerOrders(User $user, Order $order)
+    {
+        return $user->isEmployee() || ($user->isCustomer() && $user->id === $order->customer_id);
+    }
 
     public function viewRevenue(User $user)
     {
@@ -30,5 +34,15 @@ class OrderPolicy
     public function viewPrescriptions(User $user, Order $order)
     {
         return $user->isEmployee() || ($user->isCustomer() && $user->id === $order->customer_id);
+    }
+
+    public function viewOrdersChart(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
+    }
+
+    public function viewRevneueChart(User $user)
+    {
+        return $user->isEmployee() && $user->isAdministrator();
     }
 }

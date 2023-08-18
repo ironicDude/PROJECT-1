@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\User\EmployeeController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Product\WishlistController;
@@ -113,6 +114,12 @@ Route::middleware(['auth', 'forceLogout'])->group(function () {
 
     Route::put('/employees/update-info', [EmployeeController::class, 'updateInfo'])
         ->name('employees.update');
+
+    Route::post('/backup', [BackupController::class, 'runBackup'])
+        ->name('backup');
+
+    Route::get('/employees/payments/{employee}', [EmployeeController::class, 'getPayments'])
+        ->name('employees.payments.get');
 
 
 });

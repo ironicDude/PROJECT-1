@@ -32,7 +32,7 @@ class Customer extends User
 
 
 
- 
+
     public function createCart()
     {
         $cart = Cart::firstOrNew(['id' => $this->id]);
@@ -48,84 +48,87 @@ class Customer extends User
     public static function countNewbies(int $days)
     {
         $date = Carbon::now()->subDays($days);
-        $count = Customer::all()->where('created_at', '>=', $date)->count();
+        $count = Customer::all()->where('updated_at', '>=', $date)->count();
         return $count;
     }
 
     public static function chartNewbiesAndBastards(string $date, string $period)
     {
         $points = collect();
+        $counter = 0;
         switch ($period) {
             case 'day':
-                for ($i = 0; $i < 24; $i++) {
-                    $start = Carbon::parse($date)->addHours($i);
-                    $end = Carbon::parse($date)->addHours($i + 1);
-                    $newbies = Customer::where('created_at', '>=', $start)
-                        ->where('created_at', '<', $end)
+                for ($i = 23; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subHours($i);
+                    $end = Carbon::parse($date)->subHours($i - 1);
+                    $newbies = Customer::where('updated_at', '>=', $start)
+                        ->where('updated_at', '<', $end)
                         ->count();
                     $bastards = Customer::withTrashed()
                         ->where('deleted_at', '>=', $start)
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'hour' => $i,
+                        'hour' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
                 break;
             case 'week':
-                for ($i = 0; $i < 7; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
-                    $newbies = Customer::where('created_at', '>=', $start)
-                        ->where('created_at', '<', $end)
+                for ($i = 6; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
+                    $newbies = Customer::where('updated_at', '>=', $start)
+                        ->where('updated_at', '<', $end)
                         ->count();
                     $bastards = Customer::withTrashed()
                         ->where('deleted_at', '>=', $start)
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
                 break;
             case 'month':
-                for ($i = 0; $i < 31; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
-                    $newbies = Customer::where('created_at', '>=', $start)
-                        ->where('created_at', '<', $end)
+                for ($i = 29; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
+                    $newbies = Customer::where('updated_at', '>=', $start)
+                        ->where('updated_at', '<', $end)
                         ->count();
                     $bastards = Customer::withTrashed()
                         ->where('deleted_at', '>=', $start)
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
+                break;
             case 'year':
-                for ($i = 0; $i < 365; $i++) {
-                    $start = Carbon::parse($date)->addDays($i);
-                    $end = Carbon::parse($date)->addDays($i + 1);
-                    $newbies = Customer::where('created_at', '>=', $start)
-                        ->where('created_at', '<', $end)
+                for ($i = 364; $i >= 0; $i--) {
+                    $start = Carbon::parse($date)->subDays($i);
+                    $end = Carbon::parse($date)->subDays($i - 1);
+                    $newbies = Customer::where('updated_at', '>=', $start)
+                        ->where('updated_at', '<', $end)
                         ->count();
                     $bastards = Customer::withTrashed()
                         ->where('deleted_at', '>=', $start)
                         ->where('deleted_at', '<', $end)
                         ->count();
                     $points->push([
-                        'day' => $i,
+                        'day' => $counter++,
                         'newbies' => $newbies,
                         'bastards' => $bastards
                     ]);
                 }
+                break;
         }
 
         return $points;

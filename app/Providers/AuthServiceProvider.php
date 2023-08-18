@@ -23,7 +23,8 @@ class AuthServiceProvider extends ServiceProvider
         'App\Models\Cart' => 'App\Policies\CartPolicy',
         'App\Models\Customer' => 'App\Policies\CustomerPolicy',
         'App\Models\PurchasedProduct' => 'App\Policies\PurchasedProductPolicy',
-        'App\Models\Order' => 'App\Policies\OrderPolicy'
+        'App\Models\Order' => 'App\Policies\OrderPolicy',
+        'App\Models\Payment' => 'App\Policies\PaymentPolicy'
 
     ];
 
@@ -36,6 +37,10 @@ class AuthServiceProvider extends ServiceProvider
 
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        });
+
+        Gate::define('backup', function (User $user) {
+            return $user->isEmployee() && $user->isAdministrator();
         });
 
         // Gate::define('activateOrDeactivate', function (User $user, User $toBeToggledUser) {

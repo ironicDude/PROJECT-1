@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Order;
 
 class Prescription extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'prescription'];
+    protected $fillable = ['file_name','order_id', 'prescription'];
 
     /**
      * Relationships
@@ -17,6 +18,6 @@ class Prescription extends Model
 
      public function order()
      {
-        return $this->belongsTo(Order::class, 'order_id', 'id');
+        return $this->belongsTo(Order::class);
      }
 }

@@ -66,5 +66,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         'forceLogout' => \App\Http\Middleware\CheckForceLogout::class,
+        'checkForPaidOrders' => \App\Http\Middleware\CheckForPaidOrders::class,
+        'checkForModifiableOnlineOrder' => \App\Http\Middleware\CheckForModifiableOnlineOrder::class,
+
     ];
 }
