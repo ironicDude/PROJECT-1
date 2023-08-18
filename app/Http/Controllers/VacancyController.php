@@ -33,7 +33,6 @@ class VacancyController extends Controller
             'description' => 'required|string',
             'type' => 'required|string|max:255',
             'salary' => 'required|numeric',
-            'posting_date' => 'required|date',
             'deadline' => 'required|date',
             'number_of_vacancies' => 'required|integer',
         ]);
@@ -43,9 +42,7 @@ class VacancyController extends Controller
         }
 
         $data = $request->all();
-        $data['employee_id'] = Auth::user()->id;
-        $vacancy = Vacancy::create($data);
-
+        $vacancy = Auth::user()->vacancies()->create($data);
         return self::customResponse('Vacancy created', new VacancyResource($vacancy), 200);
     }
 

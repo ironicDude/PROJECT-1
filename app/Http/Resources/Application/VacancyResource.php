@@ -24,7 +24,7 @@ class VacancyResource extends JsonResource
             'deadline' => $this->deadline,
             'numberOfVacancies' => $this->number_of_vacancies,
             'createdAtDate' => $this->created_at->format('Y-m-d'),
-            'createdAtTime' => $this->creatd_at->format('g:i A'),
+            'createdAtTime' => $this->created_at->format('g:i A'),
             'applications' => new ApplicationOverviewCollection($this->applications),
         ];
     }

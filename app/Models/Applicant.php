@@ -44,13 +44,13 @@ class Applicant extends Model
 
         $applicant->setResume($info['resume']);
 
-        Application::create([
+        $applicant->applications()->create([
             'applicant_id' => $applicant->id,
             'vacancy_id' => $vacancyId,
             'status' => 'Review',
         ]);
 
-        // Mail::to($applicant)->send(new ApplicantMail);
+        Mail::to($applicant)->send(new ApplicantMail);
 
         return $applicant;
 
@@ -63,7 +63,7 @@ class Applicant extends Model
         }
         $resumeName = "Applicant{$this->id}.{$resume->getClientOriginalExtension()}";
         Storage::disk('local')->put("resumes/{$resumeName}", File::get($resume));
-        $this->resume = $resume;
+        $this->resume = $resumeName;
         $this->save();
         return $this->getResume();
     }
@@ -74,7 +74,7 @@ class Applicant extends Model
         if(!$resumeName){
             return null;
         }
-        $resumeContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\resumes\\{$resumeName}");
+        $resumeContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\\resumes\\{$resumeName}");
         $encodedContent = base64_encode($resumeContent);
         $resumeData = mb_convert_encoding("data:application/pdf;base64,{$encodedContent}", 'UTF-8');
         return $resumeData;
@@ -83,7 +83,7 @@ class Applicant extends Model
 
     public function generateWorkEmail()
     {
-        $email = "{$this->first_name}{$this->last_name}{$this->id}@remedyat.com";
+        $email = "{$this->first_name}{$this->last_name}{$this->id}@remedya.com";
         return $email;
     }
 

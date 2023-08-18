@@ -13,19 +13,13 @@ return new class extends Migration
     {
         Schema::create('vacancies', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('employee_id');
+            $table->foreignId('employee_id')->nullable()->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('title');
             $table->string('description');
             $table->string('type');
-            $table->integer('salary');
-            $table->date('posting_date');
+            $table->decimal('salary', 10, 2);
             $table->date('deadline');
             $table->integer('number_of_vacancies');
-            $table->string('status')->default('Alowed');
-            $table->foreign('employee_id')
-            ->references('id')
-            ->on('employee_role')
-            ->onDelete('cascade');
             $table->timestamps();
         });
     }

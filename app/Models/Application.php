@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\ApplicationAlreadyAcceptedException;
+use App\Exceptions\ApplicationAlreadyRejectedException;
 use App\Mail\AcceptMail;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,11 +18,19 @@ class Application extends Model
         'number_of_vacancies',
         'applicant_id',
         'vacancy_id',
-
     ];
 
+    protected function validateStatus()
+    {
+        if($this->status == 'Accepted') {
+            throw new ApplicationAlreadyAcceptedException('This application has already been accepted');
+        } elseif($this->status == 'Rejected') {
+            throw new ApplicationAlreadyRejectedException('This application has already been rejected');
+        }
+    }
     public function accept()
     {
+        $this->validateStatus();
         $vacancy = $this->vacancy;
         $vacancy->decrement('number_of_vacancies', 1);
 
@@ -28,9 +38,9 @@ class Application extends Model
         $password = Str::password();
         $employee = Employee::create([
             'first_name' => $applicant->first_name,
-            'last_name' => $applicant->second_name,
+            'last_name' => $applicant->last_name,
             'email' => $applicant->generateWorkEmail(),
-            'password' => $applicant->Hash::make($password),
+            'password' => Hash::make($password),
             'address' => $applicant->address,
             'date_of_birth' => $applicant->date_of_birth,
             'gender' => $applicant->gender,
@@ -41,11 +51,12 @@ class Application extends Model
 
         $this->markAsAccepted();
 
-        // Mail::to($applicant)->send(new AcceptMail($employee, $password));
+        Mail::to($applicant)->send(new AcceptMail($employee, $password));
     }
 
     public function reject()
     {
+        $this->validateStatus();
         $this->markAsRejected();
     }
 

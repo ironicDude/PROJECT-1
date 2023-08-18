@@ -15,7 +15,7 @@ class ApplicationOverviewResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'applicant' => $this->applicant->first_name . $this->applicant->last_name,
+            'applicant' => $this->applicant->first_name .' '. $this->applicant->last_name,
             'vacancy' => $this->vacancy->title,
             'status' => $this->status,
             'date' => $this->created_at->format('Y-m-d'),
