@@ -72,7 +72,7 @@ class Order extends Model
         if ($date) {
             $orders = $orders->whereDate('updated_at', $date);
         }
-        if($status) {
+        if ($status) {
             $orders = $orders->whereStatus($status);
         }
         return $orders;
@@ -84,7 +84,7 @@ class Order extends Model
         if ($date) {
             $orders = $orders->whereDate('updated_at', $date);
         }
-        if($status) {
+        if ($status) {
             $orders = $orders->whereStatus($status);
         }
         return $orders;
@@ -105,7 +105,7 @@ class Order extends Model
 
         $data = [];
         foreach ($filePaths as $path) {
-            $fileContents = file_get_contents("C:\Programming\Laravel\PROJECT-1\storage\app\\{$path}");
+            $fileContents = file_get_contents("F:\\files\Pharmacy managment system _back-end\PROJECT-1-1\storage\app\\{$path}");
             $encodedContents = base64_encode($fileContents);
             if (pathinfo($path, PATHINFO_EXTENSION) === 'pdf') {
                 $data[] = mb_convert_encoding("data:application/pdf;base64,{$encodedContents}", 'UTF-8');

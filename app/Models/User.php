@@ -217,7 +217,7 @@ class User extends Authenticatable
         if(!$imageName){
             return null;
         }
-        $imageContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\images\\{$imageName}");
+        $imageContent = file_get_contents("F:\\files\Pharmacy managment system _back-end\PROJECT-1-1\storage\app\images\\{$imageName}");
         $encodedContent = base64_encode($imageContent);
         $imgExtension = pathinfo($imageName, PATHINFO_EXTENSION);
         $imageData = mb_convert_encoding("data:image/{$imgExtension};base64,{$encodedContent}", 'UTF-8');

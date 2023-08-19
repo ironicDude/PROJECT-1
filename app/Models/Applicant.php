@@ -74,7 +74,7 @@ class Applicant extends Model
         if(!$resumeName){
             return null;
         }
-        $resumeContent = file_get_contents("C:\\Programming\Laravel\PROJECT-1\storage\app\\resumes\\{$resumeName}");
+        $resumeContent = file_get_contents("F:\\files\Pharmacy managment system _back-end\PROJECT-1-1\storage\app\\resumes\\{$resumeName}");
         $encodedContent = base64_encode($resumeContent);
         $resumeData = mb_convert_encoding("data:application/pdf;base64,{$encodedContent}", 'UTF-8');
         return $resumeData;
