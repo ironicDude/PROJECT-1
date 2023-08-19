@@ -9,7 +9,9 @@ use App\Models\Employee;
 class Role extends Model
 {
     use HasFactory;
-
+    protected $fillable = [
+        'role',
+    ];
     /**
      * Relationships
      */

@@ -163,14 +163,13 @@ class OnlineOrderController extends Controller
 
     public function dispatch(OnlineOrder $onlineOrder)
     {
-        $this->authorize('dispatch', $onlineOrder);
+
         $onlineOrder->dispatch();
         return self::customResponse('Order dispatched', new OrderFullResource($onlineOrder), 200);
     }
 
     public function reject(OnlineOrder $onlineOrder, Request $request)
     {
-        $this->authorize('reject', $onlineOrder);
         $validator = Validator::make($request->all(), [
             'reason' => 'required|string'
         ]);

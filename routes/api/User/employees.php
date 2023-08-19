@@ -17,57 +17,53 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'forceLogout'])->group(function () {
 
-    Route::get('/employees/{employee}/salary', [EmployeeController::class, 'getSalary'])
+    //info
+    Route::get('/{employee}/salary', [EmployeeController::class, 'getSalary'])
         ->name('employees.salary.get');
 
-    Route::post('/employees/{employee}/salary', [EmployeeController::class, 'setSalary'])
+    Route::post('/{employee}/salary', [EmployeeController::class, 'setSalary'])
         ->name('employees.salary.set');
 
-    Route::get('/employees/{employee}/roles', [EmployeeController::class, 'getRoles'])
-        ->name('employees.role.get');
-
-    Route::post('/employees/{employee}/role', [EmployeeController::class, 'setRole'])
-        ->name('employees.role.set');
-
-    Route::get('/employees/{employee}/personal-email', [EmployeeController::class, 'getPersonalEmail'])
+    Route::get('/{employee}/personal-email', [EmployeeController::class, 'getPersonalEmail'])
         ->name('employees.personal_email.get');
 
-    Route::post('/employees/{employee}/personal-email', [EmployeeController::class, 'setPersonalEmail'])
+    Route::post('/{employee}/personal-email', [EmployeeController::class, 'setPersonalEmail'])
         ->name('employees.personal_email.set');
 
-    Route::get('/employees/{employee}/date-of-joining', [EmployeeController::class, 'getDateOfJoining'])
+    Route::get('/{employee}/date-of-joining', [EmployeeController::class, 'getDateOfJoining'])
         ->name('employees.date_of_joining.get');
 
-    Route::put('/employees/update-info', [EmployeeController::class, 'updateInfo'])
+    Route::put('/update-info', [EmployeeController::class, 'updateInfo'])
         ->name('employees.update');
 
-    Route::get('/employees/payments/{employee}', [EmployeeController::class, 'getPayments'])
+    Route::get('/payments/{employee}', [EmployeeController::class, 'getPayments'])
         ->name('employees.payments.get');
 
-    Route::put('/employees/{employee}/roles/{role}/update', [EmployeeController::class, 'updateRole'])
+
+    //roles
+    Route::put('roles/update/{employee}/{role}/{newRole}', [EmployeeController::class, 'updateRole'])
         ->name('employee.role.update');
 
-    Route::delete('/employees/{employee}/roles/{role}/delete', [EmployeeController::class, 'updateRole'])
+    Route::delete('roles/delete/{employee}/{role}', [EmployeeController::class, 'deleteRole'])
         ->name('employee.role.update');
 
-    Route::get('/employees', [EmployeeController::class, 'index'])
+    Route::get('roles/{employee}', [EmployeeController::class, 'getRoles'])
+        ->name('employeey.roles.get');
+
+    Route::post('roles/set/{employee}/{role}', [EmployeeController::class, 'setRole'])
+        ->name('employee.role.set');
+
+
+    Route::get('/', [EmployeeController::class, 'index'])
         ->name('employee.index');
 
-    Route::get('/employees/{employee}/show', [EmployeeController::class, 'show'])
+    Route::get('/show/{employee}', [EmployeeController::class, 'show'])
         ->name('employee.show');
 
-    Route::get('/employees/{employee}/delete', [EmployeeController::class, 'destroy'])
+    Route::get('/delete/{employee}', [EmployeeController::class, 'destroy'])
         ->name('employee.delete');
 
-    //Customer
-    Route::get('customers/search/names', [CustomerController::class, 'searchNames'])
-        ->name('customers.name.search');
-
 });
-
-Route::get('/restore', [UserController::class, 'restore'])
-    ->name('user.restore')
-    ->middleware(['signed', 'throttle:6,1']);
 
 
 // Create a new Employee with hardcoded data (This is just a temporary route for testing or seeding purposes)

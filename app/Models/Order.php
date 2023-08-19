@@ -105,6 +105,7 @@ class Order extends Model
 
         $data = [];
         foreach ($filePaths as $path) {
+
             $fileContents = file_get_contents("F:\\files\Pharmacy managment system _back-end\PROJECT-1-1\storage\app\\{$path}");
             $encodedContents = base64_encode($fileContents);
             if (pathinfo($path, PATHINFO_EXTENSION) === 'pdf') {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Exceptions\EmployeeIsAlreadyAssignedThisRoleException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Payment\PaymentCollection;
 use App\Http\Resources\User\EmployeeCollection;
@@ -17,6 +18,22 @@ use Illuminate\Support\Facades\Validator;
 class EmployeeController extends Controller
 {
     use CustomResponse;
+
+    public function index()
+    {
+        return new EmployeeCollection(Employee::paginate(15));
+    }
+
+    public function show(Employee $employee)
+    {
+        return self::customResponse('employee', new EmployeeResource($employee), 200);
+    }
+
+    public function destroy(Employee $employee)
+    {
+        $employee->delete();
+        return self::customResponse('employee deleted', null, 200);
+    }
 
     public function getPersonalEmail(Employee $employee)
     {
@@ -59,27 +76,6 @@ class EmployeeController extends Controller
         return self::customResponse('Salary set', $salary, 200);
     }
 
-    public function getRole(Employee $employee)
-    {
-        $role = $employee->getRole();
-        return self::customResponse('Role returned', $role, 200);
-    }
-
-    public function setRole(Employee $employee, Request $request)
-    {
-        $this->authorize('manageRoles', $employee);
-        $validator = Validator::make($request->all(), [
-            'role' => 'required|string|exists:roles,role',
-        ]);
-
-        if ($validator->fails()) {
-            return self::customResponse('errors', $validator->errors(), 422);
-        }
-
-        $role = $employee->setRole($request->role);
-        return self::customResponse('Role set', $role, 200);
-    }
-
     public function getDateOfJoining(Employee $employee)
     {
         $date = $employee->getDateOfJoining();
@@ -101,6 +97,17 @@ class EmployeeController extends Controller
         return self::customResponse('Employee with new info', $employeeInfo, 200);
     }
 
+    public function setRole(Employee $employee, Role $role)
+    {
+        $this->authorize('manageRoles', $employee);
+        try {
+            $role = $employee->setRole($role);
+        } catch(EmployeeIsAlreadyAssignedThisRoleException $e) {
+            return self::customResponse($e->getMessage(), null, 422);
+        }
+        return self::customResponse('Role set', $role, 200);
+    }
+
     public function getPayments(Employee $employee)
     {
         $this->authorize('viewPayments', $employee);
@@ -113,17 +120,11 @@ class EmployeeController extends Controller
         return self::customResponse('Roles returned', $employee->getRoles(), 200);
     }
 
-    public function updateRole(Employee $employee, Role $role, Request $request)
+    public function updateRole(Employee $employee, Role $role, Role $newRole)
     {
         $this->authorize('manageRoles', $employee);
-        $validator = Validator::make($request->all(), [
-            'role' => 'required|string|exists:roles,role',
-        ]);
-        if ($validator->fails()) {
-            return self::customResponse('errors', $validator->errors(), 422);
-        }
-        $employee->updateRole($role, $request->newRole);
-        return self::customResponse('role updated', $request->role, 200);
+        $employee->updateRole($role, $newRole);
+        return self::customResponse('role updated', $role, 200);
     }
 
     public function deleteRole(Employee $employee, Role $role)
@@ -131,23 +132,6 @@ class EmployeeController extends Controller
         $this->authorize('manageRoles', $employee);
         $employee->deleteRole($role);
         return self::customResponse('role deleted', null, 200);
-    }
-
-
-    public function index()
-    {
-        return self::customResponse('employees', new EmployeeCollection(Employee::paginate(20)), 200);
-    }
-
-    public function show(Employee $employee)
-    {
-        return self::customResponse('employee', new EmployeeResource($employee), 200);
-    }
-
-    public function destroy(Employee $employee)
-    {
-        $employee->delete();
-        return self::customResponse('employee deleted', null, 200);
     }
 
 

@@ -32,7 +32,7 @@ class VacancyController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'type' => 'required|string|max:255',
-            'salary' => 'required|numeric',
+            'salary' => 'required|numeric|exists',
             'deadline' => 'required|date',
             'number_of_vacancies' => 'required|integer',
         ]);
